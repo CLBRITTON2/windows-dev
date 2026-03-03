@@ -2,15 +2,66 @@
 " VsVim configuration
 " =========================
 
+" --- Leader key ---
+let mapleader=" "
+
 " --- Line numbers ---
 set number
 set relativenumber
 
-" --- Scroll half-page and center cursor ---
-nnoremap <C-d> <C-d>zz
-nnoremap <C-u> <C-u>zz
-inoremap kj <Esc>
-
+" --- Scroll ---
 set scrolloff=5
 set sidescrolloff=5
 set nowrap
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
+
+" --- Insert mode ---
+inoremap kj <Esc>
+
+" --- Buffer/tab navigation ---
+nnoremap <S-h> :vsc Window.PreviousTab<CR>
+nnoremap <S-l> :vsc Window.NextTab<CR>
+
+" --- Splits ---
+nnoremap <Leader>v :vsc Window.NewVerticalTabGroup<CR>
+nnoremap <Leader>s :vsc Window.NewHorizontalTabGroup<CR>
+
+" --- Pane focus ---
+nnoremap <Leader>h :vsc Window.PrevSplitPane<CR>
+nnoremap <Leader>l :vsc Window.NextSplitPane<CR>
+
+" --- Save / close ---
+nnoremap <Leader>w :w<CR>
+nnoremap <Leader>q :q<CR>
+
+" --- Panels ---
+nnoremap <Leader>e :vsc View.SolutionExplorer<CR>
+nnoremap <Leader>j :vsc View.Terminal<CR>
+
+" --- Quick open ---
+nnoremap <Leader>f :vsc Edit.GoToFile<CR>
+
+" --- Format document ---
+nnoremap <Leader>p :vsc Edit.FormatDocument<CR>
+
+" --- Diagnostics ---
+nnoremap [d :vsc View.NextError<CR>
+nnoremap ]d :vsc View.PreviousError<CR>
+
+" --- Quick fix ---
+nnoremap <Leader>ca :vsc View.QuickActions<CR>
+
+" --- Peek definition ---
+nnoremap gh :vsc Edit.PeekDefinition<CR>
+
+" --- Comment toggle (visual mode) ---
+vnoremap <Leader>c :vsc Edit.ToggleLineComment<CR>
+
+" --- Stay in visual mode while indenting ---
+vnoremap < <gv
+vnoremap > >gv
+
+" --- Move lines in visual mode ---
+vnoremap J :vsc Edit.MoveSelectedLinesDown<CR>
+vnoremap K :vsc Edit.MoveSelectedLinesUp<CR>
