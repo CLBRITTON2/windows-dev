@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" type="text/css" href="../normalize.css" />
+  <link rel="stylesheet" type="text/css" href="./styles.css" />
+  <link rel="icon" href="data:;" />
+
+  <script src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"
+    integrity="sha256-aS0B0wnsaDByLfE16h4MDCP1fQFccysd1YWOcV+gbBo=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    import React, { useState, useEffect } from "https://esm.sh/react@18?dev";
+    import { createRoot } from "https://esm.sh/react-dom@18/client?dev";
+    import * as zebar from "https://esm.sh/zebar@3";
+
+    // =============================================
+    // ICON MAP: process name (lowercase) -> icon file
+    // =============================================
+    const ICON_MAP = {
+      "clash for windows": "Clash-32.png",
+      "unity hub": "Unity-Hub-32.png",
+      acrobat: "Acrobat-32.png",
+      applicationframehost: "SystemSettings-32.png",
+      autohotkeyux: "AutoHotkeyUX-32.png",
+      chrome: "chrome-32.png",
+      code: "Visual-Studio-Code-32.png",
+      controlpanel: "control-panel-32.png",
+      cursor: "cursor-32.png",
+      devenv: "Visual-Studio-32.png",
+      everything: "Everything-32.png",
+      excel: "EXCEL-32.png",
+      explorer: "file-explorer-32.png",
+      firefox: "Firefox-32.png",
+      idea64: "idea64-32.png",
+      matlab: "matlab-32.png",
+      mintty: "mintty-32.png",
+      msedgewebview2: "Edge-32.png",
+      notepad: "Notepad-32.png",
+      obs64: "obs64-32.png",
+      obsidian: "Obsidian-32.png",
+      memreduct: "memreduct-32.png",
+      mspaint: "mspaint-32.png",
+      powerpnt: "POWERPNT-32.png",
+      qq: "QQ-32.png",
+      regedit: "regedit-32.png",
+      snippingtool: "SnippingTool-32.png",
+      spotify: "Spotify-32.png",
+      steamwebhelper: "Steam-32.png",
+      sublime_text: "Sublime-Text-32.png",
+      taskmgr: "Taskmgr-32.png",
+      virtualbox: "VirtualBox-32.png",
+      windowsterminal: "Terminal-32.png",
+      winword: "WINWORD-32.png",
+      "notepad++": "Notepad++-32.png",
+      discord: "Discord-32.png",
+      githubdesktop: "Github-32.png",
+      "wezterm-gui": "WezTerm-32.png",
+      "docker desktop": "Docker-32.png"
+    };
+    const ICON_BASE = "./assets/icons/";
+    const DEFAULT_ICON_FILE = "Application-32.png";
+
+    function getIconSrc(processName) {
+      const key = (processName || "").toLowerCase().trim();
+      const fileName = ICON_MAP[key] ?? DEFAULT_ICON_FILE;
+      return `${ICON_BASE}${fileName}`;
+    }
+
+    // Recursively collect windows from workspace children (handles split containers)
+    function collectWindows(child) {
+      if (child.type === "window") return [child];
+      if (child.type === "split" && child.children) {
+        return child.children.flatMap(collectWindows);
+      }
+      return [];
+    }
+
+    function CurrentApps({ glazewm }) {
+      const windows = (glazewm.allWorkspaces || [])
+        .filter((ws) => ws.isDisplayed)
+        .flatMap((ws) => (ws.children || []).flatMap(collectWindows));
+
+      return (
+        <>
+          {windows.map((win) => (
+            <button
+              className={`app-element ${win.hasFocus ? "app-focus" : ""}`}
+              key={win.handle}
+              title={win.title}
+              onClick={() =>
+                glazewm.runCommand(
+                  `shell-exec %userprofile%/.glzr/zebar/dev/assets/scripts/FocusWindow.ahk ${win.handle}`
+                )
+              }
+            >
+              <img
+                className="app-icon"
+                src={getIconSrc(win.processName)}
+                alt={win.processName}
+              />
+            </button>
+          ))}
+        </>
+      );
+    }
+
+    const providers = zebar.createProviderGroup({
+      network: { type: "network" },
+      glazewm: { type: "glazewm" },
+      cpu: { type: "cpu", refreshInterval: 1000 },
+      date: { type: "date", formatting: "EEE d MMM yyyy, t" },
+      battery: { type: "battery" },
+      memory: { type: "memory", refreshInterval: 1000 },
+      weather: { type: "weather" },
+      media: { type: "media" },
+      audio: { type: "audio" },
+      systray: { type: "systray" },
+    });
+
+    createRoot(document.getElementById("root")).render(<App />);
+
+    function App() {
+      const [output, setOutput] = useState(providers.outputMap);
+      const [systrayExpanded, setSystrayExpanded] = useState(false);
+
+      useEffect(() => {
+        providers.onOutput(() => setOutput({ ...providers.outputMap }));
+      }, []);
+
+      function getNetworkIcon(networkOutput) {
+        switch (networkOutput.defaultInterface?.type) {
+          case "ethernet":
+            return (
+              <>
+                <span className="icon ethernet-icon green">󰈀</span>
+                <span className="green">Connected</span>
+              </>
+            );
+          case "wifi":
+            if (networkOutput.defaultGateway?.signalStrength >= 80) {
+              return <span className="icon wifi-icon green">󰤨</span>;
+            } else if (networkOutput.defaultGateway?.signalStrength >= 65) {
+              return <span className="icon wifi-icon yellow">󰤥</span>;
+            } else if (networkOutput.defaultGateway?.signalStrength >= 40) {
+              return <span className="icon wifi-icon yellow">󰤢</span>;
+            } else if (networkOutput.defaultGateway?.signalStrength >= 25) {
+              return <span className="icon wifi-icon magenta">󰤟</span>;
+            } else {
+              return <span className="icon wifi-icon magenta">󰤯</span>;
+            }
+          default:
+            return <span className="magenta">⌀ No internet</span>;
+        }
+      }
+
+      function getAudioIcon(volume) {
+        if (volume > 20) {
+          return <span className="icon audio-icon green"></span>;
+        } else if (volume > 10) {
+          return <span className="icon audio-icon green"></span>;
+        } else if (volume > 0) {
+          return <span className="icon audio-icon green"></span>;
+        } else {
+          return <span className="icon audio-icon magenta"></span>;
+        }
+      }
+
+      function getWeatherIcon(weatherOutput) {
+        switch (weatherOutput.status) {
+          case "clear_day":
+            return <span className="icon weather-icon yellow">☀</span>;
+          case "clear_night":
+            return <span className="icon weather-icon yellow">☽</span>;
+          case "cloudy_day":
+            return <span className="icon weather-icon green"></span>;
+          case "cloudy_night":
+            return <span className="icon weather-icon green"></span>;
+          case "light_rain_day":
+            return <span className="icon weather-icon blue"></span>;
+          case "light_rain_night":
+            return <span className="icon weather-icon blue"></span>;
+          case "heavy_rain_day":
+            return <span className="icon weather-icon blue"></span>;
+          case "heavy_rain_night":
+            return <span className="icon weather-icon blue"></span>;
+          case "snow_day":
+            return <span className="icon weather-icon green"></span>;
+          case "snow_night":
+            return <span className="icon weather-icon green"></span>;
+          case "thunder_day":
+            return <span className="icon weather-icon cyan"></span>;
+          case "thunder_night":
+            return <span className="icon weather-icon cyan"></span>;
+        }
+      }
+
+      function bytesToGigabytes(bytes) {
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1);
+      }
+
+      return (
+        <div className="app">
+          <div className="left">
+            {output.glazewm && (
+              <div className="box">
+                {output.glazewm.currentWorkspaces.map((workspace) => (
+                  <button
+                    className={`workspace-button ${workspace.hasFocus && "focused"
+                      } ${workspace.children.length && "has-child"}`}
+                    onClick={() =>
+                      output.glazewm.runCommand(
+                        `focus --workspace ${workspace.name}`
+                      )
+                    }
+                    key={workspace.name}
+                  >
+                    <span className="workspace-icon">
+                      {workspace.hasFocus ? "󰴈" : ""}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {output.glazewm && (
+              <div className="box app-list">
+                <CurrentApps glazewm={output.glazewm} />
+              </div>
+            )}
+          </div>
+
+          <div className="center">
+            {output.date && (
+              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
+                <span className="icon date-icon">󱑁</span>
+                <span className="info">{output.date?.formatted}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="right">
+            {output.systray && (
+              <div className="box systray-container">
+                <div className={`systray ${systrayExpanded ? "expanded" : ""}`}>
+                  {output.systray.icons?.map((icon) => (
+                    <div
+                      className="systray-icon-container"
+                      title={icon.tooltip}
+                      key={icon.id}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        output.systray.onLeftClick(icon.id);
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        output.systray.onRightClick(icon.id);
+                      }}
+                    >
+                      <img className="systray-icon" src={icon.iconUrl} />
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className={`systray-toggle ${systrayExpanded ? "expanded" : "tucked"}`}
+                  onClick={() => setSystrayExpanded(!systrayExpanded)}
+                >
+                  <span className="content">
+                    {systrayExpanded ? "" : ""}
+                  </span>
+                </button>
+              </div>
+            )}
+            {output.glazewm && (
+              <div className="box">
+                {output.glazewm.bindingModes.map((bindingMode) => (
+                  <button className="binding-mode" key={bindingMode.name}>
+                    {bindingMode.displayName ?? bindingMode.name}
+                  </button>
+                ))}
+
+                <button
+                  className="tiling-direction-icon"
+                  onClick={() =>
+                    output.glazewm.runCommand("toggle-tiling-direction")
+                  }
+                >
+                  {output.glazewm.tilingDirection === "horizontal"
+                    ? "⇄"
+                    : "⇵"}
+                </button>
+              </div>
+            )}
+
+            {output.network && (
+              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:network-status')}>{getNetworkIcon(output.network)}</div>
+            )}
+
+            {output.cpu && (
+              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec taskmgr')}>
+                <span className="icon cpu-icon"></span>
+                <span className="info">{Math.round(output.cpu.usage)}%</span>
+              </div>
+            )}
+
+            {output.memory && (
+              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec C:/Program Files/Mem Reduct/memreduct.exe')}>
+                <span className="icon memory-icon"></span>
+                <span className="info">
+                  {bytesToGigabytes(output.memory.usedMemory)} GBs
+                </span>
+              </div>
+            )}
+
+            {output.audio?.defaultPlaybackDevice && (
+              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec sndvol.exe')}>
+                {getAudioIcon(output.audio.defaultPlaybackDevice.volume)}
+                <span className="info">
+                  {Math.round(output.audio.defaultPlaybackDevice.volume)}%
+                </span>
+              </div>
+            )}
+
+            {output.weather && (
+              <div className="box">
+                {getWeatherIcon(output.weather)}
+                <span className="info">
+                  {Math.round(output.weather.fahrenheitTemp)}°F
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+  </script>
+</body>
+
+</html>

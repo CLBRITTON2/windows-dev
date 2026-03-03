@@ -1,0 +1,16 @@
+" =========================
+" VsVim configuration
+" =========================
+
+" --- Line numbers ---
+set number
+set relativenumber
+
+" --- Scroll half-page and center cursor ---
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
+inoremap kj <Esc>
+
+set scrolloff=5
+set sidescrolloff=5
+set nowrap

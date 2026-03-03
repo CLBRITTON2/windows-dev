@@ -1,0 +1,215 @@
+{
+    "C_Cpp.default.compilerPath": "C:\\MinGW\\bin\\gcc.exe",
+    "code-runner.runInTerminal": true,
+    "cmake.showOptionsMovedNotification": false,
+    "terminal.integrated.env.linux": {
+    "PRE_NAMESPACE_PWD": "${cwd}"
+  },
+    "cmake.pinnedCommands": [
+        "workbench.action.tasks.configureTaskRunner",
+        "workbench.action.tasks.runTask"
+    ],
+    "git.confirmSync": false,
+    "editor.minimap.enabled": false,
+    "breadcrumbs.enabled": false,
+    "editor.lineNumbers": "relative",
+    "vim.insertModeKeyBindings": [
+      {
+        "before": ["k", "j"],
+        "after": ["<Esc>"],
+      }
+    ],
+  "vim.leader": "<Space>",
+  "vim.hlsearch": true,
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // NAVIGATION
+    // switch b/w buffers
+    { "before": ["<S-h>"], "commands": [":bprevious"] },
+    { "before": ["<S-l>"], "commands": [":bnext"] },
+
+    // splits
+    { "before": ["leader", "v"], "commands": [":vsplit"] },
+    { "before": ["leader", "s"], "commands": [":split"] },
+
+    // panes
+    {
+      "before": ["leader", "h"],
+      "commands": ["workbench.action.focusLeftGroup"]
+    },
+    {
+      "before": ["leader", "j"],
+      "commands": ["workbench.action.focusBelowGroup"]
+    },
+    {
+      "before": ["leader", "k"],
+      "commands": ["workbench.action.focusAboveGroup"]
+    },
+    {
+      "before": ["leader", "l"],
+      "commands": ["workbench.action.focusRightGroup"]
+    },
+    // NICE TO HAVE
+    { "before": ["leader", "w"], "commands": [":w!"] },
+    { "before": ["leader", "q"], "commands": [":q!"] },
+    { "before": ["leader", "x"], "commands": [":x!"] },
+    {
+      "before": ["[", "d"],
+      "commands": ["editor.action.marker.prev"]
+    },
+    {
+      "before": ["]", "d"],
+      "commands": ["editor.action.marker.next"]
+    },
+    {
+      "before": ["<leader>", "c", "a"],
+      "commands": ["editor.action.quickFix"]
+    },
+    { "before": ["leader", "f"], "commands": ["workbench.action.quickOpen"] },
+    { "before": ["leader", "p"], "commands": ["editor.action.formatDocument"] },
+    {
+      "before": ["g", "h"],
+      "commands": ["editor.action.showDefinitionPreviewHover"]
+    }
+  ],
+  "vim.visualModeKeyBindings": [
+    // Stay in visual mode while indenting
+    { "before": ["<"], "commands": ["editor.action.outdentLines"] },
+    { "before": [">"], "commands": ["editor.action.indentLines"] },
+    // Move selected lines while staying in visual mode
+    { "before": ["J"], "commands": ["editor.action.moveLinesDownAction"] },
+    { "before": ["K"], "commands": ["editor.action.moveLinesUpAction"] },
+    // toggle comment selection
+    { "before": ["leader", "c"], "commands": ["editor.action.commentLine"] }
+  ],
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+  "github.copilot.editor.enableAutoCompletions": false,
+  "[go]": {
+    "editor.insertSpaces": false,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "chat.viewSessions.enabled": false,
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "workbench.colorTheme": "Rosé Pine",
+  "editor.fontFamily": "'JetBrainsMono Nerd Font', monospace",
+  "workbench.settings.applyToAllProfiles": [
+    "editor.fontFamily"
+  ],
+"editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": [
+            "comment",
+            "comment.block",
+            "comment.block.documentation",
+            "comment.line",
+            "constant",
+            "constant.character",
+            "constant.character.escape",
+            "constant.numeric",
+            "constant.numeric.integer",
+            "constant.numeric.float",
+            "constant.numeric.hex",
+            "constant.numeric.octal",
+            "constant.other",
+            "constant.regexp",
+            "constant.rgb-value",
+            "emphasis",
+            "entity",
+            "entity.name",
+            "entity.name.class",
+            "entity.name.function",
+            "entity.name.method",
+            "entity.name.section",
+            "entity.name.selector",
+            "entity.name.tag",
+            "entity.name.type",
+            "entity.other",
+            "entity.other.attribute-name",
+            "entity.other.inherited-class",
+            "invalid",
+            "invalid.deprecated",
+            "invalid.illegal",
+            "keyword",
+            "keyword.control",
+            "keyword.operator",
+            "keyword.operator.new",
+            "keyword.operator.assignment",
+            "keyword.operator.arithmetic",
+            "keyword.operator.logical",
+            "keyword.other",
+            "markup",
+            "markup.bold",
+            "markup.changed",
+            "markup.deleted",
+            "markup.heading",
+            "markup.inline.raw",
+            "markup.inserted",
+            "markup.italic",
+            "markup.list",
+            "markup.list.numbered",
+            "markup.list.unnumbered",
+            "markup.other",
+            "markup.quote",
+            "markup.raw",
+            "markup.underline",
+            "markup.underline.link",
+            "meta",
+            "meta.block",
+            "meta.cast",
+            "meta.class",
+            "meta.function",
+            "meta.function-call",
+            "meta.preprocessor",
+            "meta.return-type",
+            "meta.selector",
+            "meta.tag",
+            "meta.type.annotation",
+            "meta.type",
+            "punctuation.definition.string.begin",
+            "punctuation.definition.string.end",
+            "punctuation.separator",
+            "punctuation.separator.continuation",
+            "punctuation.terminator",
+            "storage",
+            "storage.modifier",
+            "storage.type",
+            "string",
+            "string.interpolated",
+            "string.other",
+            "string.quoted",
+            "string.quoted.double",
+            "string.quoted.other",
+            "string.quoted.single",
+            "string.quoted.triple",
+            "string.regexp",
+            "string.unquoted",
+            "strong",
+            "support",
+            "support.class",
+            "support.constant",
+            "support.function",
+            "support.other",
+            "support.type",
+            "support.type.property-name",
+            "support.variable",
+            "variable",
+            "variable.language",
+            "variable.name",
+            "variable.other",
+            "variable.other.readwrite",
+            "variable.parameter"
+        ],
+        "settings": {
+          "fontStyle": ""
+        }
+      }
+    ]
+}

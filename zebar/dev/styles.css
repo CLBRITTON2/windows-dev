@@ -1,0 +1,383 @@
+:root {
+  --color-foreground: #e0def4;
+  --color-foreground-muted: #908caa;
+  --color-foreground-30: rgba(224, 222, 244, 0.14);
+  --color-background: rgba(25, 23, 36, 0.9);
+  --color-background-90: rgba(25, 23, 36, 0.9);
+  --color-border: rgba(110, 106, 134, 0.25);
+  --color-black: #191724;
+  --color-red: #eb6f92;
+  --color-green: #9ccfd8;
+  --color-blue: #31748f;
+  --color-yellow: #f6c177;
+  --color-magenta: #c4a7e7;
+  --color-cyan: #9ccfd8;
+  --color-white: #e0def4;
+  --color-accent: #ebbcba;
+  --color-accent-alt: #c4a7e7;
+  --color-hover: rgba(64, 61, 82, 0.8);
+}
+
+.green {
+  color: var(--color-green);
+}
+
+.blue {
+  color: var(--color-blue);
+}
+
+.yellow {
+  color: var(--color-yellow);
+}
+
+.cyan {
+  color: var(--color-cyan);
+}
+
+:root {
+  height: 90vh;
+  color: var(--color-foreground);
+  font-family: "JetBrainsMono Nerd Font", ui-monospace, monospace;
+  font-size: 14px;
+  padding: 5px;
+  padding-bottom: 0;
+}
+
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+.app {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  background: var(--color-background);
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  padding: 4px;
+  gap: 0;
+}
+
+.left {
+  margin-right: auto;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.right {
+  margin-left: auto;
+}
+
+/* =========================
+   MODULES
+========================= */
+.box {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  position: relative;
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+  margin: 0;
+  transition: background 0.25s ease;
+  cursor: pointer;
+}
+
+.box:hover {
+  background: var(--color-hover);
+}
+
+.info {
+  display: inline-block;
+  max-width: 360px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.icon {
+  display: inline-block;
+  margin-right: 0.8rem;
+}
+
+/* =========================
+   ICON COLORS
+========================= */
+.ethernet-icon {
+  color: var(--color-green);
+  font-size: 1.2rem;
+}
+
+.wifi-icon {
+  color: var(--color-green);
+  font-size: 1.2rem;
+  margin-right: 0.2rem;
+}
+
+.cpu-icon {
+  color: var(--color-accent);
+  font-size: 1.2rem;
+}
+
+.memory-icon {
+  color: var(--color-accent-alt);
+  font-size: 1.2rem;
+}
+
+.full-icon {
+  color: var(--color-green);
+  font-size: 0.7rem;
+  z-index: 100;
+  position: absolute;
+  right: 2.5rem;
+  bottom: 0.6rem;
+  filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 1));
+}
+
+.audio-icon {
+  color: var(--color-cyan);
+  font-size: 1.2rem;
+  margin-right: 1rem;
+}
+
+.weather-icon {
+  font-size: 1.2rem;
+  margin-right: 0.8rem !important;
+}
+
+.date-icon {
+  color: var(--color-cyan);
+  font-size: 1.2rem;
+}
+
+/* =========================
+   WORKSPACES
+========================= */
+.workspace-button {
+  font-size: 1.2rem;
+  background: none;
+  color: var(--color-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  margin: 0 3px;
+  cursor: pointer;
+  border: none;
+  border-radius: 999px;
+  transition: all 0.25s ease;
+
+  &.has-child {
+    color: var(--color-foreground);
+  }
+
+  &:hover {
+    background: var(--color-hover);
+    color: var(--color-foreground);
+  }
+}
+
+.workspace-icon {
+  display: inline-block;
+  transform: translateX(-0.2rem);
+}
+
+.box:has(.workspace-button):hover {
+  background: none;
+}
+
+/* =========================
+   BINDING MODES / TILING
+========================= */
+.binding-mode {
+  background: var(--color-foreground-30);
+  color: var(--color-foreground);
+  border-radius: 999px;
+  border: none;
+  padding: 2px 8px;
+  margin: 0 3px;
+  font-weight: 600;
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.35),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.25);
+}
+
+.tiling-direction-icon {
+  font-size: 1.2rem;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--color-accent-alt);
+  transform: translateY(-0.1rem);
+}
+
+.box:has(.tiling-direction-icon) {
+  padding-left: 0.2rem;
+  padding-right: 0.2rem;
+}
+
+/* =========================
+   SYSTRAY
+========================= */
+.systray-container {
+  display: flex;
+  border-radius: 10px;
+  align-items: center;
+  gap: 1px;
+  user-select: none;
+  padding: 0;
+}
+
+.systray-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 100%;
+  width: auto;
+  padding: 0 0.6rem;
+  border-radius: 10px;
+  background: none;
+  border: none;
+  color: var(--color-foreground);
+  font-size: 1rem;
+}
+
+.systray-toggle .content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  width: 100%;
+  height: 100%;
+
+  font-size: 16px;
+  line-height: 1;
+}
+
+.systray {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  max-width: 0;
+  transition: max-width 0.4s ease-out;
+}
+
+.systray.expanded {
+  max-width: 500px;
+}
+
+.systray-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.systray-icon-container:hover {
+  background: var(--color-hover);
+}
+
+.systray-toggle:hover {
+  background: var(--color-hover);
+}
+
+.systray-container.box:hover {
+  background: none;
+}
+
+.systray-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* =========================
+   CURRENT APPS (taskbar icons)
+========================= */
+.app-list {
+  gap: 3px;
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+}
+
+.box:has(.app-element):hover {
+  background: none;
+}
+
+.app-element {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.25s ease, transform 0.1s ease;
+}
+
+.app-element:hover {
+  background: var(--color-hover);
+}
+
+.app-element:active {
+  transform: scale(0.9);
+}
+
+.app-element.app-focus {
+  background: var(--color-foreground-30);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.app-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+
+/* =========================
+   ANIMATIONS
+========================= */
+@keyframes blink {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.5;
+  }
+}

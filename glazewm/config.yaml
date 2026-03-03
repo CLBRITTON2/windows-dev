@@ -1,0 +1,237 @@
+general:
+  startup_commands: ['focus --workspace 1', 'shell-exec zebar']
+  shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
+  config_reload_commands: []
+  focus_follows_cursor: false
+  toggle_workspace_on_refocus: true
+  cursor_jump:
+    enabled: true
+    trigger: 'monitor_focus'
+  hide_method: 'cloak'
+  show_all_in_taskbar: false
+
+gaps:
+  scale_with_dpi: false
+  inner_gap: '3px'
+  outer_gap:
+    top: '40px'
+    right: '3px'
+    bottom: '3px'
+    left: '3px'
+    
+workspaces:
+  - name: '1'
+    bind_to_monitor: 1
+  - name: '3'
+    bind_to_monitor: 1
+  - name: '5'
+    bind_to_monitor: 1
+  - name: '7'
+    bind_to_monitor: 1
+  - name: '9'
+    bind_to_monitor: 1
+
+  - name: '2'
+    bind_to_monitor: 0
+  - name: '4'
+    bind_to_monitor: 0
+  - name: '6'
+    bind_to_monitor: 0
+  - name: '8'
+    bind_to_monitor: 0
+  - name: '10'
+    bind_to_monitor: 0
+
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: '#8aadf4'
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: true
+      style: 'rounded'
+    transparency:
+      enabled: false
+      opacity: '100%'
+  other_windows:
+    border:
+      enabled: true
+      color: '#404040'
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: true
+      style: 'rounded'
+    transparency:
+      enabled: false
+      opacity: '100%'
+
+window_behavior:
+  initial_state: 'tiling'
+  state_defaults:
+    floating:
+      centered: true
+      shown_on_top: false
+    fullscreen:
+      maximized: true
+      shown_on_top: false
+
+window_rules:
+  - commands: ['ignore']
+    match:
+      - window_process: { equals: 'zebar' }
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: '.*? - Peek' }
+      - window_process: { equals: 'Lively' }
+        window_class: { regex: 'HwndWrapper' }
+      - window_process: { equals: 'EXCEL' }
+        window_class: { not_regex: 'XLMAIN' }
+      - window_process: { equals: 'WINWORD' }
+        window_class: { not_regex: 'OpusApp' }
+      - window_process: { equals: 'POWERPNT' }
+        window_class: { not_regex: 'PPTFrameClass' }
+
+binding_modes:
+  - name: 'resize'
+    keybindings:
+      - commands: ['resize --width -2%']
+        bindings: ['h', 'left']
+      - commands: ['resize --width +2%']
+        bindings: ['l', 'right']
+      - commands: ['resize --height +2%']
+        bindings: ['k', 'up']
+      - commands: ['resize --height -2%']
+        bindings: ['j', 'down']
+      - commands: ['wm-disable-binding-mode --name resize']
+        bindings: ['escape', 'enter']
+
+keybindings:
+  # APPLICATION LAUNCHES (SUPER key)
+  - commands: ['shell-exec pwsh']
+    bindings: ['rwin+enter']
+  - commands: ['shell-exec chrome']
+    bindings: ['rwin+b']
+  - commands: ['shell-exec explorer']
+    bindings: ['rwin+n']
+  - commands: ['shell-exec devenv']
+    bindings: ['rwin+v']
+
+  # WINDOW MANAGEMENT
+  - commands: ['close']
+    bindings: ['rwin+e']
+  - commands: ['toggle-fullscreen']
+    bindings: ['rwin+f']
+  - commands: ['toggle-fullscreen']
+    bindings: ['rwin+m']
+  - commands: ['toggle-floating --centered']
+    bindings: ['rwin+t']
+  - commands: ['toggle-tiling-direction']
+    bindings: ['rwin+s']
+
+  # FOCUS MOVEMENT (SUPER+H/J/K/L)
+  - commands: ['focus --direction left']
+    bindings: ['rwin+h', 'rwin+left']
+  - commands: ['focus --direction right']
+    bindings: ['rwin+l', 'rwin+right']
+  - commands: ['focus --direction up']
+    bindings: ['rwin+k', 'rwin+up']
+  - commands: ['focus --direction down']
+    bindings: ['rwin+j', 'rwin+down']
+
+  # WINDOW RESIZING (SUPER+SHIFT+H/J/K/L)
+  - commands: ['resize --width -100px']
+    bindings: ['rwin+shift+h']
+  - commands: ['resize --width +100px']
+    bindings: ['rwin+shift+l']
+  - commands: ['resize --height +100px']
+    bindings: ['rwin+shift+j']
+  - commands: ['resize --height -100px']
+    bindings: ['rwin+shift+k']
+
+  # WINDOW SWAPPING (SUPER+ALT+H/J/K/L)
+  - commands: ['move --direction left']
+    bindings: ['rwin+alt+h']
+  - commands: ['move --direction right']
+    bindings: ['rwin+alt+l']
+  - commands: ['move --direction up']
+    bindings: ['rwin+alt+k']
+  - commands: ['move --direction down']
+    bindings: ['rwin+alt+j']
+
+  # SYSTEM ACTIONS
+  - commands: ['wm-reload-config']
+    bindings: ['rwin+ctrl+r']
+  - commands: ['close']
+    bindings: ['rwin+shift+e']
+  - commands: ['wm-redraw']
+    bindings: ['rwin+shift+w']
+  - commands: ['wm-exit']
+    bindings: ['rwin+shift+q']
+
+  # WORKSPACE SWITCHING (SUPER+1-0)
+  - commands: ['focus --workspace 1']
+    bindings: ['rwin+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['rwin+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['rwin+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['rwin+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['rwin+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['rwin+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['rwin+7']
+  - commands: ['focus --workspace 8']
+    bindings: ['rwin+8']
+  - commands: ['focus --workspace 9']
+    bindings: ['rwin+9']
+  - commands: ['focus --workspace 10']
+    bindings: ['rwin+0']
+
+  # MOVE WINDOW TO WORKSPACE (SUPER+CTRL+1-0)
+  - commands: ['move --workspace 1']
+    bindings: ['rwin+ctrl+1']
+  - commands: ['move --workspace 2']
+    bindings: ['rwin+ctrl+2']
+  - commands: ['move --workspace 3']
+    bindings: ['rwin+ctrl+3']
+  - commands: ['move --workspace 4']
+    bindings: ['rwin+ctrl+4']
+  - commands: ['move --workspace 5']
+    bindings: ['rwin+ctrl+5']
+  - commands: ['move --workspace 6']
+    bindings: ['rwin+ctrl+6']
+  - commands: ['move --workspace 7']
+    bindings: ['rwin+ctrl+7']
+  - commands: ['move --workspace 8']
+    bindings: ['rwin+ctrl+8']
+  - commands: ['move --workspace 9']
+    bindings: ['rwin+ctrl+9']
+  - commands: ['move --workspace 10']
+    bindings: ['rwin+ctrl+0']
+
+  # WORKSPACE CYCLING (SUPER+TAB)
+  - commands: ['focus --next-active-workspace']
+    bindings: ['rwin+tab']
+  - commands: ['focus --prev-active-workspace']
+    bindings: ['rwin+shift+tab']
+  - commands: ['focus --recent-workspace']
+    bindings: ['rwin+d']
+
+  # RESIZE MODE (SUPER+R)
+  - commands: ['wm-enable-binding-mode --name resize']
+    bindings: ['rwin+r']
+
+  # ADDITIONAL BINDINGS
+  - commands: ['wm-toggle-pause']
+    bindings: ['rwin+shift+p']
+  - commands: ['wm-cycle-focus']
+    bindings: ['rwin+space']
