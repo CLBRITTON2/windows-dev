@@ -18,20 +18,12 @@
   --color-hover: rgba(64, 61, 82, 0.8);
 }
 
-.green {
-  color: var(--color-green);
-}
-
-.blue {
-  color: var(--color-blue);
-}
-
 .yellow {
   color: var(--color-yellow);
 }
 
-.cyan {
-  color: var(--color-cyan);
+.accent {
+  color: var(--color-accent)
 }
 
 :root {
@@ -126,18 +118,18 @@ body,
    ICON COLORS
 ========================= */
 .ethernet-icon {
-  color: var(--color-green);
+  color: var(--color-accent);
   font-size: 1.2rem;
 }
 
 .wifi-icon {
-  color: var(--color-green);
+  color: var(--color-accent);
   font-size: 1.2rem;
   margin-right: 0.2rem;
 }
 
 .cpu-icon {
-  color: var(--color-accent);
+  color: var(--color-cyan);
   font-size: 1.2rem;
 }
 
@@ -157,18 +149,19 @@ body,
 }
 
 .audio-icon {
-  color: var(--color-cyan);
+  color: var(--color-accent);
   font-size: 1.2rem;
   margin-right: 1rem;
 }
 
 .weather-icon {
+  color: var(--color-cyan);
   font-size: 1.2rem;
   margin-right: 0.8rem !important;
 }
 
 .date-icon {
-  color: var(--color-cyan);
+  color: var(--color-accent);
   font-size: 1.2rem;
 }
 
@@ -201,6 +194,7 @@ body,
 
 .workspace-icon {
   display: inline-block;
+    color: var(--color-accent-alt);
   transform: translateX(-0.2rem);
 }
 
@@ -214,6 +208,7 @@ body,
 .binding-mode {
   background: var(--color-foreground-30);
   color: var(--color-foreground);
+  color: var(--color-accent-alt);
   border-radius: 999px;
   border: none;
   padding: 2px 8px;
@@ -269,7 +264,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-accent);
+  color: var(--color-cyan);
   width: 100%;
   height: 100%;
 

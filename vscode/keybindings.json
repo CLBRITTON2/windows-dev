@@ -65,5 +65,5 @@
   {
     "key": "ctrl+shift+5",
     "command": "editor.emmet.action.matchTag"
-  },
+  }
 ]

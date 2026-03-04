@@ -13,6 +13,7 @@
     "editor.minimap.enabled": false,
     "breadcrumbs.enabled": false,
     "editor.lineNumbers": "relative",
+    "vim.scrolloff": 5,
     "vim.insertModeKeyBindings": [
       {
         "before": ["k", "j"],
@@ -26,7 +27,14 @@
     // switch b/w buffers
     { "before": ["<S-h>"], "commands": [":bprevious"] },
     { "before": ["<S-l>"], "commands": [":bnext"] },
-
+    {
+      "before": ["<C-d>"],
+      "after": ["<C-d>", "z", "z"]
+    },
+    {
+      "before": ["<C-u>"],
+      "after": ["<C-u>", "z", "z"]
+    },
     // splits
     { "before": ["leader", "v"], "commands": [":vsplit"] },
     { "before": ["leader", "s"], "commands": [":split"] },
