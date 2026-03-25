@@ -1,11 +1,8 @@
-# ── Editor ──
-$env:EDITOR = "nvim"
-
 # ── Prompt ──
 function prompt {
     $time = Get-Date -Format "HH:mm"
     $user = $env:USERNAME
-    $path = $(Get-Location).Path.Replace($HOME, "~")
+    $path = $(Get-Location).Path
     "┌[$time]-[$user]-[$path]`n└─> "
 }
 
@@ -82,7 +79,6 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 
 # ── Aliases ──
 Set-Alias -Name c     -Value Clear-Host
-Set-Alias -Name v     -Value nvim
 Set-Alias -Name which -Value Get-Command
 
 Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
