@@ -154,21 +154,28 @@ body,
    WORKSPACES
 ========================= */
 .workspace-button {
-  font-size: 1.2rem;
+  font-size: 1rem;
   background: none;
-  color: var(--color-foreground);
+  color: var(--color-foreground-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 8px;
-  margin: 0 3px;
+  padding: 2px 6px;
+  margin: 0 1px;
   cursor: pointer;
   border: none;
-  border-radius: 999px;
+  border-radius: 10px;
+  position: relative;
   transition: all 0.25s ease;
 
   &.has-child {
     color: var(--color-foreground);
+  }
+
+  &.focused {
+    color: var(--color-black);
+    background: var(--color-accent-alt);
+    font-weight: 600;
   }
 
   &:hover {
@@ -177,10 +184,13 @@ body,
   }
 }
 
-.workspace-icon {
-  display: inline-block;
-    color: var(--color-accent-alt);
-  transform: translateX(-0.2rem);
+
+.left-divider {
+  width: 1px;
+  height: 60%;
+  background: var(--color-border);
+  margin: 0 4px;
+  flex-shrink: 0;
 }
 
 .box:has(.workspace-button):hover {

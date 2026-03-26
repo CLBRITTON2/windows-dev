@@ -215,28 +215,32 @@
           <div className="left">
             {output.glazewm && (
               <div className="box">
-                {output.glazewm.currentWorkspaces.map((workspace) => (
-                  <button
-                    className={`workspace-button ${workspace.hasFocus ? "focused" : ""} ${workspace.children.length > 0 ? "has-child" : ""}`}
-                    onClick={() =>
-                      output.glazewm.runCommand(
-                        `focus --workspace ${workspace.name}`
-                      )
-                    }
-                    key={workspace.name}
-                  >
-                    <span className="workspace-icon">
-                      {workspace.hasFocus ? "󰴈" : ""}
-                    </span>
-                  </button>
-                ))}
+                {output.glazewm.currentWorkspaces.map((workspace) => {
+                  const hasWindows = (workspace.children || []).flatMap(collectWindows).length > 0;
+                  return (
+                    <button
+                      className={`workspace-button ${workspace.hasFocus ? "focused" : ""} ${hasWindows ? "has-child" : ""}`}
+                      onClick={() =>
+                        output.glazewm.runCommand(
+                          `focus --workspace ${workspace.name}`
+                        )
+                      }
+                      key={workspace.name}
+                    >
+                      {workspace.name}
+                    </button>
+                  );
+                })}
               </div>
             )}
 
             {output.glazewm && (
-              <div className="box app-list">
-                <CurrentApps glazewm={output.glazewm} />
-              </div>
+              <>
+                <div className="left-divider"></div>
+                <div className="box app-list">
+                  <CurrentApps glazewm={output.glazewm} />
+                </div>
+              </>
             )}
           </div>
 
