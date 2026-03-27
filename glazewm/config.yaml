@@ -165,6 +165,10 @@ keybindings:
   - commands: ['move --direction down']
     bindings: ['rwin+alt+j']
 
+  # SLEEP
+  - commands: ['shell-exec rundll32.exe powrprof.dll,SetSuspendState 0,1,0']
+    bindings: ['rwin+ctrl+s']
+
   # SYSTEM ACTIONS
   - commands: ['wm-reload-config']
     bindings: ['rwin+ctrl+r']
