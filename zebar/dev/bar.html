@@ -17,7 +17,7 @@
   <div id="root"></div>
 
   <script type="text/babel" data-type="module">
-    import React, { useState, useEffect } from "https://esm.sh/react@18?dev";
+    import React, { useState, useEffect, useMemo } from "https://esm.sh/react@18?dev";
     import { createRoot } from "https://esm.sh/react-dom@18/client?dev";
     import * as zebar from "https://esm.sh/zebar@3";
 
@@ -114,6 +114,14 @@
       );
     }
 
+    async function fetchGeoLocation() {
+      const res = await fetch("http://ip-api.com/json/?fields=lat,lon");
+      const data = await res.json();
+      return { latitude: data.lat, longitude: data.lon };
+    }
+
+    const geo = await fetchGeoLocation().catch(() => null);
+
     const providers = zebar.createProviderGroup({
       network: { type: "network" },
       glazewm: { type: "glazewm" },
@@ -121,7 +129,7 @@
       date: { type: "date", formatting: "EEE d MMM yyyy, t" },
       battery: { type: "battery" },
       memory: { type: "memory", refreshInterval: 1000 },
-      weather: { type: "weather" },
+      weather: { type: "weather", ...geo },
       media: { type: "media" },
       audio: { type: "audio" },
       systray: { type: "systray" },
@@ -204,6 +212,10 @@
           default:
             return <span className="icon weather-icon">?</span>;
         }
+      }
+
+      function formatWeatherStatus(status) {
+        return (status || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
       }
 
       function bytesToGigabytes(bytes) {
@@ -306,18 +318,31 @@
             )}
 
             {output.network && output.glazewm && (
-              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:network-status')}>{getNetworkIcon(output.network)}</div>
+              <div className="box" title={[
+                output.network.defaultInterface?.type?.toUpperCase(),
+                output.network.defaultGateway?.ssid && `SSID: ${output.network.defaultGateway.ssid}`,
+                output.network.defaultGateway?.signalStrength != null && `Signal: ${output.network.defaultGateway.signalStrength}%`,
+                output.network.defaultInterface?.ipv4Addresses?.[0] && `IP: ${output.network.defaultInterface.ipv4Addresses[0]}`,
+                output.network.traffic && `↓ ${output.network.traffic.received.siValue.toFixed(1)} ${output.network.traffic.received.siUnit}/s  ↑ ${output.network.traffic.transmitted.siValue.toFixed(1)} ${output.network.traffic.transmitted.siUnit}/s`,
+              ].filter(Boolean).join('\n')} onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:network-status')}>{getNetworkIcon(output.network)}</div>
             )}
 
             {output.cpu && output.glazewm && (
-              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec taskmgr')}>
+              <div className="box" title={[
+                output.cpu.vendor,
+                `${output.cpu.physicalCoreCount} cores / ${output.cpu.logicalCoreCount} threads`,
+                `Frequency: ${(output.cpu.frequency / 1000).toFixed(2)} GHz`,
+              ].join('\n')} onClick={() => output.glazewm.runCommand('shell-exec taskmgr')}>
                 <span className="icon cpu-icon"></span>
                 <span className="info">{Math.round(output.cpu.usage)}%</span>
               </div>
             )}
 
             {output.memory && output.glazewm && (
-              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec cmd /c start "" "C:\\Program Files\\Mem Reduct\\memreduct.exe"')}>
+              <div className="box" title={[
+                `Total: ${bytesToGigabytes(output.memory.totalMemory)} GB`,
+                output.memory.totalSwap > 0 && `Swap: ${bytesToGigabytes(output.memory.usedSwap)} / ${bytesToGigabytes(output.memory.totalSwap)} GB`,
+              ].filter(Boolean).join('\n')} onClick={() => output.glazewm.runCommand('shell-exec cmd /c start "" "C:\\Program Files\\Mem Reduct\\memreduct.exe"')}>
                 <span className="icon memory-icon"></span>
                 <span className="info">
                   {bytesToGigabytes(output.memory.usedMemory)} GBs
@@ -326,7 +351,10 @@
             )}
 
             {output.audio?.defaultPlaybackDevice && output.glazewm && (
-              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec sndvol.exe')}>
+              <div className="box" title={[
+                output.audio.defaultPlaybackDevice.name,
+                output.audio.defaultPlaybackDevice.isMuted ? 'Muted' : `Volume: ${Math.round(output.audio.defaultPlaybackDevice.volume)}%`,
+              ].join('\n')} onClick={() => output.glazewm.runCommand('shell-exec sndvol.exe')}>
                 {getAudioIcon(output.audio.defaultPlaybackDevice.volume)}
                 <span className="info">
                   {Math.round(output.audio.defaultPlaybackDevice.volume)}%
@@ -335,7 +363,11 @@
             )}
 
             {output.weather && (
-              <div className="box">
+              <div className="box" title={[
+                formatWeatherStatus(output.weather.status),
+                `Wind: ${(output.weather.windSpeed * 0.6214).toFixed(1)} mph`,
+                `${Math.round(output.weather.celsiusTemp)}°C / ${Math.round(output.weather.fahrenheitTemp)}°F`,
+              ].join('\n')}>
                 {getWeatherIcon(output.weather)}
                 <span className="info">
                   {Math.round(output.weather.fahrenheitTemp)}°F
