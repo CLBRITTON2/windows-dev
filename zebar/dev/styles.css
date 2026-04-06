@@ -139,6 +139,23 @@ body,
   margin-right: 1rem;
 }
 
+.battery-icon {
+  color: var(--color-green);
+  font-size: 1.2rem;
+}
+
+.battery-icon.low {
+  color: var(--color-yellow);
+}
+
+.battery-icon.critical {
+  color: var(--color-red);
+}
+
+.battery-icon.charging {
+  color: var(--color-green);
+}
+
 .weather-icon {
   color: var(--color-cyan);
   font-size: 1.2rem;
@@ -359,5 +376,3 @@ body,
   height: 18px;
   object-fit: contain;
 }
-
-

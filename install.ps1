@@ -64,6 +64,11 @@ Link "$HOME\.glzr\zebar\normalize.css"   "$repo\zebar\normalize.css"
 Link "$HOME\.glzr\zebar\settings.json"   "$repo\zebar\settings.json"
 Link "$HOME\.glzr\zebar\dev"             "$repo\zebar\dev"
 
+# ── Windows Terminal ─────────────────────────────────────────
+Write-Host "Windows Terminal" -ForegroundColor Magenta
+Link "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" `
+     "$repo\windows-terminal\settings.json"
+
 # ── Notepad++ ────────────────────────────────────────────────
 Write-Host "Notepad++" -ForegroundColor Magenta
 Link "$env:APPDATA\Notepad++\themes" "$repo\notepadpp\themes"

@@ -183,6 +183,24 @@
         }
       }
 
+      function getBatteryIcon(batteryOutput) {
+        const level = batteryOutput.chargePercent;
+        const charging = batteryOutput.state === "charging";
+        if (charging) {
+          return <span className="icon battery-icon charging">󰂄</span>;
+        } else if (level > 80) {
+          return <span className="icon battery-icon">󰁹</span>;
+        } else if (level > 60) {
+          return <span className="icon battery-icon">󰂁</span>;
+        } else if (level > 40) {
+          return <span className="icon battery-icon">󰁾</span>;
+        } else if (level > 20) {
+          return <span className="icon battery-icon low">󰁼</span>;
+        } else {
+          return <span className="icon battery-icon critical">󰂎</span>;
+        }
+      }
+
       function getWeatherIcon(weatherOutput) {
         switch (weatherOutput.status) {
           case "clear_day":
@@ -254,14 +272,15 @@
                 </div>
               </>
             )}
-          </div>
 
-          <div className="center">
             {output.date && (
-              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
-                <span className="icon date-icon">󱑁</span>
-                <span className="info">{output.date?.formatted}</span>
-              </div>
+              <>
+                <div className="left-divider"></div>
+                <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
+                  <span className="icon date-icon">󱑁</span>
+                  <span className="info">{output.date?.formatted}</span>
+                </div>
+              </>
             )}
           </div>
 
@@ -358,6 +377,19 @@
                 {getAudioIcon(output.audio.defaultPlaybackDevice.volume)}
                 <span className="info">
                   {Math.round(output.audio.defaultPlaybackDevice.volume)}%
+                </span>
+              </div>
+            )}
+
+            {output.battery && (
+              <div className="box" title={[
+                `${Math.round(output.battery.chargePercent)}%`,
+                output.battery.state === "charging" ? "Charging" : "On battery",
+                output.battery.healthPercent != null && `Health: ${output.battery.healthPercent}%`,
+              ].filter(Boolean).join('\n')}>
+                {getBatteryIcon(output.battery)}
+                <span className="info">
+                  {Math.round(output.battery.chargePercent)}%
                 </span>
               </div>
             )}

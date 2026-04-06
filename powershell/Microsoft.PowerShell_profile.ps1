@@ -31,6 +31,8 @@ Set-PSReadLineOption -Colors @{
 }
 
 # ── fzf ──
+$env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\eza-community.eza_Microsoft.Winget.Source_8wekyb3d8bbwe"
 Import-Module PSFzf
 Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t'
 Set-PsFzfOption -PSReadlineChordReverseHistory 'Ctrl+r'
@@ -89,3 +91,4 @@ function ll  { eza -al --icons=always @args }
 function lt  { eza -a  --tree --level=1 --icons=always @args }
 function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
+
