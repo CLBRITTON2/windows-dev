@@ -92,3 +92,5 @@ function lt  { eza -a  --tree --level=1 --icons=always @args }
 function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
 
+$env:Path =
+  "C:\msys64\mingw64\bin;" + $env:Path
