@@ -89,3 +89,25 @@ function ll  { eza -al --icons=always @args }
 function lt  { eza -a  --tree --level=1 --icons=always @args }
 function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
+
+# ── Log tailing ──
+function ptail {
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [int]$Tail = 5
+    )
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "ptail: file not found: $Path"
+    }
+    $item = Get-Item -LiteralPath $Path -Force
+    $real = if ($item.Target) {
+        $t = $item.Target | Select-Object -First 1
+        if ([System.IO.Path]::IsPathRooted($t)) { $t }
+        else { Join-Path (Split-Path $Path -Parent) $t }
+    } else { $Path }
+    Get-Content -LiteralPath $real -Tail $Tail -Wait
+}
+
+function tziti {
+    ptail 'C:\Program Files (x86)\NetFoundry Inc\Ziti Desktop Edge\logs\service\ziti-tunneler.log'
+}
