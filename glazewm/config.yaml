@@ -1,6 +1,11 @@
 general:
-  startup_commands: ['focus --workspace 1', 'shell-exec zebar']
-  shutdown_commands: ['shell-exec taskkill /IM zebar.exe /F']
+  startup_commands:
+    - 'focus --workspace 1'
+    - 'shell-exec zebar'
+    - 'shell-exec "C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe" "C:\Users\Chris\windows-dev\glazewm\winkey-fix.ahk"'
+  shutdown_commands:
+    - 'shell-exec taskkill /IM zebar.exe /F'
+    - 'shell-exec taskkill /IM AutoHotkey64.exe /F'
   config_reload_commands: []
   focus_follows_cursor: false
   toggle_workspace_on_refocus: true
@@ -30,16 +35,26 @@ workspaces:
     bind_to_monitor: 1
   - name: '5'
     bind_to_monitor: 1
-
   - name: '6'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '7'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '8'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '9'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '10'
+    bind_to_monitor: 1
+
+  - name: '11'
+    bind_to_monitor: 0
+  - name: '12'
+    bind_to_monitor: 0
+  - name: '13'
+    bind_to_monitor: 0
+  - name: '14'
+    bind_to_monitor: 0
+  - name: '15'
     bind_to_monitor: 0
 
 window_effects:
@@ -179,7 +194,7 @@ keybindings:
   - commands: ['wm-exit']
     bindings: ['rwin+shift+q']
 
-  # WORKSPACE SWITCHING (SUPER+1-0)
+  # WORKSPACE SWITCHING (SUPER+1-0) — monitor 1
   - commands: ['focus --workspace 1']
     bindings: ['rwin+1']
   - commands: ['focus --workspace 2']
@@ -201,7 +216,19 @@ keybindings:
   - commands: ['focus --workspace 10']
     bindings: ['rwin+0']
 
-  # MOVE WINDOW TO WORKSPACE (SUPER+CTRL+1-0)
+  # WORKSPACE SWITCHING (SUPER+SHIFT+1-5) — monitor 0
+  - commands: ['focus --workspace 11']
+    bindings: ['rwin+shift+1']
+  - commands: ['focus --workspace 12']
+    bindings: ['rwin+shift+2']
+  - commands: ['focus --workspace 13']
+    bindings: ['rwin+shift+3']
+  - commands: ['focus --workspace 14']
+    bindings: ['rwin+shift+4']
+  - commands: ['focus --workspace 15']
+    bindings: ['rwin+shift+5']
+
+  # MOVE WINDOW TO WORKSPACE (SUPER+CTRL+1-0) — monitor 1
   - commands: ['move --workspace 1']
     bindings: ['rwin+ctrl+1']
   - commands: ['move --workspace 2']
@@ -222,6 +249,18 @@ keybindings:
     bindings: ['rwin+ctrl+9']
   - commands: ['move --workspace 10']
     bindings: ['rwin+ctrl+0']
+
+  # MOVE WINDOW TO WORKSPACE (SUPER+ALT+1-5) — monitor 0
+  - commands: ['move --workspace 11']
+    bindings: ['rwin+alt+1']
+  - commands: ['move --workspace 12']
+    bindings: ['rwin+alt+2']
+  - commands: ['move --workspace 13']
+    bindings: ['rwin+alt+3']
+  - commands: ['move --workspace 14']
+    bindings: ['rwin+alt+4']
+  - commands: ['move --workspace 15']
+    bindings: ['rwin+alt+5']
 
   # WORKSPACE CYCLING (SUPER+TAB)
   - commands: ['focus --next-active-workspace']

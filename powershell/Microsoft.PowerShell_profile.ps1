@@ -89,6 +89,8 @@ function ll  { eza -al --icons=always @args }
 function lt  { eza -a  --tree --level=1 --icons=always @args }
 function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
+function cdzet { Set-Location 'C:\Users\Chris\dev\ziti-tunnel-sdk-c' }
+function cdew  { Set-Location 'C:\Users\Chris\dev\desktop-edge-win' }
 
 # ── Log tailing ──
 function ptail {
