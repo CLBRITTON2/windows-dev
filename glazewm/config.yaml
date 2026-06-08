@@ -2,7 +2,6 @@ general:
   startup_commands:
     - 'focus --workspace 1'
     - 'shell-exec zebar'
-    - 'shell-exec "C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe" "C:\Users\Chris\windows-dev\glazewm\winkey-fix.ahk"'
   shutdown_commands:
     - 'shell-exec taskkill /IM zebar.exe /F'
     - 'shell-exec taskkill /IM AutoHotkey64.exe /F'
