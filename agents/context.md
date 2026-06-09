@@ -90,9 +90,8 @@ repo is the source of truth. The rules marked absolute do not bend.
 
 - Primary shell is PowerShell. Use PowerShell syntax when targeting it: `$null`, `$env:VAR`, backtick for
   line continuation. Bash is for one-offs and POSIX scripts.
-- Bash rules (enforced by `agents/hooks/pre-tool-use-hook.ps1`, wired as a PreToolUse hook): one command at
-  a time, no `;` chaining, no `cd /path && cmd`, no bare `find`, no `>` or `>>` redirection (use `tee`), no
-  inline env before docker, `gh api` must start with `gh api -X GET`.
+- Bash constraints are enforced by `agents/hooks/pre-tool-use-hook.ps1` (PreToolUse hook), so they are not
+  restated here. Prefer `tee` over redirection and `rg` over `find` to avoid the hook rejecting the call.
 - Prefer `rg` for searching code and files. Prefer non-interactive flags over interactive prompts.
 - When handing me multiple shell commands to run in sequence, output ONLY a single fenced code block with
   the commands back-to-back. No prose between commands. Put any explanation as a `# ...` comment on the line
@@ -118,9 +117,6 @@ repo is the source of truth. The rules marked absolute do not bend.
 ## Environment
 
 - Windows 11 Pro. Primary shell PowerShell. WSL (zsh) for POSIX work.
-- WezTerm as daily driver, Windows Terminal as backup. Neovim in WSL (lazyvim config), VS Code with Vim,
-  Visual Studio 2022 with VsVim.
-- glazewm window manager, zebar bar. This `windows-dev` repo holds these configs.
 - Build mostly in Go, CMake, and node (npm and yarn). I work in the openziti and netfoundry ecosystems,
   `ziti` CLI is on my path.
 - Match the toolchain already present in a repo. Do not introduce a new build system.
