@@ -14,12 +14,11 @@
   --color-accent: #ebbcba;
   --color-accent-alt: #c4a7e7;
   --color-hover: rgba(64, 61, 82, 0.8);
-  height: 90vh;
+  height: 100%;
   color: var(--color-foreground);
   font-family: "JetBrainsMono Nerd Font", ui-monospace, monospace;
   font-size: 14px;
   padding: 5px;
-  padding-bottom: 0;
 }
 
 .yellow {
