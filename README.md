@@ -6,15 +6,13 @@
 - Hide Windows taskbar: https://github.com/amnweb/thide
 - App launcher: https://learn.microsoft.com/en-us/windows/powertoys/
 
-Main VSCode extensions are Vim and Rose Pine  
 WezTerm uses my lazyvim config https://github.com/CLBRITTON2/lazyvim-config and .zshrc from https://github.com/CLBRITTON2/dots in WSL  
-Notepad++ is just a rose pine theme  
-Visual Studio 2022 extensions are Rose Pine and VsVim 2022
+Visual Studio 2022 extensions: VsVim 2022
 - ctrl c, ctrl f, ctrl v handled by VS all others handled by VsVim
 
 ## Claude Code context
 
-[`agents/context.md`](agents/context.md) holds my working rules: responses, code style, error handling,
+[`agents/context.md`](agents/context.md) holds working rules: responses, code style, error handling,
 workflow, git, shell, and environment. It loads at the start of every Claude Code session through an
 `@`-import in `~/.claude/CLAUDE.md`, so this repo is the single source of truth.
 
@@ -34,8 +32,7 @@ this repo. Replace `<REPO>` with wherever the repo lives.
 @<REPO>/agents/context.md
 ```
 
-`~/.claude/settings.json` (the hook wiring, plus deny git mutations so the agent asks before changing the
-repo):
+`~/.claude/settings.json`:
 
 ```json
 {
