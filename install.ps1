@@ -39,6 +39,12 @@ Write-Host "PowerShell" -ForegroundColor Magenta
 Link "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" `
      "$repo\powershell\Microsoft.PowerShell_profile.ps1"
 
+# ── Claude Code ─────────────────────────────────────────────
+Write-Host "Claude Code" -ForegroundColor Magenta
+Link "$HOME\.claude\CLAUDE.md"          "$repo\agents\context.md"
+Link "$HOME\.claude\settings.json"      "$repo\agents\settings.json"
+Link "$HOME\.claude\agents"             "$repo\agents\subagents"
+
 # ── VS Code ─────────────────────────────────────────────────
 Write-Host "VS Code" -ForegroundColor Magenta
 Link "$env:APPDATA\Code\User\settings.json"    "$repo\vscode\settings.json"
