@@ -91,6 +91,7 @@ function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
 function cdzet { Set-Location '~\dev\openziti\ziti-tunnel-sdk-c' }
 function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
+function udoz-repos { & "~\dev\windows-dev\scripts\update-ziti-repos.ps1" @args }
 
 # ── Log tailing ──
 function ptail {
