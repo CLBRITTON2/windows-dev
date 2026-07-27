@@ -50,6 +50,13 @@ Write-Host "VS Code" -ForegroundColor Magenta
 Link "$env:APPDATA\Code\User\settings.json"    "$repo\vscode\settings.json"
 Link "$env:APPDATA\Code\User\keybindings.json" "$repo\vscode\keybindings.json"
 
+# ── CMake ────────────────────────────────────────────────────
+# The per-repo presets file include()s the home one, so both must be linked.
+Write-Host "CMake" -ForegroundColor Magenta
+Link "$HOME\CMakeUserPreset.json" "$repo\cmake\CMakeUserPreset.json"
+Link "$HOME\dev\openziti\ziti-tunnel-sdk-c\CMakeUserPresets.json" `
+     "$repo\cmake\CMakeUserPresets.json"
+
 # ── Visual Studio 2022 ──────────────────────────────────────
 Write-Host "Visual Studio 2022" -ForegroundColor Magenta
 Link "$HOME\_vsvimrc" "$repo\visualstudio\_vsvimrc"
