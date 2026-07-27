@@ -17,8 +17,8 @@
   <div id="root"></div>
 
   <script type="text/babel" data-type="module">
-    import React, { useState, useEffect, useMemo } from "https://esm.sh/react@18?dev";
-    import { createRoot } from "https://esm.sh/react-dom@18/client?dev";
+    import React, { useState, useEffect } from "https://esm.sh/react@18";
+    import { createRoot } from "https://esm.sh/react-dom@18/client";
     import * as zebar from "https://esm.sh/zebar@3";
 
     // =============================================
@@ -86,7 +86,9 @@
     }
 
     function CurrentApps({ glazewm }) {
-      const windows = (glazewm.allWorkspaces || [])
+      // currentWorkspaces is scoped to this bar's monitor; allWorkspaces would
+      // mix in other monitors' apps on a multi-monitor setup.
+      const windows = (glazewm.currentWorkspaces || [])
         .filter((ws) => ws.isDisplayed)
         .flatMap((ws) => (ws.children || []).flatMap(collectWindows));
 
@@ -115,9 +117,19 @@
     }
 
     async function fetchGeoLocation() {
-      const res = await fetch("http://ip-api.com/json/?fields=lat,lon");
-      const data = await res.json();
-      return { latitude: data.lat, longitude: data.lon };
+      // Bound the request: ip-api is HTTP-only and rate-limited, and a hung
+      // socket here would block the whole bar from rendering (top-level await).
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+      try {
+        const res = await fetch("http://ip-api.com/json/?fields=lat,lon", {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        return { latitude: data.lat, longitude: data.lon };
+      } finally {
+        clearTimeout(timeout);
+      }
     }
 
     const geo = await fetchGeoLocation().catch(() => null);
@@ -127,10 +139,8 @@
       glazewm: { type: "glazewm" },
       cpu: { type: "cpu", refreshInterval: 1000 },
       date: { type: "date", formatting: "EEE d MMM yyyy, t" },
-      battery: { type: "battery" },
       memory: { type: "memory", refreshInterval: 1000 },
       weather: { type: "weather", ...geo },
-      media: { type: "media" },
       audio: { type: "audio" },
       systray: { type: "systray" },
     });
@@ -142,7 +152,8 @@
       const [systrayExpanded, setSystrayExpanded] = useState(false);
 
       useEffect(() => {
-        providers.onOutput(() => setOutput({ ...providers.outputMap }));
+        const unlisten = providers.onOutput(() => setOutput({ ...providers.outputMap }));
+        return () => unlisten?.();
       }, []);
 
       function getNetworkIcon(networkOutput) {
@@ -171,7 +182,8 @@
         }
       }
 
-      function getAudioIcon(volume) {
+      function getAudioIcon(device) {
+        const volume = device.isMuted ? 0 : device.volume;
         if (volume > 20) {
           return <span className="icon audio-icon"></span>;
         } else if (volume > 10) {
@@ -350,7 +362,6 @@
               <div className="box" title={[
                 output.cpu.vendor,
                 `${output.cpu.physicalCoreCount} cores / ${output.cpu.logicalCoreCount} threads`,
-                `Frequency: ${(output.cpu.frequency / 1000).toFixed(2)} GHz`,
               ].join('\n')} onClick={() => output.glazewm.runCommand('shell-exec taskmgr')}>
                 <span className="icon cpu-icon"></span>
                 <span className="info">{Math.round(output.cpu.usage)}%</span>
@@ -373,8 +384,14 @@
               <div className="box" title={[
                 output.audio.defaultPlaybackDevice.name,
                 output.audio.defaultPlaybackDevice.isMuted ? 'Muted' : `Volume: ${Math.round(output.audio.defaultPlaybackDevice.volume)}%`,
-              ].join('\n')} onClick={() => output.glazewm.runCommand('shell-exec sndvol.exe')}>
-                {getAudioIcon(output.audio.defaultPlaybackDevice.volume)}
+                'Scroll to adjust',
+              ].join('\n')} onClick={() => output.glazewm.runCommand('shell-exec sndvol.exe')}
+                onWheel={(e) => {
+                  const step = e.deltaY < 0 ? 2 : -2;
+                  const next = Math.max(0, Math.min(100, Math.round(output.audio.defaultPlaybackDevice.volume) + step));
+                  output.audio.setVolume(next);
+                }}>
+                {getAudioIcon(output.audio.defaultPlaybackDevice)}
                 <span className="info">
                   {Math.round(output.audio.defaultPlaybackDevice.volume)}%
                 </span>
