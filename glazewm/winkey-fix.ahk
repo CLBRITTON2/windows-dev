@@ -3,32 +3,39 @@
 
 ; Windows fires Start menu on Win release if no chord key was seen during
 ; the hold. GlazeWM consumes chord keys before Windows sees them, so every
-; chord looks like a lone Win tap. Send an unassigned vk on RWin press to
+; chord looks like a lone Win tap. Send an unassigned vk on Win press to
 ; preempt the trigger, then re-fire Start manually on detected lone taps.
+;
+; Both Win keys are hooked because this machine swaps configs: config.yaml
+; binds lwin (builtin keyboard), kinesis_config.yaml binds rwin.
 
-global g_RWinDownAt := 0
-global g_RWinChord := false
+global g_WinDownAt := 0
+global g_WinChord := false
 
+~LWin::
 ~RWin::
 {
-    global g_RWinDownAt, g_RWinChord
-    g_RWinDownAt := A_TickCount
-    g_RWinChord := false
+    global g_WinDownAt, g_WinChord
+    g_WinDownAt := A_TickCount
+    g_WinChord := false
     Send "{Blind}{vkFF}"
-    SetTimer(WatchRWinChord, 10)
+    SetTimer(WatchWinChord, 10)
 }
 
+~LWin Up::
 ~RWin Up::
 {
-    global g_RWinDownAt, g_RWinChord
-    SetTimer(WatchRWinChord, 0)
-    if (!g_RWinChord && (A_TickCount - g_RWinDownAt) < 300)
+    global g_WinDownAt, g_WinChord
+    SetTimer(WatchWinChord, 0)
+    ; Safe to re-fire LWin from inside an LWin hotkey: Send defaults to level 0
+    ; and a hotkey only triggers on input above its own level, so this cannot recurse.
+    if (!g_WinChord && (A_TickCount - g_WinDownAt) < 300)
         Send "{LWin}"
 }
 
-WatchRWinChord() {
-    global g_RWinChord
-    if (g_RWinChord)
+WatchWinChord() {
+    global g_WinChord
+    if (g_WinChord)
         return
     static keys := unset
     if !IsSet(keys) {
@@ -42,7 +49,7 @@ WatchRWinChord() {
     }
     for k in keys {
         if (GetKeyState(k, "P")) {
-            g_RWinChord := true
+            g_WinChord := true
             return
         }
     }

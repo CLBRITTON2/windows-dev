@@ -30,6 +30,22 @@ function Link($target, $source) {
     Write-Host "  Linked: $target" -ForegroundColor Green
 }
 
+function StartupShortcut([string]$name, [string]$exe, [string]$arguments, [string]$workingDir) {
+    if (!(Test-Path $exe)) {
+        Write-Warning "Executable missing, skipping shortcut: $exe"
+        return
+    }
+
+    $target = Join-Path ([Environment]::GetFolderPath('Startup')) "$name.lnk"
+    $shortcut = (New-Object -ComObject WScript.Shell).CreateShortcut($target)
+    $shortcut.TargetPath = $exe
+    $shortcut.Arguments = $arguments
+    $shortcut.WorkingDirectory = $workingDir
+    $shortcut.Save()
+
+    Write-Host "  Startup: $target" -ForegroundColor Green
+}
+
 Write-Host ""
 Write-Host "=== Linking dotfiles ===" -ForegroundColor Cyan
 Write-Host ""
@@ -61,6 +77,9 @@ Link "$HOME\.wezterm.lua" "$repo\wezterm\.wezterm.lua"
 # ── GlazeWM ──────────────────────────────────────────────────
 Write-Host "GlazeWM" -ForegroundColor Magenta
 Link "$HOME\.glzr\glazewm\config.yaml" "$repo\glazewm\config.yaml"
+# Runs the repo copy directly. GlazeWM's shutdown_commands kills AutoHotkey64.
+StartupShortcut "winkey-fix" "$env:ProgramFiles\AutoHotkey\v2\AutoHotkey64.exe" `
+                "`"$repo\glazewm\winkey-fix.ahk`"" "$repo\glazewm"
 
 # ── Zebar ────────────────────────────────────────────────────
 # Assets (icons + scripts) are junctioned
