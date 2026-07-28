@@ -1952,7 +1952,7 @@
         <WidgetStyle name="Brace highlight style" styleID="34" fgColor="EBBCBA" bgColor="191724" fontName="" fontStyle="1" fontSize="10" />
         <WidgetStyle name="Bad brace colour" styleID="35" fgColor="EB6F92" bgColor="191724" fontName="" fontStyle="0" fontSize="" />
         <WidgetStyle name="Current line background colour" styleID="0" bgColor="21202E" />
-        <WidgetStyle name="Selected text colour" styleID="0" bgColor="403D52" fgColor="E0DEF4" />
+        <WidgetStyle name="Selected text colour" styleID="0" bgColor="F6C177" fgColor="191724" />
         <WidgetStyle name="Caret colour" styleID="2069" fgColor="E0DEF4" />
         <WidgetStyle name="Edge colour" styleID="0" fgColor="9CCFD8" />
         <WidgetStyle name="Line number margin" styleID="33" fgColor="6E6A86" bgColor="1F1D2E" fontName="" fontStyle="0" fontSize="" />
@@ -1962,15 +1962,15 @@
         <WidgetStyle name="Fold active" styleID="0" fgColor="EBBCBA" />
         <WidgetStyle name="Fold margin" styleID="0" fgColor="1F1D2E" bgColor="1F1D2E" />
         <WidgetStyle name="White space symbol" styleID="0" fgColor="6E6A86" />
-        <WidgetStyle name="Smart Highlighting" styleID="29" bgColor="403D52" />
+        <WidgetStyle name="Smart Highlighting" styleID="29" bgColor="F6C177" />
         <WidgetStyle name="Find Mark Style" styleID="31" bgColor="EB6F92" />
         <WidgetStyle name="Mark Style 1" styleID="25" bgColor="9CCFD8" />
         <WidgetStyle name="Mark Style 2" styleID="24" bgColor="EBBCBA" />
         <WidgetStyle name="Mark Style 3" styleID="23" bgColor="F6C177" />
         <WidgetStyle name="Mark Style 4" styleID="22" bgColor="C4A7E7" />
         <WidgetStyle name="Mark Style 5" styleID="21" bgColor="31748F" />
-        <WidgetStyle name="Incremental highlight all" styleID="28" bgColor="524F67" />
-        <WidgetStyle name="Tags match highlighting" styleID="27" bgColor="403D52" />
+        <WidgetStyle name="Incremental highlight all" styleID="28" bgColor="C4A7E7" />
+        <WidgetStyle name="Tags match highlighting" styleID="27" bgColor="6E6A86" />
         <WidgetStyle name="Tags attribute" styleID="26" bgColor="1F1D2E" />
         <WidgetStyle name="Active tab focused indicator" styleID="0" fgColor="403D52" />
         <WidgetStyle name="Active tab unfocused indicator" styleID="0" fgColor="21202E" />
@@ -1980,8 +1980,8 @@
         <WidgetStyle name="Document map" styleID="0" fgColor="1F1D2E" bgColor="191724" />
         <WidgetStyle name="EOL custom color" styleID="0" fgColor="6E6A86" />
         <WidgetStyle name="Non-printing characters custom color" styleID="0" fgColor="EBBCBA" />
-        <WidgetStyle name="Multi-selected text color" styleID="0" bgColor="403D52" />
-        <WidgetStyle name="Multi-edit carets color" styleID="0" fgColor="403D52" />
+        <WidgetStyle name="Multi-selected text color" styleID="0" bgColor="EA9D34" />
+        <WidgetStyle name="Multi-edit carets color" styleID="0" fgColor="EBBCBA" />
         <WidgetStyle name="Change History modified" styleID="0" fgColor="EBBCBA" bgColor="EBBCBA" />
         <WidgetStyle name="Change History revert modified" styleID="0" fgColor="9CCFD8" bgColor="9CCFD8" />
         <WidgetStyle name="Change History revert origin" styleID="0" fgColor="31748F" bgColor="31748F" />
