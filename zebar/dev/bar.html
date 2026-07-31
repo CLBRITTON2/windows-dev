@@ -20,6 +20,7 @@
     import React, { useState, useEffect } from "https://esm.sh/react@18";
     import { createRoot } from "https://esm.sh/react-dom@18/client";
     import * as zebar from "https://esm.sh/zebar@3";
+    import { currentMonitor } from "https://esm.sh/@tauri-apps/api@2/window";
 
     // =============================================
     // ICON MAP: process name (lowercase) -> icon file
@@ -84,9 +85,16 @@
       offsetY: "55px",
       width: "380px",
       height: "160px",
-      monitorSelection: { type: "primary" },
       dockToEdge: { enabled: false, edge: null, windowMargin: "0px" },
     };
+
+    async function openZitiMenu() {
+      const monitor = await currentMonitor();
+      const monitorSelection = monitor?.name
+        ? { type: "name", match: monitor.name }
+        : { type: "primary" };
+      await zebar.startWidget("ziti-menu", { ...ZITI_MENU_PLACEMENT, monitorSelection });
+    }
 
     function ZitiMenuButton() {
       const [count, setCount] = useState(null);
@@ -113,7 +121,7 @@
         <button
           className="box ziti-toggle"
           title="OpenZiti GitHub"
-          onClick={() => zebar.startWidget("ziti-menu", ZITI_MENU_PLACEMENT)}
+          onClick={() => openZitiMenu()}
         >
           <img className="ziti-icon" src="./assets/icons/Ziti-32.png" alt="ziti" />
           {count != null && <span className="info">{count}</span>}
