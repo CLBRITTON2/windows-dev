@@ -21,6 +21,7 @@
     import { createRoot } from "https://esm.sh/react-dom@18/client";
     import * as zebar from "https://esm.sh/zebar@3";
     import { currentMonitor } from "https://esm.sh/@tauri-apps/api@2/window";
+    import { ZITI_SECTIONS, fetchSectionItems } from "./ziti-github.js";
 
     // =============================================
     // ICON MAP: process name (lowercase) -> icon file
@@ -77,8 +78,6 @@
       return `${ICON_BASE}${fileName}`;
     }
 
-    const GITHUB_USER = "CLBRITTON2";
-    const GITHUB_ORGS = "org:openziti org:netfoundry";
     const ZITI_MENU_WIDTH = 380;
 
     async function openZitiMenu(buttonEl) {
@@ -111,17 +110,15 @@
         let cancelled = false;
         async function refresh() {
           try {
-            const q = encodeURIComponent(`${GITHUB_ORGS} is:open author:${GITHUB_USER}`);
-            const res = await fetch(`https://api.github.com/search/issues?q=${q}`);
-            if (!res.ok) throw new Error(`GitHub search ${res.status}`);
-            const data = await res.json();
-            if (!cancelled) setCount(data.total_count);
+            const results = await Promise.all(ZITI_SECTIONS.map(fetchSectionItems));
+            const ids = new Set(results.flat().map((item) => item.id));
+            if (!cancelled) setCount(ids.size);
           } catch (err) {
             console.warn("ziti count fetch failed", { err });
           }
         }
         refresh();
-        const id = setInterval(refresh, 60 * 1000);
+        const id = setInterval(refresh, 90 * 1000);
         return () => { cancelled = true; clearInterval(id); };
       }, []);
 
