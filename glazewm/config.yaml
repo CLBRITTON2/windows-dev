@@ -187,6 +187,9 @@ keybindings:
   # SYSTEM ACTIONS
   - commands: ['wm-reload-config']
     bindings: ['rwin+ctrl+r']
+  # Restart zebar, workaround for zebar#287/#288 stale systray icons
+  - commands: ['shell-exec %userprofile%/.glzr/zebar/dev/assets/scripts/RestartZebar.ahk']
+    bindings: ['rwin+ctrl+b']
   - commands: ['close']
     bindings: ['rwin+shift+e']
   - commands: ['wm-redraw']
