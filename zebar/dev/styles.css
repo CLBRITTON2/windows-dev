@@ -314,6 +314,24 @@ body,
 }
 
 /* =========================
+   ZITI GITHUB MENU
+========================= */
+.ziti-toggle {
+  border: none;
+  background: none;
+  color: var(--color-foreground);
+  font: inherit;
+  user-select: none;
+}
+
+.ziti-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  margin-right: 0.4rem;
+}
+
+/* =========================
    CURRENT APPS (taskbar icons)
 ========================= */
 .app-list {

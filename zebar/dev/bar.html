@@ -76,6 +76,51 @@
       return `${ICON_BASE}${fileName}`;
     }
 
+    const GITHUB_USER = "CLBRITTON2";
+    const GITHUB_ORGS = "org:openziti org:netfoundry";
+    const ZITI_MENU_PLACEMENT = {
+      anchor: "top_right",
+      offsetX: "-5px",
+      offsetY: "55px",
+      width: "380px",
+      height: "160px",
+      monitorSelection: { type: "primary" },
+      dockToEdge: { enabled: false, edge: null, windowMargin: "0px" },
+    };
+
+    function ZitiMenuButton() {
+      const [count, setCount] = useState(null);
+
+      useEffect(() => {
+        let cancelled = false;
+        async function refresh() {
+          try {
+            const q = encodeURIComponent(`${GITHUB_ORGS} is:open author:${GITHUB_USER}`);
+            const res = await fetch(`https://api.github.com/search/issues?q=${q}`);
+            if (!res.ok) throw new Error(`GitHub search ${res.status}`);
+            const data = await res.json();
+            if (!cancelled) setCount(data.total_count);
+          } catch (err) {
+            console.warn("ziti count fetch failed", { err });
+          }
+        }
+        refresh();
+        const id = setInterval(refresh, 60 * 1000);
+        return () => { cancelled = true; clearInterval(id); };
+      }, []);
+
+      return (
+        <button
+          className="box ziti-toggle"
+          title="OpenZiti GitHub"
+          onClick={() => zebar.startWidget("ziti-menu", ZITI_MENU_PLACEMENT)}
+        >
+          <img className="ziti-icon" src="./assets/icons/Ziti-32.png" alt="ziti" />
+          {count != null && <span className="info">{count}</span>}
+        </button>
+      );
+    }
+
     // Recursively collect windows from workspace children (handles split containers)
     function collectWindows(child) {
       if (child.type === "window") return [child];
@@ -308,6 +353,9 @@
                 </button>
               </div>
             )}
+
+            <ZitiMenuButton />
+
             {output.glazewm && (
               <div className="box">
                 {output.glazewm.bindingModes.map((bindingMode) => (
