@@ -45,6 +45,23 @@
       box-sizing: border-box;
     }
 
+    .menu::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .menu::-webkit-scrollbar-thumb {
+      background: var(--color-foreground-muted);
+      border-radius: 3px;
+    }
+
+    .menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .section + .section {
+      margin-top: 16px;
+    }
+
     .section-header {
       display: flex;
       align-items: center;
@@ -129,6 +146,7 @@
     const SECTIONS = [
       { key: "prs", title: "Pull requests", query: `${GITHUB_ORGS} is:open is:pr author:${GITHUB_USER}`, type: "pullrequests" },
       { key: "issues", title: "Issues", query: `${GITHUB_ORGS} is:open is:issue author:${GITHUB_USER}`, type: "issues" },
+      { key: "assigned", title: "Assigned to me", query: `${GITHUB_ORGS} is:open is:issue assignee:${GITHUB_USER}`, type: "issues" },
     ];
 
     const widget = zebar.currentWidget();
@@ -170,7 +188,7 @@
       }, []);
 
       return (
-        <div>
+        <div className="section">
           <div className="section-header">
             <span>{section.title}{items && ` (${items.length})`}</span>
             <button className="view-all" onClick={() => openInBrowser(searchUrl(section))}>

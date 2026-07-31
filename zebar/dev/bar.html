@@ -79,21 +79,29 @@
 
     const GITHUB_USER = "CLBRITTON2";
     const GITHUB_ORGS = "org:openziti org:netfoundry";
-    const ZITI_MENU_PLACEMENT = {
-      anchor: "top_right",
-      offsetX: "-5px",
-      offsetY: "55px",
-      width: "380px",
-      height: "160px",
-      dockToEdge: { enabled: false, edge: null, windowMargin: "0px" },
-    };
+    const ZITI_MENU_WIDTH = 380;
 
-    async function openZitiMenu() {
+    async function openZitiMenu(buttonEl) {
       const monitor = await currentMonitor();
+      const winPos = await zebar.currentWidget().tauriWindow.outerPosition();
+      const scale = monitor?.scaleFactor ?? window.devicePixelRatio;
+      const rect = buttonEl.getBoundingClientRect();
+      // Center the menu under the icon, clamped to the monitor's right edge
+      const iconCenterX = (winPos.x - (monitor?.position.x ?? 0)) / scale + rect.left + rect.width / 2;
+      const monitorWidth = (monitor?.size.width ?? screen.width * scale) / scale;
+      const left = Math.max(5, Math.min(iconCenterX - ZITI_MENU_WIDTH / 2, monitorWidth - ZITI_MENU_WIDTH - 5));
       const monitorSelection = monitor?.name
         ? { type: "name", match: monitor.name }
         : { type: "primary" };
-      await zebar.startWidget("ziti-menu", { ...ZITI_MENU_PLACEMENT, monitorSelection });
+      await zebar.startWidget("ziti-menu", {
+        anchor: "top_left",
+        offsetX: `${Math.round(left)}px`,
+        offsetY: "48px",
+        width: `${ZITI_MENU_WIDTH}px`,
+        height: "160px",
+        monitorSelection,
+        dockToEdge: { enabled: false, edge: null, windowMargin: "0px" },
+      });
     }
 
     function ZitiMenuButton() {
@@ -121,7 +129,7 @@
         <button
           className="box ziti-toggle"
           title="OpenZiti GitHub"
-          onClick={() => openZitiMenu()}
+          onClick={(e) => openZitiMenu(e.currentTarget)}
         >
           <img className="ziti-icon" src="./assets/icons/Ziti-32.png" alt="ziti" />
           {count != null && <span className="info">{count}</span>}
