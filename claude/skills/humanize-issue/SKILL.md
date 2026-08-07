@@ -75,12 +75,18 @@ Verdict per claim:
 - **FABRICATED**: no such code at the reported version or the default branch.
 
 With more than 3 claims, fan out one Explore agent per claim in a single message. Give each the repo, tag,
-the claim verbatim, and the fetch instructions above. Each returns a verdict plus the real code cite.
+the claim verbatim, and the fetch instructions above. Constrain each agent's return to: verdict, actual
+file:line, one decisive fact of at most two sentences, persists on default branch yes or no, plus a code
+quote only when the verdict is not CONFIRMED. Never relay an agent's full report.
 
-Report: one line per claim (number, verdict, actual file:line, the decisive fact), then the bottom line.
-Is there a real bug, what is the actual defect, and where does a fix go. Quote the real code for anything
-CONFIRMED or UNSUPPORTED so the next reader does not repeat the check. Draft a reply to the reporter only
-on request.
+Report a verdict table, one row per claim, each cell one clause:
+
+| # | Verdict | Location | Fact |
+
+After the table, in order, each part only if it exists: corrections for non-CONFIRMED claims with the real
+code quoted once and trimmed to the decisive lines, one line per adjacent bug the verification surfaced,
+then the bottom line as a short paragraph. Is there a real bug, what is the actual defect, and where does
+a fix go. Draft a reply to the reporter only on request.
 
 ## Never
 
