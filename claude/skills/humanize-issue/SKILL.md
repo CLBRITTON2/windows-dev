@@ -45,6 +45,10 @@ dropped padding as a single count, not a list.
 Close with one line on how machine-generated the report reads and the strongest tell. This calibrates how
 much to trust the untested parts.
 
+Before replying, check: every code claim is in the numbered Claims list and none is stated as fact, the
+Evidence section holds only artifacts the reporter actually captured, and every part above is present or
+explicitly marked empty.
+
 If the argument included `investigate`, continue straight into the next section. Otherwise end with:
 verify claims 1 through N against source, reply `investigate`.
 
@@ -78,6 +82,9 @@ With more than 3 claims, fan out one Explore agent per claim in a single message
 the claim verbatim, and the fetch instructions above. Constrain each agent's return to: verdict, actual
 file:line, one decisive fact of at most two sentences, persists on default branch yes or no, plus a code
 quote only when the verdict is not CONFIRMED. Never relay an agent's full report.
+
+Before writing the table, check: every claim has one of the four verdicts, and every verdict came from
+source fetched this session at the reported version, not from memory or the reporter's own quotes.
 
 Report a verdict table, one row per claim, each cell one clause:
 

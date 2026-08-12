@@ -22,3 +22,6 @@ without re-deriving anything.
    whether it goes through an advisory flow before producing any public text.
 6. End with the paste-ready issue: a title and a body of plain prose, a repro block, and the affected
    versions. No Summary/Steps/Expected scaffolding unless the target repo's issue template requires it.
+
+Before producing the issue text, check: every statement carries its label from step 3, the not-checked
+list from step 4 exists, and any security-sensitive finding was flagged before anything public was drafted.

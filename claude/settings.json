@@ -76,7 +76,9 @@
       "Bash(git ls-tree *)",
       "Bash(git ls-remote *)",
       "Bash(gh api -X GET:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "Bash(git merge-base *)",
+      "Bash(pwsh -NoProfile -File ~/dev/windows-dev/scripts/update-ziti-repos.ps1)"
     ],
     "deny": [
       "Bash(git add*)",
