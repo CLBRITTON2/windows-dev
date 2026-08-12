@@ -111,12 +111,10 @@ repo is the source of truth. The rules marked absolute do not bend.
 
 ## Knowledge upkeep
 
-- Glossaries live in the agents repo under `glossaries/`, one file per project, one line per term: settled
-  vocabulary, version quirks, cross-repo facts. Repo `CLAUDE.md` files import them by `@~/dev/agents/...`
-  path. Nothing is placed in the live repos.
+- Project `CLAUDE.md` files may be symlinks. Edit the symlink target, never through the link.
 - When a session settles what a term means, finds a version-specific behavior, or corrects a wrong
-  assumption about a subsystem, update the glossary in the same turn without being asked. Current state
-  only, no changelog. If the project has no glossary yet, create it and add the import.
+  assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
+  asked (terms go in its `## Vocabulary` section). Current state only, no changelog.
 
 ## Security
 
