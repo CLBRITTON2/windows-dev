@@ -109,6 +109,15 @@ repo is the source of truth. The rules marked absolute do not bend.
   invokes the script. Pass GitHub-specific values (tokens, run IDs) as script parameters so they can be
   supplied manually when running locally.
 
+## Knowledge upkeep
+
+- Glossaries live in the agents repo under `glossaries/`, one file per project, one line per term: settled
+  vocabulary, version quirks, cross-repo facts. Repo `CLAUDE.md` files import them by `@~/dev/agents/...`
+  path. Nothing is placed in the live repos.
+- When a session settles what a term means, finds a version-specific behavior, or corrects a wrong
+  assumption about a subsystem, update the glossary in the same turn without being asked. Current state
+  only, no changelog. If the project has no glossary yet, create it and add the import.
+
 ## Security
 
 - Never read `.env`, `.env.*`, `secrets/`, `~/.aws/`, `~/.encrypted/`, or credential stores.
