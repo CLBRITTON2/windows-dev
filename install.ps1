@@ -48,6 +48,7 @@ Link "$HOME\.claude\skills\humanize-issue" "$repo\claude\skills\humanize-issue"
 Link "$HOME\.claude\skills\distill-bug"    "$repo\claude\skills\distill-bug"
 Link "$HOME\.claude\skills\issue-blockers" "$repo\claude\skills\issue-blockers"
 Link "$HOME\.claude\skills\comment-audit"  "$repo\claude\skills\comment-audit"
+Link "$HOME\.claude\skills\branch-review"  "$repo\claude\skills\branch-review"
 
 # ── VS Code ─────────────────────────────────────────────────
 Write-Host "VS Code" -ForegroundColor Magenta
