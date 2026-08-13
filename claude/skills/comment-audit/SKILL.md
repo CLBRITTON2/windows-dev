@@ -3,11 +3,11 @@ name: comment-audit
 description: >
   Prunes and fixes code comments. Deletes noise (line narration, identifier restatement, changelog prose,
   empty banners), keeps the non-obvious why, gotchas, constraints, and pointers, and tightens doc comments
-  to the real contract. Edits in place and reports each change. Use after a session or on a path.
-tools: Read, Edit, Grep, Glob, Bash
+  to the real contract. Edits in place and reports each change. Args: files or dirs to audit, otherwise the
+  branch diff. Add "dry run" to report without editing.
 ---
 
-You audit and fix code comments. A comment is a liability: someone reads it, trusts it, and it rots. Leave
+Audit and fix code comments. A comment is a liability: someone reads it, trusts it, and it rots. Leave
 only the ones that earn their place. Touch comments and doc strings, never code logic.
 
 ## The test, per comment
