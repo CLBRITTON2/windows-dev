@@ -1,27 +1,54 @@
 ---
 name: distill-bug
-description: Turn this session's findings into a short, verified bug report ready to file. Re-checks every code claim against source at the named version, separates verified from inferred, ends with paste-ready issue text. Use before posting an investigation as a GitHub issue or Slack message.
+description: Turn this session's findings into a short, verified bug report ready to file. Re-checks every code claim against source at the named version, separates verified from inferred, ends with a draft issue. Use before posting an investigation as a GitHub issue or Slack message.
 ---
 
 # distill-bug
 
-Outbound twin of humanize-issue: it turns this session's investigation into a report the reader can act on
-without re-deriving anything.
+Outbound twin of humanize-issue: turns this session's investigation into a report the reader can act on without
+re-deriving anything.
 
 ## Process
 
-1. Collect every factual claim the report rests on. Re-verify each against the source at the version the
-   bug targets (a checkout or the module cache, never memory). A claim that cannot be re-verified is
-   labeled unverified inline, never silently kept.
-2. Sort findings by severity, one short heading each, plain names (no invented labels or numbering
-   schemes). Each finding: a one-sentence claim, the evidence as file:line citations, then impact.
-3. Mark every statement as one of: verified against source, reproduced by running, inferred. An inference
-   must never read as fact.
-4. State what was not checked. A bounded claim beats an implied-complete one.
-5. If a finding is security-sensitive (remote crash, credential or data leak), flag it first and ask
-   whether it goes through an advisory flow before producing any public text.
-6. End with the paste-ready issue: a title and a body of plain prose, a repro block, and the affected
-   versions. No Summary/Steps/Expected scaffolding unless the target repo's issue template requires it.
+1. Re-verify every claim against real source at the tagged version the bug targets: a checkout at the tag, or the
+   repo host at the tag. Never the Go module cache, never memory. A claim that cannot be re-verified is labeled
+   unverified inline, never silently kept.
+2. Two-state check: a claim about a field, flag, or message is verified only when both states are traced, what
+   the sender emits for true AND for false/absent, and what the receiver does with each. Quoting a line (an
+   omitempty tag, a zero-init, a default arg) is not verifying its behavior. Search every naming variant of the
+   value, case-insensitively (isTotpEnrolled vs IsTotpEnrolled).
+3. Blame check: the blamed code must exist in the oldest version where the symptom was observed, else the blame
+   is wrong or partial.
+4. Sort findings by severity. Each one: a one-sentence claim, file:line evidence, impact. Plain names, no
+   invented labels or numbering schemes.
+5. Label every statement: verified against source, reproduced by running, or inferred. An inference never reads
+   as fact.
+6. List what was not checked. A bounded claim beats an implied-complete one.
+7. Flag security-sensitive findings (remote crash, credential or data leak) first and ask about an advisory flow
+   before drafting anything public.
+8. Propose a fix only after checking it against every caller or population that reaches the changed decision
+   point. Otherwise name the defect and stop.
+9. Refute pass, only when a fix is proposed: spawn a fresh subagent with the drafted findings and repo access,
+   instructed to kill the fix and the claims it rests on. Rework anything it wounds.
+10. Draft an issue: title, plain-prose body, repro block, affected versions. No Summary/Steps/Expected
+    scaffolding unless the repo's template requires it. Lead with the user-visible failure in one sentence, give
+    the mechanism one paragraph, and delete any sentence that restates a citation.
 
-Before producing the issue text, check: every statement carries its label from step 3, the not-checked
-list from step 4 exists, and any security-sensitive finding was flagged before anything public was drafted.
+## Output shape
+
+For the user's eyes only, never pasted into GitHub: one line of context, two tables, "Not checked" bullets, then
+the draft issue. No other headings, no prose between tables.
+
+| Claim | Evidence | Status | Impact |
+|---|---|---|---|
+
+One row per finding. Claim and impact under ten words each. Evidence as file:line at a named version. Status is
+verified / reproduced / inferred.
+
+| Component | Version | State |
+|---|---|---|
+
+One row per involved component. State is affected / fixed / not checked.
+
+Voice: first person, short declaratives, no hedging adverbs, no "comprehensive/deep-dive/critical", never
+restate a table row in prose. The draft issue body is prose, no tables.
