@@ -44,6 +44,7 @@ Write-Host "Claude Code" -ForegroundColor Magenta
 Link "$HOME\.claude\CLAUDE.md"          "$repo\claude\context.md"
 Link "$HOME\.claude\settings.json"      "$repo\claude\settings.json"
 Link "$HOME\.claude\agents"             "$repo\claude\agents"
+Link "$HOME\.claude\output-styles"      "$repo\claude\output-styles"
 Link "$HOME\.claude\skills\humanize-issue" "$repo\claude\skills\humanize-issue"
 Link "$HOME\.claude\skills\distill-bug"    "$repo\claude\skills\distill-bug"
 Link "$HOME\.claude\skills\issue-blockers" "$repo\claude\skills\issue-blockers"

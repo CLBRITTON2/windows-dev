@@ -109,6 +109,7 @@
     ]
   },
   "model": "opus[1m]",
+  "outputStyle": "Terse Engineer",
   "hooks": {
     "PostToolUse": [],
     "PreToolUse": [
