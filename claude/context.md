@@ -3,16 +3,6 @@
 Context loaded at the start of every Claude Code session via an @-import in `~/.claude/CLAUDE.md`. This
 repo is the source of truth. The rules marked absolute do not bend.
 
-## Responses
-
-- Keep responses to 1-3 sentences or bullets. Add detail only when required for correctness. If more detail
-  might help, ask first or offer a reply keyword like `details` or `bullet1 details`.
-- No fluff: no preambles, filler, restating my question, summaries, or niceties. Cut any sentence that adds
-  no new information. When in doubt, stop typing.
-- Do not end with vague delegation like "your call", "which way?", or "want me to...?". When options exist,
-  recommend one default and state the exact next action.
-- Ask only one concrete question if blocked.
-
 ## Writing
 
 - Never use the em dash character (U+2014) anywhere: not in files, chat, commit messages, or PR
