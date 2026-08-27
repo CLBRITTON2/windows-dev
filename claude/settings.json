@@ -1,6 +1,5 @@
 {
   "permissions": {
-    "defaultMode": "default",
     "allow": [
       "Bash(ls:*)",
       "Bash(ls *)",
@@ -106,10 +105,10 @@
       "Read(~/.encrypted/**)",
       "Read(~/.aws/**)",
       "Read(/e/**)"
-    ]
+    ],
+    "defaultMode": "default"
   },
   "model": "opus[1m]",
-  "outputStyle": "Terse Engineer",
   "hooks": {
     "PostToolUse": [],
     "PreToolUse": [
@@ -128,6 +127,7 @@
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true
   },
+  "outputStyle": "Terse Engineer",
   "feedbackSurveyRate": 0,
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",

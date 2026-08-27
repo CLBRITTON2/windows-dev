@@ -30,7 +30,10 @@ re-deriving anything.
    point. Otherwise name the defect and stop.
 9. Refute pass, only when a fix is proposed: spawn a fresh subagent with the drafted findings and repo access,
    instructed to kill the fix and the claims it rests on. Rework anything it wounds.
-10. Draft an issue: title, plain-prose body, repro block, affected versions. No Summary/Steps/Expected
+10. Run the issue-precheck skill on the surviving claims. A REPORTED verdict turns the draft into a comment on
+    the existing issue, a FIXED verdict ends the report with the version to upgrade to. Draft a new issue only
+    on UNREPORTED.
+11. Draft an issue: title, plain-prose body, repro block, affected versions. No Summary/Steps/Expected
     scaffolding unless the repo's template requires it. Lead with the user-visible failure in one sentence, give
     the mechanism one paragraph, and delete any sentence that restates a citation.
 
