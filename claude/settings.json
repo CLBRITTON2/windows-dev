@@ -122,6 +122,18 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/hooks/reply-style-reminder.ps1",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
