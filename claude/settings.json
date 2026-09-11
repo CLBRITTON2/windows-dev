@@ -76,7 +76,9 @@
       "Bash(git ls-tree *)",
       "Bash(git ls-remote *)",
       "Bash(gh api -X GET:*)",
-      "Bash(gh run watch:*)"
+      "Bash(gh run watch:*)",
+      "Bash(git merge-base *)",
+      "Bash(pwsh -NoProfile -File ~/dev/windows-dev/scripts/update-ziti-repos.ps1)"
     ],
     "deny": [
       "Bash(git add*)",
@@ -103,7 +105,8 @@
       "Read(~/.encrypted/**)",
       "Read(~/.aws/**)",
       "Read(/e/**)"
-    ]
+    ],
+    "defaultMode": "default"
   },
   "model": "opus[1m]",
   "hooks": {
@@ -119,13 +122,28 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo reminder for chat replies only, not prose written into files or commits: 1-3 sentences or bullets, lead with the verdict, no preamble, no wrap-up summary, no hedges or filler adjectives, no em dash, no semicolon in prose, never end with vague delegation. Recommend one default and state the exact next action.",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true
   },
+  "outputStyle": "Terse Engineer",
   "feedbackSurveyRate": 0,
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
-  "tui": "fullscreen"
+  "tui": "fullscreen",
+  "theme": "dark",
+  "switchModelsOnFlag": false
 }

@@ -7,18 +7,12 @@
     {
       "name": "cwdming",
       "inherits": ["mingw-vcpkg-base", "flags-windows-mingw"],
-      "binaryDir": "${sourceDir}/build/cwdming",
-      "environment": {
-        "VCPKG_INSTALLED_DIR": "C:/vcpkg/installed-cwdming"
-      }
+      "binaryDir": "${sourceDir}/build/cwdming"
     },
     {
       "name": "cwdming-win32crypto",
       "inherits": ["mingw-vcpkg-base", "flags-windows-mingw"],
       "binaryDir": "${sourceDir}/build/cwdming-win32crypto",
-      "environment": {
-        "VCPKG_INSTALLED_DIR": "C:/vcpkg/installed-cwdming-win32crypto"
-      },
       "cacheVariables": {
         "TLSUV_TLSLIB": "win32crypto"
       }
@@ -27,12 +21,23 @@
       "name": "cwdming-localsdk",
       "inherits": ["mingw-vcpkg-base", "flags-windows-mingw"],
       "binaryDir": "${sourceDir}/build/cwdming-localsdk",
-      "environment": {
-        "VCPKG_INSTALLED_DIR": "C:/vcpkg/installed-cwdming"
-      },
       "cacheVariables": {
         "ZITI_SDK_DIR": "$penv{USERPROFILE}/dev/openziti/ziti-sdk-c"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "cwdming",
+      "configurePreset": "cwdming"
+    },
+    {
+      "name": "cwdming-win32crypto",
+      "configurePreset": "cwdming-win32crypto"
+    },
+    {
+      "name": "cwdming-localsdk",
+      "configurePreset": "cwdming-localsdk"
     }
   ]
 }

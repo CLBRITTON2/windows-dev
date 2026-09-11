@@ -7,8 +7,11 @@ function prompt {
 }
 
 # ── PSReadLine ──
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle InlineView
+# Prediction refuses to enable when stdout is redirected (pwsh -Command from a script).
+if (-not [Console]::IsOutputRedirected) {
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle InlineView
+}
 Set-PSReadLineOption -HistorySaveStyle SaveIncrementally
 Set-PSReadLineOption -MaximumHistoryCount 10000
 Set-PSReadLineOption -Colors @{
@@ -38,9 +41,17 @@ $env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\eza-commun
 $env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
 
 # ── fzf ──
-Import-Module PSFzf
-Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t'
-Set-PsFzfOption -PSReadlineChordReverseHistory 'Ctrl+r'
+# Importing PSFzf costs ~300ms, so defer it to the first idle tick after the prompt is up. The action
+# runs in its own scope (hence -Global) and its errors never reach the console (hence the catch).
+Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action {
+    try {
+        Import-Module PSFzf -Global
+        Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t'
+        Set-PsFzfOption -PSReadlineChordReverseHistory 'Ctrl+r'
+    } catch {
+        [Console]::Error.WriteLine("PSFzf setup failed: $($_.Exception.Message)")
+    }
+} | Out-Null
 
 # ── PSStyle (PS 7.2+) ──
 if ($PSVersionTable.PSVersion.Major -ge 7) {
@@ -100,6 +111,17 @@ function cdzet { Set-Location '~\dev\openziti\ziti-tunnel-sdk-c' }
 function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
 function udoz-repos { & "~\dev\windows-dev\scripts\update-ziti-repos.ps1" @args }
 
+# Claude Code runs as its own unprivileged account, see scripts/setup-agent-account.ps1. The agent shares this
+# profile, so the guard keeps its own `claude` resolving to the binary instead of recursing into runas.
+if ($env:USERNAME -ne 'claude') {
+    function claude {
+        # wezterm.exe is the console-subsystem CLI and flashes a window of its own before handing off to the
+        # GUI, so spawn wezterm-gui.exe. runas is a console app too, hence the hidden host.
+        Start-Process runas -WindowStyle Hidden -ArgumentList `
+            "/user:claude /savecred `"wezterm-gui.exe start --cwd $PWD -- pwsh -NoLogo -Command claude`""
+    }
+}
+
 # ── Log tailing ──
 function ptail {
     param(
@@ -125,8 +147,10 @@ function tziti {
 # DO NOT MODIFY -- coreutils -- 60b36fc6-2d59-49df-be51-28dd2f4c3c9a
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 # Inlining the template into the profile shaves off ~10ms (25%).
+# 'ls' is deliberately absent: the rewrite fires before command resolution, so keeping it would shadow the eza
+# function above. Reinstalling coreutils puts it back.
 $script:__COREUTILS__ = [System.Collections.Generic.HashSet[string]]::new(
-    [string[]]@('arch','b2sum','base32','base64','basename','basenc','cat','cksum','comm','cp','csplit','cut','date','df','dirname','du','echo','env','expr','factor','false','find','fmt','fold','grep','head','hostname','join','la','link','ln','ls','md5sum','mkdir','mktemp','mv','nl','nproc','numfmt','od','paste','pathchk','pr','printenv','printf','ptx','pwd','readlink','realpath','rm','rmdir','seq','sha1sum','sha224sum','sha256sum','sha384sum','sha512sum','shuf','sleep','sort','split','stat','sum','tac','tail','tee','test','touch','tr','true','truncate','tsort','unexpand','uniq','unlink','uptime','wc','xargs','yes'),
+    [string[]]@('arch','b2sum','base32','base64','basename','basenc','cat','cksum','comm','cp','csplit','cut','date','df','dirname','du','echo','env','expr','factor','false','find','fmt','fold','grep','head','hostname','join','la','link','ln','md5sum','mkdir','mktemp','mv','nl','nproc','numfmt','od','paste','pathchk','pr','printenv','printf','ptx','pwd','readlink','realpath','rm','rmdir','seq','sha1sum','sha224sum','sha256sum','sha384sum','sha512sum','shuf','sleep','sort','split','stat','sum','tac','tail','tee','test','touch','tr','true','truncate','tsort','unexpand','uniq','unlink','uptime','wc','xargs','yes'),
     [System.StringComparer]::OrdinalIgnoreCase
 )
 

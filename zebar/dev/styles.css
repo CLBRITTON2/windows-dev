@@ -6,7 +6,6 @@
   --color-border: rgba(110, 106, 134, 0.25);
   --color-black: #191724;
   --color-red: #eb6f92;
-  --color-green: #9ccfd8;
   --color-blue: #31748f;
   --color-yellow: #f6c177;
   --color-magenta: #c4a7e7;
@@ -143,7 +142,7 @@ body,
 }
 
 .battery-icon {
-  color: var(--color-green);
+  color: var(--color-cyan);
   font-size: 1.2rem;
 }
 
@@ -153,10 +152,6 @@ body,
 
 .battery-icon.critical {
   color: var(--color-red);
-}
-
-.battery-icon.charging {
-  color: var(--color-green);
 }
 
 .weather-icon {
@@ -332,6 +327,24 @@ body,
 }
 
 /* =========================
+   ZITI GITHUB MENU
+========================= */
+.ziti-toggle {
+  border: none;
+  background: none;
+  color: var(--color-foreground);
+  font: inherit;
+  user-select: none;
+}
+
+.ziti-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  margin-right: 0.4rem;
+}
+
+/* =========================
    CURRENT APPS (taskbar icons)
 ========================= */
 .app-list {
@@ -378,3 +391,5 @@ body,
   height: 18px;
   object-fit: contain;
 }
+
+

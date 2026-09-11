@@ -6,7 +6,6 @@ return {
   default_prog = {"wsl", "--cd", "~"},
   font = wezterm.font("JetBrainsMono NF"),
   font_size = 16,
-  window_background_opacity = 1,
   window_decorations = "RESIZE",
   color_scheme = "rose-pine",
   window_background_opacity = 0.9,

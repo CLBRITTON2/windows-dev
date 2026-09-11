@@ -1,17 +1,7 @@
 # Working rules
 
-Context loaded at the start of every Claude Code session via an @-import in `~/.claude/CLAUDE.md`. This
-repo is the source of truth. The rules marked absolute do not bend.
-
-## Responses
-
-- Keep responses to 1-3 sentences or bullets. Add detail only when required for correctness. If more detail
-  might help, ask first or offer a reply keyword like `details` or `bullet1 details`.
-- No fluff: no preambles, filler, restating my question, summaries, or niceties. Cut any sentence that adds
-  no new information. When in doubt, stop typing.
-- Do not end with vague delegation like "your call", "which way?", or "want me to...?". When options exist,
-  recommend one default and state the exact next action.
-- Ask only one concrete question if blocked.
+Context loaded at the start of every Claude Code session: `~/.claude/CLAUDE.md` is a symlink to this file.
+This repo is the source of truth. The rules marked absolute do not bend.
 
 ## Writing
 
@@ -90,8 +80,9 @@ repo is the source of truth. The rules marked absolute do not bend.
 
 - Primary shell is PowerShell. Use PowerShell syntax when targeting it: `$null`, `$env:VAR`, backtick for
   line continuation. Bash is for one-offs and POSIX scripts.
-- Bash constraints are enforced by `agents/hooks/pre-tool-use-hook.ps1` (PreToolUse hook), so they are not
-  restated here. Prefer `tee` over redirection and `rg` over `find` to avoid the hook rejecting the call.
+- Bash, Write, and Edit constraints are enforced by `claude/hooks/pre-tool-use-hook.ps1` (PreToolUse hook),
+  so they are not restated here: read the hook for the full list. Prefer `tee` over redirection and `rg`
+  over `find` to avoid the hook rejecting the call.
 - Prefer `rg` for searching code and files. Prefer non-interactive flags over interactive prompts.
 - When handing me multiple shell commands to run in sequence, output ONLY a single fenced code block with
   the commands back-to-back. No prose between commands. Put any explanation as a `# ...` comment on the line
@@ -109,9 +100,17 @@ repo is the source of truth. The rules marked absolute do not bend.
   invokes the script. Pass GitHub-specific values (tokens, run IDs) as script parameters so they can be
   supplied manually when running locally.
 
+## Knowledge upkeep
+
+- Project `CLAUDE.md` files may be symlinks. Edit the symlink target, never through the link.
+- When a session settles what a term means, finds a version-specific behavior, or corrects a wrong
+  assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
+  asked (terms go in its `## Vocabulary` section). Current state only, no changelog.
+
 ## Security
 
-- Never read `.env`, `.env.*`, `secrets/`, `~/.aws/`, `~/.encrypted/`, or credential stores.
+- Never read `.env`, `.env.*`, `secrets/`, `~/.aws/`, `~/.encrypted/`, `~/.ssh/`, the E: drive, or credential
+  stores.
 - No silent fallbacks that mask an auth or validation failure. Never leak secrets into logs.
 
 ## Environment

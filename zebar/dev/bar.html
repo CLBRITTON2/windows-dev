@@ -17,9 +17,11 @@
   <div id="root"></div>
 
   <script type="text/babel" data-type="module">
-    import React, { useState, useEffect } from "https://esm.sh/react@18";
-    import { createRoot } from "https://esm.sh/react-dom@18/client";
-    import * as zebar from "https://esm.sh/zebar@3";
+    import React, { useState, useEffect } from "https://esm.sh/react@18.3.1";
+    import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+    import * as zebar from "https://esm.sh/zebar@3.3.1";
+    import { currentMonitor } from "https://esm.sh/@tauri-apps/api@2.11.1/window";
+    import { ZITI_SECTIONS, fetchSection } from "./ziti-github.js";
 
     // =============================================
     // ICON MAP: process name (lowercase) -> icon file
@@ -74,6 +76,65 @@
       const key = (processName || "").toLowerCase().trim();
       const fileName = ICON_MAP[key] ?? DEFAULT_ICON_FILE;
       return `${ICON_BASE}${fileName}`;
+    }
+
+    const ZITI_MENU_WIDTH = 380;
+
+    // Below this logical width the centre section has no room, so the date moves in beside the app list.
+    const NARROW_SCREEN_WIDTH = 1920;
+
+    async function openZitiMenu(buttonEl) {
+      const monitor = await currentMonitor();
+      const winPos = await zebar.currentWidget().tauriWindow.outerPosition();
+      const scale = monitor?.scaleFactor ?? window.devicePixelRatio;
+      const rect = buttonEl.getBoundingClientRect();
+      // Center the menu under the icon, clamped to the monitor's right edge
+      const iconCenterX = (winPos.x - (monitor?.position.x ?? 0)) / scale + rect.left + rect.width / 2;
+      const monitorWidth = (monitor?.size.width ?? screen.width * scale) / scale;
+      const left = Math.max(5, Math.min(iconCenterX - ZITI_MENU_WIDTH / 2, monitorWidth - ZITI_MENU_WIDTH - 5));
+      const monitorSelection = monitor?.name
+        ? { type: "name", match: monitor.name }
+        : { type: "primary" };
+      await zebar.startWidget("ziti-menu", {
+        anchor: "top_left",
+        offsetX: `${Math.round(left)}px`,
+        offsetY: "48px",
+        width: `${ZITI_MENU_WIDTH}px`,
+        height: "160px",
+        monitorSelection,
+        dockToEdge: { enabled: false, edge: null, windowMargin: "0px" },
+      });
+    }
+
+    function ZitiMenuButton() {
+      const [count, setCount] = useState(null);
+
+      useEffect(() => {
+        let cancelled = false;
+        async function refresh() {
+          try {
+            const results = await Promise.all(ZITI_SECTIONS.map(fetchSection));
+            const total = results.reduce((sum, r) => sum + r.totalCount, 0);
+            if (!cancelled) setCount(total);
+          } catch (err) {
+            console.warn("ziti count fetch failed", { err });
+          }
+        }
+        refresh();
+        const id = setInterval(refresh, 90 * 1000);
+        return () => { cancelled = true; clearInterval(id); };
+      }, []);
+
+      return (
+        <button
+          className="box ziti-toggle"
+          title="OpenZiti GitHub"
+          onClick={(e) => openZitiMenu(e.currentTarget)}
+        >
+          <img className="ziti-icon" src="./assets/icons/Ziti-32.png" alt="ziti" />
+          {count != null && <span className="info">{count}</span>}
+        </button>
+      );
     }
 
     // Recursively collect windows from workspace children (handles split containers)
@@ -151,10 +212,21 @@
     function App() {
       const [output, setOutput] = useState(providers.outputMap);
       const [systrayExpanded, setSystrayExpanded] = useState(false);
+      const [narrowScreen, setNarrowScreen] = useState(false);
 
       useEffect(() => {
         const unlisten = providers.onOutput(() => setOutput({ ...providers.outputMap }));
         return () => unlisten?.();
+      }, []);
+
+      useEffect(() => {
+        currentMonitor()
+          .then((monitor) => {
+            const scale = monitor?.scaleFactor ?? window.devicePixelRatio;
+            const width = (monitor?.size.width ?? screen.width * scale) / scale;
+            setNarrowScreen(width < NARROW_SCREEN_WIDTH);
+          })
+          .catch((err) => console.warn("monitor width lookup failed", { err }));
       }, []);
 
       function getNetworkIcon(networkOutput) {
@@ -183,24 +255,10 @@
         }
       }
 
-      function getAudioIcon(device) {
-        const volume = device.isMuted ? 0 : device.volume;
-        if (volume > 20) {
-          return <span className="icon audio-icon"></span>;
-        } else if (volume > 10) {
-          return <span className="icon audio-icon"></span>;
-        } else if (volume > 0) {
-          return <span className="icon audio-icon"></span>;
-        } else {
-          return <span className="icon audio-icon"></span>;
-        }
-      }
-
       function getBatteryIcon(batteryOutput) {
         const level = batteryOutput.chargePercent;
-        const charging = batteryOutput.state === "charging";
-        if (charging) {
-          return <span className="icon battery-icon charging">󰂄</span>;
+        if (batteryOutput.state === "charging") {
+          return <span className="icon battery-icon">󰂄</span>;
         } else if (level > 80) {
           return <span className="icon battery-icon">󰁹</span>;
         } else if (level > 60) {
@@ -211,6 +269,19 @@
           return <span className="icon battery-icon low">󰁼</span>;
         } else {
           return <span className="icon battery-icon critical">󰂎</span>;
+        }
+      }
+
+      function getAudioIcon(device) {
+        const volume = device.isMuted ? 0 : device.volume;
+        if (volume > 20) {
+          return <span className="icon audio-icon"></span>;
+        } else if (volume > 10) {
+          return <span className="icon audio-icon"></span>;
+        } else if (volume > 0) {
+          return <span className="icon audio-icon"></span>;
+        } else {
+          return <span className="icon audio-icon"></span>;
         }
       }
 
@@ -253,6 +324,13 @@
         return (bytes / (1024 * 1024 * 1024)).toFixed(1);
       }
 
+      const dateBox = output.date && output.glazewm && (
+        <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
+          <span className="icon date-icon">󱑁</span>
+          <span className="info">{output.date?.formatted}</span>
+        </div>
+      );
+
       return (
         <div className="app">
           <div className="left">
@@ -286,15 +364,16 @@
               </>
             )}
 
-            {output.date && (
+            {narrowScreen && dateBox && (
               <>
                 <div className="left-divider"></div>
-                <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
-                  <span className="icon date-icon">󱑁</span>
-                  <span className="info">{output.date?.formatted}</span>
-                </div>
+                {dateBox}
               </>
             )}
+          </div>
+
+          <div className="center">
+            {!narrowScreen && dateBox}
           </div>
 
           <div className="right">
@@ -328,6 +407,9 @@
                 </button>
               </div>
             )}
+
+            <ZitiMenuButton />
+
             {output.glazewm && (
               <div className="box">
                 {output.glazewm.bindingModes.map((bindingMode) => (
@@ -399,7 +481,7 @@
               </div>
             )}
 
-            {output.battery && (
+            {typeof output.battery?.chargePercent === "number" && (
               <div className="box" title={[
                 `${Math.round(output.battery.chargePercent)}%`,
                 output.battery.state === "charging" ? "Charging" : "On battery",
