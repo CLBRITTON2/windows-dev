@@ -9,7 +9,8 @@
   The account gets Modify on ~/dev only. Its own profile stays private and yours stays opaque to it (no
   listing, no reading .ssh, .aws, .claude, browser data). Every .git directory under ~/dev is denied write, so
   add, commit, checkout, and every other ref or index mutation fail for the account while you keep full access.
-  The E: drive is denied outright.
+  This repo's dotfile link targets and install.ps1 are denied write too, because they execute as you or
+  elevated. The E: drive is denied outright.
 
   Then runs scripts/agent-bootstrap.ps1 as the account (runas prompts for the password it just set, once, and
   saves it for the claude function in the PowerShell profile) and links the account's dotfiles from here,
@@ -41,6 +42,16 @@ $backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmm
 $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .git |
     Select-Object -ExpandProperty FullName
 
+# Linked into the owner's home by install.ps1 and run as the owner, or run elevated during setup. They sit under
+# the ~/dev grant, so the write bits have to come back off explicitly.
+$ownerExecFiles = @(
+    "$repo\powershell\Microsoft.PowerShell_profile.ps1"
+    "$repo\wezterm\.wezterm.lua"
+    "$repo\glazewm\config.yaml"
+    "$repo\vscode\settings.json"
+    "$repo\install.ps1"
+)
+
 # /C keeps going past WSL-made symlinks (a .venv lib64), which icacls cannot enumerate and otherwise exits 1920 on.
 # The .git deny lists write bits explicitly: the simple (W) includes SYNCHRONIZE, which every open requests, so
 # it would block reads too and git would not see the repo. /remove:d first keeps a rerun from stacking ACEs.
@@ -49,6 +60,10 @@ $aclSteps.Add(@($devRoot, '/grant', "${account}:(OI)(CI)(M)", '/T', '/C'))
 foreach ($g in $gitDirs) {
     $aclSteps.Add(@($g, '/remove:d', $account))
     $aclSteps.Add(@($g, '/deny', "${account}:(OI)(CI)(WD,AD,WEA,WA,DE,DC)"))
+}
+foreach ($f in $ownerExecFiles) {
+    $aclSteps.Add(@($f, '/remove:d', $account))
+    $aclSteps.Add(@($f, '/deny', "${account}:(WD,AD,WEA,WA,DE,DC)"))
 }
 foreach ($d in $denyDrives) { $aclSteps.Add(@($d, '/deny', "${account}:(OI)(CI)(F)")) }
 
@@ -74,6 +89,7 @@ Write-Host "setup-agent-account" -ForegroundColor Cyan
 Write-Host "  account    : $account (standard user, group Users only)"
 Write-Host "  dev root   : $devRoot (Modify)"
 Write-Host "  .git denied: $($gitDirs.Count) repos"
+Write-Host "  write denied: $($ownerExecFiles.Count) dotfiles"
 Write-Host "  drives     : $($denyDrives -join ', ') (denied)"
 Write-Host "  home links : $($agentLinks.Count)"
 Write-Host ""
