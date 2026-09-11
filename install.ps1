@@ -18,15 +18,8 @@ Write-Host "PowerShell" -ForegroundColor Magenta
 Link "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" `
      "$repo\powershell\Microsoft.PowerShell_profile.ps1" $backupRoot
 
-# ── Claude Code ─────────────────────────────────────────────
-Write-Host "Claude Code" -ForegroundColor Magenta
-Link "$HOME\.claude\CLAUDE.md"          "$repo\claude\context.md"       $backupRoot
-Link "$HOME\.claude\settings.json"      "$repo\claude\settings.json"    $backupRoot
-Link "$HOME\.claude\agents"             "$repo\claude\agents"           $backupRoot
-Link "$HOME\.claude\output-styles"      "$repo\claude\output-styles"    $backupRoot
-foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
-    Link "$HOME\.claude\skills\$($skill.Name)" $skill.FullName $backupRoot
-}
+# Claude Code is not linked here. It runs only as the agent account, whose ~/.claude is linked by
+# scripts/setup-agent-account.ps1.
 
 # ── VS Code ─────────────────────────────────────────────────
 Write-Host "VS Code" -ForegroundColor Magenta
