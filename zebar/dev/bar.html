@@ -80,6 +80,9 @@
 
     const ZITI_MENU_WIDTH = 380;
 
+    // Below this logical width the centre section has no room, so the date moves in beside the app list.
+    const NARROW_SCREEN_WIDTH = 1920;
+
     async function openZitiMenu(buttonEl) {
       const monitor = await currentMonitor();
       const winPos = await zebar.currentWidget().tauriWindow.outerPosition();
@@ -197,6 +200,7 @@
       glazewm: { type: "glazewm" },
       cpu: { type: "cpu", refreshInterval: 1000 },
       date: { type: "date", formatting: "EEE d MMM yyyy, t" },
+      battery: { type: "battery" },
       memory: { type: "memory", refreshInterval: 1000 },
       weather: { type: "weather", ...geo },
       audio: { type: "audio" },
@@ -208,10 +212,21 @@
     function App() {
       const [output, setOutput] = useState(providers.outputMap);
       const [systrayExpanded, setSystrayExpanded] = useState(false);
+      const [narrowScreen, setNarrowScreen] = useState(false);
 
       useEffect(() => {
         const unlisten = providers.onOutput(() => setOutput({ ...providers.outputMap }));
         return () => unlisten?.();
+      }, []);
+
+      useEffect(() => {
+        currentMonitor()
+          .then((monitor) => {
+            const scale = monitor?.scaleFactor ?? window.devicePixelRatio;
+            const width = (monitor?.size.width ?? screen.width * scale) / scale;
+            setNarrowScreen(width < NARROW_SCREEN_WIDTH);
+          })
+          .catch((err) => console.warn("monitor width lookup failed", { err }));
       }, []);
 
       function getNetworkIcon(networkOutput) {
@@ -237,6 +252,23 @@
             }
           default:
             return <span className="magenta">⌀ No internet</span>;
+        }
+      }
+
+      function getBatteryIcon(batteryOutput) {
+        const level = batteryOutput.chargePercent;
+        if (batteryOutput.state === "charging") {
+          return <span className="icon battery-icon">󰂄</span>;
+        } else if (level > 80) {
+          return <span className="icon battery-icon">󰁹</span>;
+        } else if (level > 60) {
+          return <span className="icon battery-icon">󰂁</span>;
+        } else if (level > 40) {
+          return <span className="icon battery-icon">󰁾</span>;
+        } else if (level > 20) {
+          return <span className="icon battery-icon low">󰁼</span>;
+        } else {
+          return <span className="icon battery-icon critical">󰂎</span>;
         }
       }
 
@@ -292,6 +324,13 @@
         return (bytes / (1024 * 1024 * 1024)).toFixed(1);
       }
 
+      const dateBox = output.date && output.glazewm && (
+        <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
+          <span className="icon date-icon">󱑁</span>
+          <span className="info">{output.date?.formatted}</span>
+        </div>
+      );
+
       return (
         <div className="app">
           <div className="left">
@@ -324,15 +363,17 @@
                 </div>
               </>
             )}
+
+            {narrowScreen && dateBox && (
+              <>
+                <div className="left-divider"></div>
+                {dateBox}
+              </>
+            )}
           </div>
 
           <div className="center">
-            {output.date && output.glazewm && (
-              <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
-                <span className="icon date-icon">󱑁</span>
-                <span className="info">{output.date?.formatted}</span>
-              </div>
-            )}
+            {!narrowScreen && dateBox}
           </div>
 
           <div className="right">
@@ -436,6 +477,19 @@
                 {getAudioIcon(output.audio.defaultPlaybackDevice)}
                 <span className="info">
                   {Math.round(output.audio.defaultPlaybackDevice.volume)}%
+                </span>
+              </div>
+            )}
+
+            {typeof output.battery?.chargePercent === "number" && (
+              <div className="box" title={[
+                `${Math.round(output.battery.chargePercent)}%`,
+                output.battery.state === "charging" ? "Charging" : "On battery",
+                output.battery.healthPercent != null && `Health: ${output.battery.healthPercent}%`,
+              ].filter(Boolean).join('\n')}>
+                {getBatteryIcon(output.battery)}
+                <span className="info">
+                  {Math.round(output.battery.chargePercent)}%
                 </span>
               </div>
             )}

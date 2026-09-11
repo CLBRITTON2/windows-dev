@@ -141,6 +141,19 @@ body,
   margin-right: 1rem;
 }
 
+.battery-icon {
+  color: var(--color-cyan);
+  font-size: 1.2rem;
+}
+
+.battery-icon.low {
+  color: var(--color-yellow);
+}
+
+.battery-icon.critical {
+  color: var(--color-red);
+}
+
 .weather-icon {
   color: var(--color-cyan);
   font-size: 1.2rem;
