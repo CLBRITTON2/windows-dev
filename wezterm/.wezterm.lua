@@ -9,7 +9,8 @@ return {
   window_decorations = "RESIZE",
   color_scheme = "rose-pine",
   window_background_opacity = 0.9,
-  window_padding = { left = 0, right = 0, top = 0, bottom = 0 },
+  window_padding = { left = 8, right = 8, top = 8, bottom = 8 },
+  default_cursor_style = "BlinkingBlock",
   keys = {
     -- Make Ctrl+Enter distinguishable from Enter by sending a CSI-u sequence
     -- that Neovim parses as <C-CR>. Do not re-enable enable_kitty_keyboard for this:
