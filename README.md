@@ -16,11 +16,23 @@ Visual Studio 2022 extensions: VsVim 2022
 workflow, git, shell, and environment. `~/.claude/CLAUDE.md` is a symlink to it, so this repo is the single
 source of truth.
 
+### Claude Code runs as its own Windows account
+
+Claude Code does not run as you. It runs as `claude`, a separate standard Windows account in the `Users` group
+with no administrator rights, created by
+[`scripts/setup-agent-account.ps1`](scripts/setup-agent-account.ps1). What that account can reach:
+
+- **`~/dev`**, with Modify. That grant is the only one it has in your profile, so `.ssh`, `.aws`, `.claude`,
+  and browser data stay unreadable, and listing the profile is denied.
+- **No writes to any `.git`.** Every repo under `~/dev` carries an explicit deny, so add, commit, checkout, and
+  every other ref or index mutation fail for the account while you keep full access.
+- **Its own profile**, where its keys, config, and scratch files live.
+
+`claude` in the PowerShell profile launches a session as that account. The uncontained binary is still
+reachable as `~/.local/bin/claude`, which runs as you with your full access.
+
 `claude/hooks/pre-tool-use-hook.ps1` enforces the bash rules from `context.md` as a Claude Code PreToolUse
-hook. It is a guardrail against habits, not a boundary. The boundary is a separate unprivileged Windows account
-that Claude Code runs under: [`scripts/setup-agent-account.ps1`](scripts/setup-agent-account.ps1) creates it,
-grants it `~/dev` only, and denies write on every repo's `.git`. `claude` in the PowerShell profile launches a
-session as that account. The uncontained binary is still reachable as `~/.local/bin/claude`.
+hook. It is a guardrail against habits, not a boundary. The account above is the boundary.
 
 ### Setup on a new machine
 
