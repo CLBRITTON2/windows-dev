@@ -372,9 +372,7 @@
             )}
           </div>
 
-          <div className="center">
-            {!narrowScreen && dateBox}
-          </div>
+          {!narrowScreen && dateBox && <div className="center">{dateBox}</div>}
 
           <div className="right">
             {output.systray && (
