@@ -1,11 +1,15 @@
 #Requires -RunAsAdministrator
-# ============================================================
-#  Requires Admin OR Developer Mode enabled for symlinks.
-# ============================================================
+# Windows PowerShell 5.1 cannot remove a junction without -Recurse, and with it deletes the repo files the
+# junction points at (PowerShell/PowerShell#621).
+#Requires -Version 7
 
 $repo = $PSScriptRoot
+$ErrorActionPreference = 'Stop'
+# Backups go outside the linked directories: Zebar and Claude Code scan their config dirs and would
+# pick up a stale sibling copy.
+$backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
 
-function Link($target, $source) {
+function Link([string]$target, [string]$source) {
     if (!(Test-Path $source)) {
         Write-Warning "Source missing, skipping: $source"
         return
@@ -17,7 +21,16 @@ function Link($target, $source) {
     }
 
     if (Test-Path $target) {
-        Remove-Item $target -Force -Recurse
+        $existing = Get-Item $target -Force
+        if ($existing.LinkType) {
+            Remove-Item $target -Force
+        } else {
+            # Mirror the full target path: several targets share the leaf settings.json.
+            $backup = Join-Path $backupRoot ($target -replace '^([A-Za-z]):', '$1')
+            New-Item -ItemType Directory -Path (Split-Path $backup) -Force | Out-Null
+            Move-Item $target $backup
+            Write-Warning "Existing item moved to: $backup"
+        }
     }
 
     $isDir = (Get-Item $source) -is [System.IO.DirectoryInfo]
@@ -45,11 +58,9 @@ Link "$HOME\.claude\CLAUDE.md"          "$repo\claude\context.md"
 Link "$HOME\.claude\settings.json"      "$repo\claude\settings.json"
 Link "$HOME\.claude\agents"             "$repo\claude\agents"
 Link "$HOME\.claude\output-styles"      "$repo\claude\output-styles"
-Link "$HOME\.claude\skills\humanize-issue" "$repo\claude\skills\humanize-issue"
-Link "$HOME\.claude\skills\distill-bug"    "$repo\claude\skills\distill-bug"
-Link "$HOME\.claude\skills\issue-blockers" "$repo\claude\skills\issue-blockers"
-Link "$HOME\.claude\skills\comment-audit"  "$repo\claude\skills\comment-audit"
-Link "$HOME\.claude\skills\branch-review"  "$repo\claude\skills\branch-review"
+foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
+    Link "$HOME\.claude\skills\$($skill.Name)" $skill.FullName
+}
 
 # ── VS Code ─────────────────────────────────────────────────
 Write-Host "VS Code" -ForegroundColor Magenta
@@ -60,8 +71,12 @@ Link "$env:APPDATA\Code\User\keybindings.json" "$repo\vscode\keybindings.json"
 # The per-repo presets file include()s the home one, so both must be linked.
 Write-Host "CMake" -ForegroundColor Magenta
 Link "$HOME\CMakeUserPreset.json" "$repo\cmake\CMakeUserPreset.json"
-Link "$HOME\dev\openziti\ziti-tunnel-sdk-c\CMakeUserPresets.json" `
-     "$repo\cmake\CMakeUserPresets.json"
+if (Test-Path "$HOME\dev\openziti\ziti-tunnel-sdk-c") {
+    Link "$HOME\dev\openziti\ziti-tunnel-sdk-c\CMakeUserPresets.json" `
+         "$repo\cmake\CMakeUserPresets.json"
+} else {
+    Write-Warning "ziti-tunnel-sdk-c not cloned, skipping its CMakeUserPresets.json link"
+}
 
 # ── Visual Studio 2022 ──────────────────────────────────────
 Write-Host "Visual Studio 2022" -ForegroundColor Magenta

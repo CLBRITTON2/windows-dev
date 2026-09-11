@@ -17,11 +17,11 @@
   <div id="root"></div>
 
   <script type="text/babel" data-type="module">
-    import React, { useState, useEffect } from "https://esm.sh/react@18";
-    import { createRoot } from "https://esm.sh/react-dom@18/client";
-    import * as zebar from "https://esm.sh/zebar@3";
-    import { currentMonitor } from "https://esm.sh/@tauri-apps/api@2/window";
-    import { ZITI_SECTIONS, fetchSectionItems } from "./ziti-github.js";
+    import React, { useState, useEffect } from "https://esm.sh/react@18.3.1";
+    import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+    import * as zebar from "https://esm.sh/zebar@3.3.1";
+    import { currentMonitor } from "https://esm.sh/@tauri-apps/api@2.11.1/window";
+    import { ZITI_SECTIONS, fetchSection } from "./ziti-github.js";
 
     // =============================================
     // ICON MAP: process name (lowercase) -> icon file
@@ -110,9 +110,9 @@
         let cancelled = false;
         async function refresh() {
           try {
-            const results = await Promise.all(ZITI_SECTIONS.map(fetchSectionItems));
-            const ids = new Set(results.flat().map((item) => item.id));
-            if (!cancelled) setCount(ids.size);
+            const results = await Promise.all(ZITI_SECTIONS.map(fetchSection));
+            const total = results.reduce((sum, r) => sum + r.totalCount, 0);
+            if (!cancelled) setCount(total);
           } catch (err) {
             console.warn("ziti count fetch failed", { err });
           }
@@ -327,7 +327,7 @@
           </div>
 
           <div className="center">
-            {output.date && (
+            {output.date && output.glazewm && (
               <div className="box" onClick={() => output.glazewm.runCommand('shell-exec explorer.exe ms-settings:dateandtime')}>
                 <span className="icon date-icon">󱑁</span>
                 <span className="info">{output.date?.formatted}</span>

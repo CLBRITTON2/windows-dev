@@ -13,14 +13,15 @@ Visual Studio 2022 extensions: VsVim 2022
 ## Claude Code context
 
 [`claude/context.md`](claude/context.md) holds working rules: responses, code style, error handling,
-workflow, git, shell, and environment. It loads at the start of every Claude Code session through an
-`@`-import in `~/.claude/CLAUDE.md`, so this repo is the single source of truth.
+workflow, git, shell, and environment. `~/.claude/CLAUDE.md` is a symlink to it, so this repo is the single
+source of truth.
 
 `claude/hooks/pre-tool-use-hook.ps1` enforces the bash rules from `context.md` as a Claude Code PreToolUse
 hook.
 
 ### Setup on a new machine
 
-Run [`install.ps1`](install.ps1) from an elevated shell (or with Developer Mode on). It links
-`~/.claude/CLAUDE.md`, `~/.claude/settings.json`, and `~/.claude/agents` at `claude/` in this repo, along
-with the other app configs.
+Run [`install.ps1`](install.ps1) from an elevated pwsh 7 shell. Anything already at a link target that is
+not itself a link is moved to `~/.dotfiles-backup/<timestamp>/`. It links `~/.claude/CLAUDE.md`,
+`~/.claude/settings.json`, `~/.claude/agents`, `~/.claude/output-styles`, and the skills at `claude/` in this
+repo, along with the other app configs.

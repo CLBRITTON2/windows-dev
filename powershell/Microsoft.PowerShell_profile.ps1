@@ -7,8 +7,11 @@ function prompt {
 }
 
 # ── PSReadLine ──
-Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle InlineView
+# Prediction refuses to enable when stdout is redirected (pwsh -Command from a script).
+if (-not [Console]::IsOutputRedirected) {
+    Set-PSReadLineOption -PredictionSource History
+    Set-PSReadLineOption -PredictionViewStyle InlineView
+}
 Set-PSReadLineOption -HistorySaveStyle SaveIncrementally
 Set-PSReadLineOption -MaximumHistoryCount 10000
 Set-PSReadLineOption -Colors @{
@@ -31,9 +34,17 @@ Set-PSReadLineOption -Colors @{
 }
 
 # ── fzf ──
-Import-Module PSFzf
-Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t'
-Set-PsFzfOption -PSReadlineChordReverseHistory 'Ctrl+r'
+# Importing PSFzf costs ~300ms, so defer it to the first idle tick after the prompt is up. The action
+# runs in its own scope (hence -Global) and its errors never reach the console (hence the catch).
+Register-EngineEvent -SourceIdentifier PowerShell.OnIdle -MaxTriggerCount 1 -Action {
+    try {
+        Import-Module PSFzf -Global
+        Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+t'
+        Set-PsFzfOption -PSReadlineChordReverseHistory 'Ctrl+r'
+    } catch {
+        [Console]::Error.WriteLine("PSFzf setup failed: $($_.Exception.Message)")
+    }
+} | Out-Null
 
 # ── PSStyle (PS 7.2+) ──
 if ($PSVersionTable.PSVersion.Major -ge 7) {

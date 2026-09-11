@@ -1,6 +1,7 @@
 export const GITHUB_USER = "CLBRITTON2";
 export const GITHUB_ORGS = "org:openziti org:netfoundry";
 
+// Sections are disjoint (pr vs issue, assigned excludes author), so totals can be summed.
 export const ZITI_SECTIONS = [
   { key: "prs", title: "Pull requests", query: `${GITHUB_ORGS} is:open is:pr author:${GITHUB_USER}`, type: "pullrequests" },
   { key: "issues", title: "Issues", query: `${GITHUB_ORGS} is:open is:issue author:${GITHUB_USER}`, type: "issues" },
@@ -11,9 +12,10 @@ export function sectionSearchUrl(section) {
   return `https://github.com/search?q=${encodeURIComponent(section.query)}&type=${section.type}`;
 }
 
-export async function fetchSectionItems(section) {
+// items is capped at 100 by the API, totalCount is not.
+export async function fetchSection(section) {
   const res = await fetch(`https://api.github.com/search/issues?q=${encodeURIComponent(section.query)}&per_page=100`);
   if (!res.ok) throw new Error(`GitHub search ${res.status} for ${section.key}`);
   const data = await res.json();
-  return data.items;
+  return { items: data.items, totalCount: data.total_count };
 }

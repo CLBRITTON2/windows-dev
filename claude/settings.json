@@ -129,7 +129,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/hooks/reply-style-reminder.ps1",
+            "command": "echo reminder for chat replies only, not prose written into files or commits: 1-3 sentences or bullets, lead with the verdict, no preamble, no wrap-up summary, no hedges or filler adjectives, no em dash, no semicolon in prose, never end with vague delegation. Recommend one default and state the exact next action.",
             "timeout": 5
           }
         ]
@@ -143,5 +143,6 @@
   "feedbackSurveyRate": 0,
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
-  "tui": "fullscreen"
+  "tui": "fullscreen",
+  "switchModelsOnFlag": false
 }

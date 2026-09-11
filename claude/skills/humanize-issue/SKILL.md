@@ -20,7 +20,7 @@ Parse the argument:
 
 - `https://github.com/OWNER/REPO/issues/N` or `OWNER/REPO#N`:
   `gh issue view N --repo OWNER/REPO --json title,body,comments`
-- A `#issuecomment-<id>` anchor: also `gh api repos/OWNER/REPO/issues/comments/<id>`. Distill that comment
+- A `#issuecomment-<id>` anchor: also `gh api -X GET repos/OWNER/REPO/issues/comments/<id>`. Distill that comment
   as the subject, with the issue body as context.
 - No issue reference: treat text pasted in the conversation as the source and skip fetching.
 
@@ -60,7 +60,7 @@ Locate the source two ways and use both:
   reading callers. Its checked-out ref likely differs from the reported version, so never verify line
   numbers against it.
 - The exact reported version, for line-accurate checks: fetch the cited files pinned to the tag into the
-  scratchpad, `curl -s https://raw.githubusercontent.com/OWNER/REPO/<tag>/<path>`. Resolve the tag from
+  scratchpad, `curl -fsSL https://raw.githubusercontent.com/OWNER/REPO/<tag>/<path>`. Resolve the tag from
   the reported version. When a claim says "still present in main", fetch the same path at the default
   branch too.
 

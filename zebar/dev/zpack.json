@@ -61,14 +61,19 @@
         "**/*"
       ],
       "caching": {
-        "defaultDuration": 0,
-        "rules": []
+        "defaultDuration": 604800,
+        "rules": [
+          {
+            "urlRegex": "api\\.github\\.com",
+            "duration": 0
+          }
+        ]
       },
       "privileges": {
         "shellCommands": [
           {
             "program": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "argsRegex": ".*"
+            "argsRegex": "^https://github\\.com/\\S*$"
           }
         ]
       },

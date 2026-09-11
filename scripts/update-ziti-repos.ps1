@@ -21,7 +21,7 @@ function Get-RepoState {
     param([string]$Path)
 
     $branch = git -C $Path rev-parse --abbrev-ref HEAD
-    $dirty = [bool](git -C $Path status --porcelain)
+    $dirty = [bool](git -C $Path status --porcelain --untracked-files=no)
     $upstream = git -C $Path rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null
 
     [pscustomobject]@{
@@ -67,7 +67,6 @@ $results = foreach ($repo in $repos) {
         $color = 'Yellow'
     }
     else {
-        git -C $state.Path fetch --quiet
         $pull = git -C $state.Path pull --ff-only 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
             $status = "FAILED ff-only [$($state.Branch)]: $($pull.Trim())"

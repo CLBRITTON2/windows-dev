@@ -197,7 +197,7 @@ keybindings:
   - commands: ['wm-exit']
     bindings: ['rwin+shift+q']
 
-  # WORKSPACE SWITCHING (SUPER+1-0) — monitor 1
+  # WORKSPACE SWITCHING (SUPER+1-0), monitor 1
   - commands: ['focus --workspace 1']
     bindings: ['rwin+1']
   - commands: ['focus --workspace 2']
@@ -219,7 +219,7 @@ keybindings:
   - commands: ['focus --workspace 10']
     bindings: ['rwin+0']
 
-  # WORKSPACE SWITCHING (SUPER+SHIFT+1-5) — monitor 0
+  # WORKSPACE SWITCHING (SUPER+SHIFT+1-5), monitor 0
   - commands: ['focus --workspace 11']
     bindings: ['rwin+shift+1']
   - commands: ['focus --workspace 12']
@@ -231,7 +231,7 @@ keybindings:
   - commands: ['focus --workspace 15']
     bindings: ['rwin+shift+5']
 
-  # MOVE WINDOW TO WORKSPACE (SUPER+CTRL+1-0) — monitor 1
+  # MOVE WINDOW TO WORKSPACE (SUPER+CTRL+1-0), monitor 1
   - commands: ['move --workspace 1']
     bindings: ['rwin+ctrl+1']
   - commands: ['move --workspace 2']
@@ -253,7 +253,7 @@ keybindings:
   - commands: ['move --workspace 10']
     bindings: ['rwin+ctrl+0']
 
-  # MOVE WINDOW TO WORKSPACE (SUPER+ALT+1-5) — monitor 0
+  # MOVE WINDOW TO WORKSPACE (SUPER+ALT+1-5), monitor 0
   - commands: ['move --workspace 11']
     bindings: ['rwin+alt+1']
   - commands: ['move --workspace 12']

@@ -136,11 +136,11 @@
   <div id="root"></div>
 
   <script type="text/babel" data-type="module">
-    import React, { useState, useEffect } from "https://esm.sh/react@18";
-    import { createRoot } from "https://esm.sh/react-dom@18/client";
-    import * as zebar from "https://esm.sh/zebar@3";
-    import { LogicalSize } from "https://esm.sh/@tauri-apps/api@2/dpi";
-    import { ZITI_SECTIONS, sectionSearchUrl, fetchSectionItems } from "./ziti-github.js";
+    import React, { useState, useEffect } from "https://esm.sh/react@18.3.1";
+    import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+    import * as zebar from "https://esm.sh/zebar@3.3.1";
+    import { LogicalSize } from "https://esm.sh/@tauri-apps/api@2.11.1/dpi";
+    import { ZITI_SECTIONS, sectionSearchUrl, fetchSection } from "./ziti-github.js";
 
     const widget = zebar.currentWidget();
 
@@ -166,19 +166,20 @@
     }
 
     function Section({ section }) {
-      const [items, setItems] = useState(null);
+      const [result, setResult] = useState(null);
       const [error, setError] = useState(null);
+      const items = result?.items;
 
       useEffect(() => {
-        fetchSectionItems(section)
-          .then(setItems)
+        fetchSection(section)
+          .then(setResult)
           .catch((err) => setError(err));
       }, []);
 
       return (
         <div className="section">
           <div className="section-header">
-            <span>{section.title}{items && ` (${items.length})`}</span>
+            <span>{section.title}{result && ` (${result.totalCount})`}</span>
             <button className="view-all" onClick={() => openInBrowser(sectionSearchUrl(section))}>
               view all
             </button>

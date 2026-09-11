@@ -1,7 +1,7 @@
 # Working rules
 
-Context loaded at the start of every Claude Code session via an @-import in `~/.claude/CLAUDE.md`. This
-repo is the source of truth. The rules marked absolute do not bend.
+Context loaded at the start of every Claude Code session: `~/.claude/CLAUDE.md` is a symlink to this file.
+This repo is the source of truth. The rules marked absolute do not bend.
 
 ## Writing
 
@@ -80,10 +80,9 @@ repo is the source of truth. The rules marked absolute do not bend.
 
 - Primary shell is PowerShell. Use PowerShell syntax when targeting it: `$null`, `$env:VAR`, backtick for
   line continuation. Bash is for one-offs and POSIX scripts.
-- Bash constraints are enforced by `claude/hooks/pre-tool-use-hook.ps1` (PreToolUse hook), so they are not
-  restated here. The same hook blocks git mutations, `Co-Authored-By`, em dashes and `!important` in written
-  files, and `.env` writes. Prefer `tee` over redirection and `rg` over `find` to avoid the hook rejecting the
-  call.
+- Bash, Write, and Edit constraints are enforced by `claude/hooks/pre-tool-use-hook.ps1` (PreToolUse hook),
+  so they are not restated here: read the hook for the full list. Prefer `tee` over redirection and `rg`
+  over `find` to avoid the hook rejecting the call.
 - Prefer `rg` for searching code and files. Prefer non-interactive flags over interactive prompts.
 - When handing me multiple shell commands to run in sequence, output ONLY a single fenced code block with
   the commands back-to-back. No prose between commands. Put any explanation as a `# ...` comment on the line
@@ -110,7 +109,8 @@ repo is the source of truth. The rules marked absolute do not bend.
 
 ## Security
 
-- Never read `.env`, `.env.*`, `secrets/`, `~/.aws/`, `~/.encrypted/`, or credential stores.
+- Never read `.env`, `.env.*`, `secrets/`, `~/.aws/`, `~/.encrypted/`, `~/.ssh/`, the E: drive, or credential
+  stores.
 - No silent fallbacks that mask an auth or validation failure. Never leak secrets into logs.
 
 ## Environment
