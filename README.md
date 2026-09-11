@@ -18,18 +18,19 @@ source of truth.
 
 ### Claude Code runs as its own Windows account
 
-Claude Code does not run as you. It runs as `claude`, a separate standard Windows account in the `Users` group
-with no administrator rights, created by
-[`scripts/setup-agent-account.ps1`](scripts/setup-agent-account.ps1). What that account can reach:
+Claude Code runs as `claude`, a standard account in `Users` with no administrator rights, created by
+[`scripts/setup-agent-account.ps1`](scripts/setup-agent-account.ps1). Its access:
 
-- **`~/dev`**, with Modify. That grant is the only one it has in your profile, so `.ssh`, `.aws`, `.claude`,
-  and browser data stay unreadable, and listing the profile is denied.
-- **No writes to any `.git`.** Every repo under `~/dev` carries an explicit deny, so add, commit, checkout, and
-  every other ref or index mutation fail for the account while you keep full access.
-- **Its own profile**, where its keys, config, and scratch files live.
+- Modify on `~/dev`, the only grant it holds in the owner's profile. Everything else there, `.ssh`, `.aws`,
+  `.claude`, browser data, is unreadable, and the profile cannot be listed.
+- Write denied on every `.git` under `~/dev`, so add, commit, checkout, and every other ref or index mutation
+  fail for the account.
+- Write denied on the dotfiles this repo links into the owner's home and on `install.ps1`, since those execute
+  as the owner or elevated.
+- Its own profile, holding its keys, config, and scratch files.
 
-`claude` in the PowerShell profile launches a session as that account. The uncontained binary is still
-reachable as `~/.local/bin/claude`, which runs as you with your full access.
+The `claude` function in the PowerShell profile starts a session as that account. `~/.local/bin/claude` runs
+uncontained as whoever invokes it.
 
 `claude/hooks/pre-tool-use-hook.ps1` enforces the bash rules from `context.md` as a Claude Code PreToolUse
 hook. It is a guardrail against habits, not a boundary. The account above is the boundary.
@@ -50,11 +51,10 @@ Both scripts share the `Link` function in [`scripts/dotfile-link.ps1`](scripts/d
 
 `setup-agent-account.ps1` creates the account, applies the ACLs, then runs
 [`scripts/agent-bootstrap.ps1`](scripts/agent-bootstrap.ps1) as the account through `runas`, which junctions
-its `~/dev` onto yours, puts `~/.local/bin` on its persistent PATH (the Claude Code installer only sets it for
-its own session), marks the repos safe for git, and installs Claude Code. Back in the elevated shell it links
-the account's profile, WezTerm config, and `~/.claude` entries, because the account has no privilege to create
-symlinks itself.
+the account's `~/dev` onto the owner's, puts `~/.local/bin` on its persistent PATH (the Claude Code installer
+only sets it for its own session), marks the repos safe for git, and installs Claude Code. Back in the elevated
+shell it links the account's profile, WezTerm config, and `~/.claude` entries, since the account has no
+privilege to create symlinks.
 
-`runas` asks for the account password once and saves it, which is what the `claude` function in the
-PowerShell profile relies on later. Two interactive steps are left over: `/login` in an agent session, and
-`gh auth login` with a read-only PAT.
+`runas` saves the account password once, which the `claude` function relies on later. Two interactive steps are
+left: `/login` in an agent session, and `gh auth login` with a read-only PAT.
