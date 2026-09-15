@@ -11,7 +11,6 @@
       "Bash(wc:*)",
       "Bash(du:*)",
       "Bash(grep:*)",
-      "Bash(find:*)",
       "Bash(git branch*)",
       "Bash(git diff*)",
       "Bash(git log*)",
@@ -101,10 +100,17 @@
       "Bash(git switch -c*)",
       "Read(./.env)",
       "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
       "Read(./secrets/**)",
       "Read(~/.encrypted/**)",
       "Read(~/.aws/**)",
-      "Read(/e/**)"
+      "Read(/e/**)",
+      "Edit(/e/**)",
+      "Write(/e/**)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(py:*)"
     ],
     "defaultMode": "default"
   },
@@ -145,5 +151,6 @@
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "theme": "dark",
-  "switchModelsOnFlag": false
+  "switchModelsOnFlag": false,
+  "includeCoAuthoredBy": false
 }
