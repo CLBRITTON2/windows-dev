@@ -63,6 +63,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
 - Keep changes minimal and related to the request. Do not revert unrelated changes.
 - If unsure, inspect the codebase instead of inventing patterns.
 - Prove it by running it. "I ran it and got X" is done. "It should work" is not.
+- Diagnosing a CI or test failure: quote the log line before naming a cause. A claim with no log line, source
+  line, or command output behind it is labeled a hypothesis.
 - When project instructions include test or lint commands, run them before finishing if the task changed
   code.
 
@@ -80,6 +82,7 @@ This repo is the source of truth. The rules marked absolute do not bend.
 
 - Primary shell is PowerShell. Use PowerShell syntax when targeting it: `$null`, `$env:VAR`, backtick for
   line continuation. Bash is for one-offs and POSIX scripts.
+- Bash cwd does not persist between calls. Every path argument is absolute, never a `cd`.
 - Bash, Write, and Edit constraints are enforced by `claude/hooks/pre-tool-use-hook.ps1` (PreToolUse hook),
   so they are not restated here: read the hook for the full list. Prefer `tee` over redirection and `rg`
   over `find` to avoid the hook rejecting the call.
@@ -106,6 +109,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
 - When a session settles what a term means, finds a version-specific behavior, or corrects a wrong
   assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
   asked (terms go in its `## Vocabulary` section). Current state only, no changelog.
+- Durable findings about a project go in its context file in the agents repo, never in auto-memory or ad hoc
+  files.
 
 ## Security
 

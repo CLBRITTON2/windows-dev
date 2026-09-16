@@ -74,6 +74,9 @@ Table tests only when the variants are real.
 
 ## output
 
+Assess only lines this branch changed. A finding on an unchanged line goes in a final `pre-existing` section
+and never blocks.
+
 Be honest, no softening, no praise. Group findings by section, bugs first: bugs, correctness, performance,
 dry, taste. Skip a section with nothing. One finding per line: `path:LINE` then a sentence or two with the
 concrete change you want, not "consider X". Name the helper and where it lives, or the exact test case.

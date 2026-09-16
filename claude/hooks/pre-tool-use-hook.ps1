@@ -26,10 +26,11 @@ if ($json.tool_name -eq "Bash") {
         exit 0
     }
 
-    if ($cmd -match '(^|;|\n)\s*cd\s+\S.*&&') {
+    # cwd does not persist between Bash calls.
+    if ($cmd -match '(^|;|\n|&&|\|\|)\s*cd\s') {
         @{
             decision = "block"
-            reason   = "Do not use compound 'cd /path && command' patterns. Run 'cd /path' as a standalone command first, then run subsequent commands without cd prefixes."
+            reason   = "Do not cd. The working directory does not persist between Bash calls. Pass absolute paths to every command instead."
         } | ConvertTo-Json -Compress
         exit 0
     }
@@ -37,7 +38,7 @@ if ($json.tool_name -eq "Bash") {
 	if ($cmd -match '(^|;|\n)\s*git\s+((?:-C\s+\S+)|(?:.*--git-dir=\S+))') {
 		@{
 			decision = "block"
-			reason   = "Do not use 'git -C <path>' or 'git --git-dir=<path>' patterns. Run 'cd /path' as a standalone command first, then run the git command normally."
+			reason   = "Do not use 'git -C <path>' or 'git --git-dir=<path>' patterns. Run git from the repo with absolute paths instead."
 		} | ConvertTo-Json -Compress
 		exit 0
 	}
