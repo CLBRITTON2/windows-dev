@@ -110,8 +110,15 @@ if ($env:USERNAME -ne 'claude') {
     function claude {
         # wezterm.exe is the console-subsystem CLI and flashes a window of its own before handing off to the
         # GUI, so spawn wezterm-gui.exe. runas is a console app too, hence the hidden host.
-        Start-Process runas -WindowStyle Hidden -ArgumentList `
-            "/user:claude /savecred `"wezterm-gui.exe start --cwd $PWD -- pwsh -NoLogo -Command claude`""
+        if ($args.Count -eq 0) {
+            Start-Process runas -WindowStyle Hidden -ArgumentList `
+                "/user:claude /savecred `"wezterm-gui.exe start --cwd $PWD -- pwsh -NoLogo -Command claude`""
+            return
+        }
+        # Subcommands such as `claude update` run the binary in the agent account and keep the console open
+        # so the output can be read, since runas cannot pipe it back.
+        $command = "claude $($args -join ' ')"
+        Start-Process runas -ArgumentList "/user:claude /savecred `"pwsh -NoLogo -NoExit -Command $command`""
     }
 }
 

@@ -122,7 +122,6 @@
       "Read(~/.aws/**)",
       "Read(/e/**)",
       "Edit(/e/**)",
-      "Write(/e/**)",
       "Bash(python:*)",
       "Bash(python3:*)",
       "Bash(py:*)"
