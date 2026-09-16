@@ -6,7 +6,8 @@
 - Hide Windows taskbar: https://github.com/amnweb/thide
 - App launcher: https://learn.microsoft.com/en-us/windows/powertoys/
 
-WezTerm uses my lazyvim config https://github.com/CLBRITTON2/lazyvim-config and .zshrc from https://github.com/CLBRITTON2/dots in WSL  
+WezTerm uses my lazyvim config https://github.com/CLBRITTON2/lazyvim-config and .zshrc from
+https://github.com/CLBRITTON2/dots in WSL  
 Visual Studio 2022 extensions: VsVim 2022
 - ctrl c, ctrl f, ctrl v handled by VS all others handled by VsVim
 

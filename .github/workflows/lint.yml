@@ -1,0 +1,14 @@
+name: lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Run repo checks
+        shell: pwsh
+        run: ./scripts/lint.ps1 -RepoRoot "${{ github.workspace }}"

@@ -24,9 +24,9 @@ code or adds none. Ask whether each line needs to exist, not whether it is fine.
 ## dry, both directions
 
 Flag hard when the same code appears 2 to 3 times, and say where the abstraction lives. Grep the file and
-package for siblings and report the class, not one instance. Near-identical functions: ask whether they can merge into one
-without adding un-needed state flags. If yes, merge. Never leave a thin wrapper whose body is a single
-delegating call. Repeated boilerplate at every call site means the signature is wrong.
+package for siblings and report the class, not one instance. Near-identical functions: ask whether they can
+merge into one without adding un-needed state flags. If yes, merge. Never leave a thin wrapper whose body is
+a single delegating call. Repeated boilerplate at every call site means the signature is wrong.
 
 Equally: three similar lines beat a premature abstraction. No helper for a single caller, inline it. No flag
 or parameter for a hypothetical second use. Flag a one-caller abstraction as hard as duplication.
