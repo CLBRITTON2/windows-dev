@@ -17,7 +17,7 @@ general:
   show_all_in_taskbar: false
 
 gaps:
-  scale_with_dpi: false
+  scale_with_dpi: true
   inner_gap: '5px'
   outer_gap:
     top: '50px'
