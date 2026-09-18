@@ -25,11 +25,14 @@ write nothing and stop after saying so in one line.
 
 ## Write
 
-The context file is `~/dev/<path>/CLAUDE.md`, a symlink into `~/dev/agents/context/<path>/CLAUDE.md`. Edit
-through the symlink. A subdirectory file owns its scope, the root file owns the rest, and each fact lives in
-exactly one file. Keep the file's voice, section order, and vocabulary. Current state only, no changelog
-phrasing, no dates. Prose rules: no em dash, no double hyphen as a dash, no semicolon, wrap at 120 columns.
-Leave the Verified line alone.
+The context file is `~/dev/<path>/CLAUDE.md`, a symlink into `~/dev/agents/context/<path>/CLAUDE.md`. Read and
+edit the target under `~/dev/agents/context` directly, never the symlink: the PreToolUse hook refuses writes
+through a link, and Edit requires the target itself to have been read first. A subdirectory file owns its scope,
+the root file owns the rest, and each fact lives in exactly one file. A root file may list detail files (sibling
+`*.md` in the same context dir, read on demand, each with its own read-when trigger) under `## Detail files`: a
+fact that belongs to one of those topics goes there, not into the root. Keep the file's voice, section order, and
+vocabulary. Current state only, no changelog phrasing, no dates. Prose rules: no em dash, no double hyphen as a
+dash, no semicolon, wrap at 120 columns. Leave the Verified line alone.
 
 A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.md`, opened with the same
 `Verified against <owner/repo> <short sha> (<date>)` header the other files use, sha read from
