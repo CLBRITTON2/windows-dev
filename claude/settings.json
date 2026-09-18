@@ -1,4 +1,5 @@
 {
+  "includeCoAuthoredBy": false,
   "permissions": {
     "allow": [
       "Bash(ls:*)",
@@ -77,7 +78,8 @@
       "Bash(gh api -X GET:*)",
       "Bash(gh run watch:*)",
       "Bash(git merge-base *)",
-      "Bash(pwsh -NoProfile -File ~/dev/windows-dev/scripts/update-ziti-repos.ps1)"
+      "Bash(pwsh -NoProfile -File ~/dev/windows-dev/scripts/update-ziti-repos.ps1)",
+      "Bash(pwsh -NoProfile -File ~/dev/agents/scripts/commit-context.ps1)"
     ],
     "deny": [
       "Bash(git add*)",
@@ -165,6 +167,5 @@
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "theme": "dark",
-  "switchModelsOnFlag": false,
-  "includeCoAuthoredBy": false
+  "switchModelsOnFlag": false
 }
