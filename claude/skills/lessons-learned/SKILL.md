@@ -25,9 +25,10 @@ write nothing and stop after saying so in one line.
 
 ## Write
 
-The context file is `~/dev/<path>/CLAUDE.md`, a symlink into `~/dev/agents/context/<path>/CLAUDE.md`. Edit
-through the symlink. A subdirectory file owns its scope, the root file owns the rest, and each fact lives in
-exactly one file. Keep the file's voice, section order, and vocabulary. Current state only, no changelog
+The context file is `~/dev/<path>/CLAUDE.md`, a symlink into `~/dev/agents/context/<path>/CLAUDE.md`. Read and
+edit the target under `~/dev/agents/context` directly, never the symlink: the PreToolUse hook refuses writes
+through a link, and Edit requires the target itself to have been read first. A subdirectory file owns its scope,
+the root file owns the rest, and each fact lives in exactly one file. Keep the file's voice, section order, and vocabulary. Current state only, no changelog
 phrasing, no dates. Prose rules: no em dash, no double hyphen as a dash, no semicolon, wrap at 120 columns.
 Leave the Verified line alone.
 
