@@ -128,7 +128,7 @@
       "Bash(python3:*)",
       "Bash(py:*)"
     ],
-    "defaultMode": "default"
+    "defaultMode": "auto"
   },
   "model": "opus[1m]",
   "hooks": {
@@ -163,7 +163,9 @@
   },
   "outputStyle": "Terse Engineer",
   "feedbackSurveyRate": 0,
+  "feedbackDrafts": "off",
   "effortLevel": "high",
+  "promptSuggestionEnabled": false,
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "theme": "dark",
