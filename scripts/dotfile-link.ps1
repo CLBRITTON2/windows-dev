@@ -3,8 +3,7 @@
 
 function Link([string]$target, [string]$source, [string]$backupRoot) {
     if (!(Test-Path $source)) {
-        Write-Warning "Source missing, skipping: $source"
-        return
+        throw "Link source missing: $source (target $target)"
     }
 
     $dir = Split-Path $target

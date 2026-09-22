@@ -13,7 +13,8 @@
   },
   {
     "key": "shift+j",
-    "command": "workbench.action.togglePanel"
+    "command": "workbench.action.togglePanel",
+    "when": "!inputFocus"
   },
   {
     "key": "ctrl+shift+n",

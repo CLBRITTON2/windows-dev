@@ -2,11 +2,10 @@ general:
   startup_commands:
     - 'focus --workspace 1'
     - 'shell-exec zebar'
-    # Unquoted on purpose: glzr-io/glazewm#1417, the shell-exec parser mishandles quoted paths
-    - 'shell-exec C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe %USERPROFILE%\dev\windows-dev\glazewm\winkey-fix.ahk'
+    # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
+    - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'
   shutdown_commands:
     - 'shell-exec taskkill /IM zebar.exe /F'
-    - 'shell-exec taskkill /IM AutoHotkey64.exe /F'
   config_reload_commands: []
   focus_follows_cursor: false
   toggle_workspace_on_refocus: true
@@ -183,7 +182,7 @@ keybindings:
     bindings: ['rwin+alt+j']
 
   # SLEEP
-  - commands: ['shell-exec rundll32.exe powrprof.dll,SetSuspendState 0,1,0']
+  - commands: ['shell-exec %userprofile%/dev/windows-dev/glazewm/sleep.ahk']
     bindings: ['rwin+ctrl+s']
 
   # SYSTEM ACTIONS

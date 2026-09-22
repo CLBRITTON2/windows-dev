@@ -120,7 +120,8 @@
           }
         }
         refresh();
-        const id = setInterval(refresh, 90 * 1000);
+        // Unauthenticated GitHub search allows 10 requests a minute per IP, shared by every bar and the ziti menu.
+        const id = setInterval(refresh, 5 * 60 * 1000);
         return () => { cancelled = true; clearInterval(id); };
       }, []);
 
@@ -177,22 +178,25 @@
     }
 
     async function fetchGeoLocation() {
-      // Bound the request: ip-api is HTTP-only and rate-limited, and a hung
-      // socket here would block the whole bar from rendering (top-level await).
+      // Bound the request: a hung socket here would block the whole bar from rendering (top-level await).
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 3000);
       try {
-        const res = await fetch("http://ip-api.com/json/?fields=lat,lon", {
+        const res = await fetch("https://ipwho.is/?fields=success,latitude,longitude", {
           signal: controller.signal,
         });
         const data = await res.json();
-        return { latitude: data.lat, longitude: data.lon };
+        if (!data.success) throw new Error(`ipwho.is lookup failed: ${JSON.stringify(data)}`);
+        return { latitude: data.latitude, longitude: data.longitude };
       } finally {
         clearTimeout(timeout);
       }
     }
 
-    const geo = await fetchGeoLocation().catch(() => null);
+    const geo = await fetchGeoLocation().catch((err) => {
+      console.warn("geolocation failed, weather gets no coordinates", { err });
+      return null;
+    });
 
     const providers = zebar.createProviderGroup({
       network: { type: "network" },

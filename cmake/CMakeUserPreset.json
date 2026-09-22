@@ -5,7 +5,7 @@
       "name": "local-path",
       "hidden": true,
       "environment": {
-        "PATH": "$env{LOCAL_MINGW};$env{LOCAL_CMAKE};$env{LOCAL_NINJA};C:/Program Files/Git/cmd;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0;C:/Windows;$env{PKG_CONFIG_PATH}"
+        "PATH": "$env{LOCAL_MINGW};$env{LOCAL_CMAKE};$env{LOCAL_NINJA};C:/Program Files/Git/cmd;C:/Windows/System32;C:/Windows/System32/WindowsPowerShell/v1.0;C:/Windows;$env{MSYS_USR_BIN}"
       }
     },
     {
@@ -16,7 +16,7 @@
         "LOCAL_MINGW": "C:/msys64/mingw64/bin",
         "LOCAL_CMAKE": "C:/Program Files/CMake/bin",
         "LOCAL_NINJA": "C:/msys64/mingw64/bin",
-        "PKG_CONFIG_PATH": "C:/msys64/usr/bin"
+        "MSYS_USR_BIN": "C:/msys64/usr/bin"
       }
     },
     {

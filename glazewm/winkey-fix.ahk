@@ -12,6 +12,15 @@
 global g_WinDownAt := 0
 global g_WinChord := false
 
+; GlazeWM starts this script, so exit with it rather than being killed by an image-name taskkill that would take
+; every other AutoHotkey script down too.
+SetTimer(ExitWhenGlazeWMGone, 5000)
+
+ExitWhenGlazeWMGone() {
+    if !ProcessExist("glazewm.exe")
+        ExitApp()
+}
+
 ~LWin::
 ~RWin::
 {

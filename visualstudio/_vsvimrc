@@ -46,8 +46,8 @@ nnoremap <Leader>f :vsc Edit.GoToFile<CR>
 nnoremap <Leader>p :vsc Edit.FormatDocument<CR>
 
 " --- Diagnostics ---
-nnoremap [d :vsc View.NextError<CR>
-nnoremap ]d :vsc View.PreviousError<CR>
+nnoremap [d :vsc View.PreviousError<CR>
+nnoremap ]d :vsc View.NextError<CR>
 
 " --- Quick fix ---
 nnoremap <Leader>ca :vsc View.QuickActions<CR>

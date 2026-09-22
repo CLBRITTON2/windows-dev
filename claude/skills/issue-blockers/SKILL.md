@@ -36,7 +36,7 @@ state alone.
 
 Check staleness without mutating: compare `git ls-remote origin <default-branch>` against the local
 `origin/<default-branch>` ref. When they differ, run
-`pwsh -NoProfile -File ~/dev/windows-dev/scripts/update-ziti-repos.ps1` once
+`pwsh -NoProfile -File ~/dev/windows-dev/scripts/update-ziti-repos.ps1 -Root ~/dev/openziti` once
 per invocation (never once per issue), then re-check. The script skips dirty and non-tracking checkouts.
 When it skipped the checkout that matters, say so in the report instead of pretending it is fresh.
 

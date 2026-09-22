@@ -6,13 +6,11 @@
     when the working tree is clean and the current branch tracks its upstream. Dirty repos, detached heads,
     and repos with no upstream are skipped and reported, never modified.
 .EXAMPLE
-    ./update-ziti-repos.ps1
-.EXAMPLE
-    ./update-ziti-repos.ps1 -Root "D:\src\openziti"
+    ./update-ziti-repos.ps1 -Root "$HOME\dev\openziti"
 #>
 [CmdletBinding()]
 param(
-    [string]$Root = "$HOME\dev\openziti"
+    [Parameter(Mandatory)][string]$Root
 )
 
 $ErrorActionPreference = 'Stop'

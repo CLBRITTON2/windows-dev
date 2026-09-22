@@ -54,6 +54,7 @@ $ownerExecPaths = @(
     "$repo\glazewm\config_kinesis.yaml"
     "$repo\glazewm\config_desktop.yaml"
     "$repo\glazewm\winkey-fix.ahk"
+    "$repo\glazewm\sleep.ahk"
     "$repo\vscode\settings.json"
     "$repo\vscode\keybindings.json"
     "$repo\visualstudio\_vsvimrc"
