@@ -44,9 +44,10 @@ $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .g
     Select-Object -ExpandProperty FullName |
     Where-Object { $_ -ne "$devRoot\agents\.git" }
 
-# Linked into the owner's home by setup-configs.ps1 and run as the owner, or run elevated during setup. They sit under
-# the ~/dev grant, so the write bits have to come back off explicitly.
-$ownerExecFiles = @(
+# Run as the owner (linked by setup-configs.ps1 or launched from the profile, GlazeWM, or Zebar) or run elevated
+# during setup. They sit under the ~/dev grant, so the write bits have to come back off explicitly. A directory
+# entry covers everything under it.
+$ownerExecPaths = @(
     "$repo\powershell\Microsoft.PowerShell_profile.ps1"
     "$repo\wezterm\.wezterm.lua"
     "$repo\glazewm\config_laptop.yaml"
@@ -54,9 +55,30 @@ $ownerExecFiles = @(
     "$repo\glazewm\config_desktop.yaml"
     "$repo\glazewm\winkey-fix.ahk"
     "$repo\vscode\settings.json"
+    "$repo\vscode\keybindings.json"
+    "$repo\visualstudio\_vsvimrc"
+    "$repo\windows-terminal\settings.json"
+    "$repo\zebar"
     "$repo\setup-configs.ps1"
     "$repo\bootstrap.ps1"
+    "$repo\scripts\setup-agent-account.ps1"
+    "$repo\scripts\dotfile-link.ps1"
+    "$repo\scripts\update-ziti-repos.ps1"
+    "$repo\winget\packages.json"
 )
+
+# Without this the account could rename a parent directory aside and recreate it with its own copy of a denied
+# file at the same path. Deny is this-folder-only so the directory's other contents stay editable.
+$ownerExecAncestors = $ownerExecPaths |
+    ForEach-Object {
+        $dir = Split-Path $_ -Parent
+        while ($dir.StartsWith($devRoot, [StringComparison]::OrdinalIgnoreCase)) {
+            $dir
+            $dir = Split-Path $dir -Parent
+        }
+    } |
+    Sort-Object -Unique |
+    Where-Object { $_ -notin $ownerExecPaths }
 
 # /C keeps going past WSL-made symlinks (a .venv lib64), which icacls cannot enumerate and otherwise exits 1920 on.
 # The .git deny lists write bits explicitly: the simple (W) includes SYNCHRONIZE, which every open requests, so
@@ -67,9 +89,15 @@ foreach ($g in $gitDirs) {
     $aclSteps.Add(@($g, '/remove:d', $account))
     $aclSteps.Add(@($g, '/deny', "${account}:(OI)(CI)(WD,AD,WEA,WA,DE,DC)"))
 }
-foreach ($f in $ownerExecFiles) {
-    $aclSteps.Add(@($f, '/remove:d', $account))
-    $aclSteps.Add(@($f, '/deny', "${account}:(WD,AD,WEA,WA,DE,DC)"))
+foreach ($p in $ownerExecPaths) {
+    if (-not (Test-Path $p)) { throw "owner-exec path missing, fix the list: $p" }
+    $inherit = if (Test-Path $p -PathType Container) { '(OI)(CI)' } else { '' }
+    $aclSteps.Add(@($p, '/remove:d', $account))
+    $aclSteps.Add(@($p, '/deny', "${account}:${inherit}(WD,AD,WEA,WA,DE,DC)"))
+}
+foreach ($a in $ownerExecAncestors) {
+    $aclSteps.Add(@($a, '/remove:d', $account))
+    $aclSteps.Add(@($a, '/deny', "${account}:(DE)"))
 }
 foreach ($d in $denyDrives) { $aclSteps.Add(@($d, '/deny', "${account}:(OI)(CI)(F)")) }
 
@@ -95,7 +123,7 @@ Write-Host "setup-agent-account" -ForegroundColor Cyan
 Write-Host "  account    : $account (standard user, group Users only)"
 Write-Host "  dev root   : $devRoot (Modify)"
 Write-Host "  .git denied: $($gitDirs.Count) repos"
-Write-Host "  write denied: $($ownerExecFiles.Count) dotfiles"
+Write-Host "  write denied: $($ownerExecPaths.Count) owner-exec paths, $($ownerExecAncestors.Count) parent dirs"
 Write-Host "  drives     : $($denyDrives -join ', ') (denied)"
 Write-Host "  home links : $($agentLinks.Count)"
 Write-Host ""
