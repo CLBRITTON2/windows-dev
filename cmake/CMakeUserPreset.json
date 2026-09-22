@@ -24,8 +24,8 @@
       "hidden": true,
       "inherits": ["local-path"],
       "environment": {
-        "VS_BIN": "C:/Program Files/Microsoft Visual Studio/18/Community",
-        "LOCAL_MINGW": "$env{VS_BIN}/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64",
+        "VS_BIN": "C:/Program Files/Microsoft Visual Studio/2022/Community",
+        "LOCAL_MINGW": "$env{VS_BIN}/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64",
         "LOCAL_CMAKE": "$env{VS_BIN}/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin",
         "LOCAL_NINJA": "$env{VS_BIN}/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja"
       }

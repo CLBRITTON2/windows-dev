@@ -23,6 +23,7 @@
 				{ "PackageIdentifier" : "GoLang.Go" },
 				{ "PackageIdentifier" : "OpenJS.NodeJS.LTS" },
 				{ "PackageIdentifier" : "Notepad++.Notepad++" },
+				{ "PackageIdentifier" : "Microsoft.Coreutils" },
 				{ "PackageIdentifier" : "eza-community.eza" },
 				{ "PackageIdentifier" : "junegunn.fzf" },
 				{ "PackageIdentifier" : "MSYS2.MSYS2" },

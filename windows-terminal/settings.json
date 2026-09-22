@@ -69,20 +69,8 @@
                 "source": "Microsoft.WSL"
             },
             {
-                "guid": "{8346b5bf-7f58-5f11-84ec-1742add4e4c3}",
-                "hidden": false,
-                "name": "Developer Command Prompt for VS 18",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
-                "guid": "{b0dd8dbd-35eb-5f9b-9c7b-b532e697b3fa}",
-                "hidden": false,
-                "name": "Developer PowerShell for VS 18",
-                "source": "Windows.Terminal.VisualStudio"
-            },
-            {
                 "guid": "{51855cb2-8cce-5362-8f54-464b92b32386}",
-                "hidden": false,
+                "hidden": true,
                 "name": "Ubuntu",
                 "source": "CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc"
             },

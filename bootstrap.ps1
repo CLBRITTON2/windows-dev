@@ -20,6 +20,18 @@ $ErrorActionPreference = 'Stop'
 $repoUrl = 'https://github.com/CLBRITTON2/windows-dev'
 $repo = "$HOME\dev\windows-dev"
 $pwsh = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
+$vcpkgRoot = 'C:\vcpkg'
+$vscodeExtensions = @(
+    'anthropic.claude-code'
+    'golang.go'
+    'ms-vscode.cmake-tools'
+    'ms-vscode.cpp-devtools'
+    'ms-vscode.cpptools'
+    'ms-vscode.cpptools-extension-pack'
+    'ms-vscode.cpptools-themes'
+    'mvllow.rose-pine'
+    'vscodevim.vim'
+)
 
 function Assert-ExitCode([string]$step) {
     if ($LASTEXITCODE -ne 0) { throw "$step failed with exit code $LASTEXITCODE" }
@@ -50,6 +62,26 @@ winget import -i "$repo\winget\packages.json" --no-upgrade --accept-package-agre
 Assert-ExitCode 'winget import'
 Update-SessionPath
 
+Write-Host "Installing PSFzf" -ForegroundColor Cyan
+# The profile imports it. PSResourceGet ships with pwsh 7.4+, and installing from pwsh puts it in the pwsh module path.
+& $pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -TrustRepository -ErrorAction Stop }"
+Assert-ExitCode 'Install-PSResource PSFzf'
+
+# The CMake presets expect vcpkg at this path. It is a git checkout, not a winget package.
+if (-not (Test-Path $vcpkgRoot)) {
+    Write-Host "Installing vcpkg" -ForegroundColor Cyan
+    git clone https://github.com/microsoft/vcpkg $vcpkgRoot
+    Assert-ExitCode 'git clone vcpkg'
+    & "$vcpkgRoot\bootstrap-vcpkg.bat" -disableMetrics
+    Assert-ExitCode 'bootstrap-vcpkg.bat'
+}
+
+Write-Host "Installing VS Code extensions" -ForegroundColor Cyan
+foreach ($extension in $vscodeExtensions) {
+    code --install-extension $extension
+    Assert-ExitCode "code --install-extension $extension"
+}
+
 & $pwsh -NoProfile -File "$repo\setup-configs.ps1" -Layout $Layout
 Assert-ExitCode 'setup-configs.ps1'
 
@@ -57,4 +89,4 @@ Assert-ExitCode 'setup-configs.ps1'
 Assert-ExitCode 'setup-agent-account.ps1'
 
 Write-Host ""
-Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, thide, /login, gh auth login." -ForegroundColor Yellow
+Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, thide, VsVim, /login, gh auth login." -ForegroundColor Yellow
