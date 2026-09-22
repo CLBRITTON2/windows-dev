@@ -161,7 +161,7 @@ keybindings:
     bindings: ['lwin+alt+j']
 
   # SLEEP
-  - commands: ['shell-exec %userprofile%/dev/windows-dev/glazewm/sleep.ahk']
+  - commands: ['shell-exec C:\Windows\System32\rundll32.exe powrprof.dll,SetSuspendState 0,1,0']
     bindings: ['lwin+ctrl+s']
 
   # SYSTEM ACTIONS
