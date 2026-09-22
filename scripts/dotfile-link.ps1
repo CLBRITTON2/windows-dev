@@ -1,5 +1,5 @@
 #Requires -Version 7
-# Dot-sourced by setup-configs.ps1 and scripts/setup-agent-account.ps1, which link into different homes.
+# Dot-sourced by setup-configs.ps1 and setup-agent-account.ps1, which link into different homes.
 
 function Link([string]$target, [string]$source, [string]$backupRoot) {
     if (!(Test-Path $source)) {

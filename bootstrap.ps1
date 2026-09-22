@@ -82,7 +82,7 @@ foreach ($extension in $vscodeExtensions) {
     Assert-ExitCode "code --install-extension $extension"
 }
 
-& $pwsh -NoProfile -File "$repo\setup-configs.ps1" -Layout $Layout
+& $pwsh -NoProfile -File "$repo\scripts\setup-configs.ps1" -Layout $Layout
 Assert-ExitCode 'setup-configs.ps1'
 
 & $pwsh -NoProfile -File "$repo\scripts\setup-agent-account.ps1"

@@ -51,7 +51,7 @@ The layout picks which GlazeWM config gets linked:
 To switch layouts, run this from an elevated pwsh 7 shell in the repo:
 
 ```powershell
-.\setup-configs.ps1 -Layout Kinesis
+.\scripts\setup-configs.ps1 -Layout Kinesis
 ```
 
 Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/` first.

@@ -147,7 +147,7 @@ function Get-OwnerExecPath([string]$repoRoot) {
 }
 
 function Get-LinkSource([string]$repoRoot) {
-    $script = Join-Path $repoRoot 'setup-configs.ps1'
+    $script = Join-Path $repoRoot 'scripts\setup-configs.ps1'
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
     $links = $ast.FindAll({
             param($node)

@@ -59,7 +59,7 @@ $ownerExecPaths = @(
     "$repo\visualstudio\_vsvimrc"
     "$repo\windows-terminal\settings.json"
     "$repo\zebar"
-    "$repo\setup-configs.ps1"
+    "$repo\scripts\setup-configs.ps1"
     "$repo\bootstrap.ps1"
     "$repo\scripts\setup-agent-account.ps1"
     "$repo\scripts\dotfile-link.ps1"

@@ -9,7 +9,7 @@ param(
     [string]$Layout
 )
 
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent
 $ErrorActionPreference = 'Stop'
 # Backups go outside the linked directories: Zebar and Claude Code scan their config dirs and would
 # pick up a stale sibling copy.
