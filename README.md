@@ -27,8 +27,7 @@ Open Windows PowerShell as administrator and run, picking your layout:
 
 [`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, installs every app in
 [`winget/packages.json`](winget/packages.json) plus PSFzf, vcpkg, and the VS Code extensions, links the configs, and
-creates the Claude Code account. It is
-safe to rerun.
+creates the Claude Code account. It is safe to rerun.
 
 Then by hand:
 
