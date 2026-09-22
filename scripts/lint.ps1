@@ -147,28 +147,34 @@ function Get-OwnerExecPath([string]$repoRoot) {
 }
 
 function Get-LinkSource([string]$repoRoot) {
-    $script = Join-Path $repoRoot 'scripts\setup-configs.ps1'
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
-    $links = $ast.FindAll({
-            param($node)
-            $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -eq 'Link'
-        }, $true)
+    $linkScripts = @(
+        Join-Path $repoRoot 'scripts\setup-configs.ps1'
+        Join-Path $repoRoot 'scripts\switch-layout.ps1'
+    )
     $sources = @()
-    foreach ($link in $links) {
-        $pattern = Get-RepoPath $link.CommandElements[2] $repoRoot
-        $matched = @(Get-Item -Path $pattern -Force -ErrorAction Ignore)
-        if ($matched.Count -eq 0) {
-            throw "Link source ${pattern} in ${script}:$($link.Extent.StartLineNumber) matches no file"
+    foreach ($script in $linkScripts) {
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
+        $links = $ast.FindAll({
+                param($node)
+                $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -eq 'Link'
+            }, $true)
+        foreach ($link in $links) {
+            $pattern = Get-RepoPath $link.CommandElements[2] $repoRoot
+            $matched = @(Get-Item -Path $pattern -Force -ErrorAction Ignore)
+            if ($matched.Count -eq 0) {
+                throw "Link source ${pattern} in ${script}:$($link.Extent.StartLineNumber) matches no file"
+            }
+            $sources += $matched.FullName
         }
-        $sources += $matched.FullName
     }
     return $sources
 }
 
 function Get-LaunchedScript([string]$repoRoot) {
-    # Scripts the profile and GlazeWM start by path. Zebar's dev dir is reached through its ~/.glzr link.
+    # Scripts the profile, GlazeWM, and Zebar start by path. Zebar's dev dir is reached through its ~/.glzr link.
     $launchers = @(Join-Path $repoRoot 'powershell\Microsoft.PowerShell_profile.ps1') +
-        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName)
+        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName) +
+        @(Get-ChildItem (Join-Path $repoRoot 'zebar\dev') -Filter '*.html' | ForEach-Object FullName)
     $references = @{
         'windows-dev[\\/]([\w\\/.-]+\.(?:ps1|ahk))' = $repoRoot
         '\.glzr[\\/]zebar[\\/]([\w\\/.-]+\.(?:ps1|ahk))' = Join-Path $repoRoot 'zebar'

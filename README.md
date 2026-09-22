@@ -48,11 +48,13 @@ The layout picks which GlazeWM config gets linked:
 | `Kinesis` | Kinesis, rwin | 1 | [`config_kinesis.yaml`](glazewm/config_kinesis.yaml) |
 | `Desktop` | rwin | 2 | [`config_desktop.yaml`](glazewm/config_desktop.yaml) |
 
-To switch layouts, run this from an elevated pwsh 7 shell in the repo:
+To switch layouts, click the keyboard icon in Zebar and pick one, or run:
 
 ```powershell
-.\scripts\setup-configs.ps1 -Layout Kinesis
+.\scripts\switch-layout.ps1 -Layout Kinesis
 ```
+
+It needs Developer Mode (turned on by `setup-configs.ps1`) or an elevated shell to create the symlink.
 
 Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/` first.
 

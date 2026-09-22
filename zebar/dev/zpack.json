@@ -24,6 +24,10 @@
           {
             "urlRegex": "api\\.github\\.com",
             "duration": 0
+          },
+          {
+            "urlRegex": "current-layout\\.txt",
+            "duration": 0
           }
         ]
       },

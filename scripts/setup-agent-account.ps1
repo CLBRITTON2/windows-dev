@@ -60,6 +60,7 @@ $ownerExecPaths = @(
     "$repo\windows-terminal\settings.json"
     "$repo\zebar"
     "$repo\scripts\setup-configs.ps1"
+    "$repo\scripts\switch-layout.ps1"
     "$repo\bootstrap.ps1"
     "$repo\scripts\setup-agent-account.ps1"
     "$repo\scripts\dotfile-link.ps1"

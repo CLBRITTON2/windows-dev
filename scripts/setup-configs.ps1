@@ -2,8 +2,7 @@
 #Requires -Version 7
 
 param(
-    # Picks glazewm/config_<layout>.yaml. Laptop binds lwin (builtin keyboard), Kinesis and Desktop bind rwin,
-    # and Desktop spreads workspaces over two monitors.
+    # Passed to switch-layout.ps1, which documents the layouts.
     [Parameter(Mandatory)]
     [ValidateSet('Laptop', 'Kinesis', 'Desktop')]
     [string]$Layout
@@ -55,10 +54,11 @@ Link "$HOME\.wezterm.lua" "$repo\wezterm\.wezterm.lua" $backupRoot
 
 # ── GlazeWM ──────────────────────────────────────────────────
 Write-Host "GlazeWM" -ForegroundColor Magenta
-Link "$HOME\.glzr\glazewm\config.yaml" "$repo\glazewm\config_$($Layout.ToLower()).yaml" $backupRoot
-if (Get-Process glazewm -ErrorAction Ignore) {
-    glazewm command wm-reload-config
-}
+& "$PSScriptRoot\switch-layout.ps1" -Layout $Layout
+# Lets a non-elevated shell create symlinks, so the Zebar layout button runs switch-layout.ps1 without UAC.
+$devModeKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
+New-Item -Path $devModeKey -Force | Out-Null
+Set-ItemProperty -Path $devModeKey -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord
 # Windows handles Win+L before any keyboard hook, so the win+l focus binding never reaches GlazeWM.
 # This also removes Lock from ctrl+alt+del. Takes effect at next sign-in.
 $lockPolicy = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System'

@@ -160,7 +160,7 @@ body,
 }
 
 .date-icon {
-  color: var(--color-accent);
+  color: var(--color-accent-alt);
   font-size: 1.2rem;
 }
 
@@ -188,7 +188,7 @@ body,
 
   &.focused {
     color: var(--color-black);
-    background: var(--color-accent-alt);
+    background: var(--color-cyan);
     font-weight: 600;
   }
 
@@ -272,7 +272,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-cyan);
+  color: var(--color-accent);
   font-size: 16px;
   line-height: 1;
   transition: transform 0.3s ease;
@@ -342,6 +342,41 @@ body,
   height: 18px;
   object-fit: contain;
   margin-right: 0.4rem;
+}
+
+/* =========================
+   LAYOUT SWITCHER
+========================= */
+/* Sized to match the 18px ziti icon beside it. line-height 1 drops the font's line box so the glyph centers. */
+.layout-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-cyan);
+  font-size: 18px;
+  line-height: 1;
+  margin-right: 0;
+}
+
+.layout-option {
+  background: none;
+  border: none;
+  color: var(--color-foreground-muted);
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 6px;
+  margin-left: 4px;
+}
+
+.layout-option:hover {
+  background: var(--color-hover);
+  color: var(--color-foreground);
+}
+
+.layout-option.active {
+  color: var(--color-black);
+  background: var(--color-cyan);
+  font-weight: 600;
 }
 
 /* =========================

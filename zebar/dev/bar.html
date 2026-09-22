@@ -137,6 +137,56 @@
       );
     }
 
+    const LAYOUTS = ["Laptop", "Kinesis", "Desktop"];
+
+    function LayoutSwitcher({ glazewm }) {
+      const [expanded, setExpanded] = useState(false);
+      const [current, setCurrent] = useState(null);
+
+      async function refreshCurrent() {
+        try {
+          const res = await fetch("./current-layout.txt", { cache: "no-store" });
+          if (!res.ok) throw new Error(`current-layout.txt returned ${res.status}`);
+          setCurrent((await res.text()).trim());
+        } catch (err) {
+          console.warn("current layout lookup failed", { err });
+          setCurrent(null);
+        }
+      }
+
+      function toggle() {
+        if (!expanded) refreshCurrent();
+        setExpanded(!expanded);
+      }
+
+      function switchLayout(event, layout) {
+        // The whole box toggles the menu, so keep this click from reopening it.
+        event.stopPropagation();
+        setExpanded(false);
+        // Unquoted on purpose: glzr-io/glazewm#1417, the shell-exec parser mishandles quoted paths.
+        glazewm
+          .runCommand(
+            `shell-exec C:\\Program Files\\PowerShell\\7\\pwsh.exe -NoProfile -WindowStyle Hidden -File %USERPROFILE%/dev/windows-dev/scripts/switch-layout.ps1 -Layout ${layout}`
+          )
+          .catch((err) => console.error("layout switch failed", { layout, err }));
+      }
+
+      return (
+        <div className="box" title="Switch GlazeWM layout" onClick={toggle}>
+          <span className="icon layout-icon">󰌌</span>
+          {expanded && LAYOUTS.map((layout) => (
+            <button
+              className={`layout-option ${layout === current ? "active" : ""}`}
+              key={layout}
+              onClick={(e) => switchLayout(e, layout)}
+            >
+              {layout}
+            </button>
+          ))}
+        </div>
+      );
+    }
+
     // Recursively collect windows from workspace children (handles split containers)
     function collectWindows(child) {
       if (child.type === "window") return [child];
@@ -410,6 +460,8 @@
             )}
 
             <ZitiMenuButton />
+
+            {output.glazewm && <LayoutSwitcher glazewm={output.glazewm} />}
 
             {output.glazewm && (
               <div className="box">
