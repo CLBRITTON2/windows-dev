@@ -9,7 +9,7 @@
   The account gets Modify on ~/dev only. Its own profile stays private and yours stays opaque to it (no
   listing, no reading .ssh, .aws, .claude, browser data). Every .git directory under ~/dev is denied write, so
   add, commit, checkout, and every other ref or index mutation fail for the account while you keep full access.
-  This repo's dotfile link targets and setup-configs.ps1 are denied write too, because they execute as you or
+  This repo's dotfile link targets and setup scripts are denied write too, because they execute as you or
   elevated. The E: drive is denied outright.
 
   Then runs scripts/agent-bootstrap.ps1 as the account (runas prompts for the password it just set, once, and
@@ -55,6 +55,7 @@ $ownerExecFiles = @(
     "$repo\glazewm\winkey-fix.ahk"
     "$repo\vscode\settings.json"
     "$repo\setup-configs.ps1"
+    "$repo\bootstrap.ps1"
 )
 
 # /C keeps going past WSL-made symlinks (a .venv lib64), which icacls cannot enumerate and otherwise exits 1920 on.

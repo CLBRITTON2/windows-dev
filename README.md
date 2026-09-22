@@ -1,61 +1,63 @@
 # Windows dev environment
 
-- Bar: https://github.com/glzr-io/zebar
-- Window manager: https://github.com/glzr-io/glazewm
-- Mem reduct: https://github.com/henrypp/memreduct
-- Hide Windows taskbar: https://github.com/amnweb/thide
-- App launcher: https://learn.microsoft.com/en-us/windows/powertoys/
+My Windows setup: a tiling window manager, a custom status bar, terminal and editor configs, and a sandboxed
+Claude Code.
 
-WezTerm uses my lazyvim config https://github.com/CLBRITTON2/lazyvim-config and .zshrc from
-https://github.com/CLBRITTON2/dots in WSL  
-Visual Studio 2022 extensions: VsVim 2022
-- ctrl c, ctrl f, ctrl v handled by VS all others handled by VsVim
+| What | Tool |
+| --- | --- |
+| Window manager | [GlazeWM](https://github.com/glzr-io/glazewm) |
+| Status bar | [Zebar](https://github.com/glzr-io/zebar) |
+| Terminal | [WezTerm](https://wezfurlong.org/wezterm/) with [lazyvim](https://github.com/CLBRITTON2/lazyvim-config) and [.zshrc](https://github.com/CLBRITTON2/dots) in WSL |
+| App launcher | [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/) |
+| Hide the taskbar | [thide](https://github.com/amnweb/thide) |
+| Free up RAM | [Mem Reduct](https://github.com/henrypp/memreduct) |
+| Visual Studio 2022 | VsVim 2022 (VS keeps ctrl+c, ctrl+f, ctrl+v, VsVim gets everything else) |
 
-## Claude Code context
+## New machine
 
-[`claude/context.md`](claude/context.md) holds working rules: responses, code style, error handling,
-workflow, git, shell, and environment. `~/.claude/CLAUDE.md` is a symlink to it, so this repo is the single
-source of truth.
-
-### Claude Code runs as its own Windows account
-
-Claude Code runs as `claude`, a standard account in `Users` with no administrator rights, created by
-[`scripts/setup-agent-account.ps1`](scripts/setup-agent-account.ps1). Its access:
-
-- Modify on `~/dev`, the only grant it holds in the owner's profile. Everything else there, `.ssh`, `.aws`,
-  `.claude`, browser data, is unreadable, and the profile cannot be listed.
-- Write denied on every `.git` under `~/dev`, so add, commit, checkout, and every other ref or index mutation
-  fail for the account.
-- Write denied on the dotfiles this repo links into the owner's home and on `setup-configs.ps1`, since those execute
-  as the owner or elevated.
-- Its own profile, holding its keys, config, and scratch files.
-
-The `claude` function in the PowerShell profile starts a session as that account. `~/.local/bin/claude` runs
-uncontained as whoever invokes it.
-
-`claude/hooks/pre-tool-use-hook.ps1` enforces the bash rules from `context.md` as a Claude Code PreToolUse
-hook. It is a guardrail against habits, not a boundary. The account above is the boundary.
-
-### Setup on a new machine
-
-Two scripts, both from an elevated pwsh 7 shell, both safe to rerun:
+Open Windows PowerShell as administrator and run, picking your layout:
 
 ```powershell
-# Setup configs (-Layout picks the GlazeWM config and reloads GlazeWM if it is running)
-.\setup-configs.ps1 -Layout Laptop|Kinesis|Desktop
-# Setup agent account
-.\scripts\setup-agent-account.ps1
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Laptop
 ```
 
-Anything already at a link target that is not itself a link is moved to `~/.dotfiles-backup/<timestamp>/`.
-Both scripts share the `Link` function in [`scripts/dotfile-link.ps1`](scripts/dotfile-link.ps1).
+[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, installs every app in
+[`winget/packages.json`](winget/packages.json), links the configs, and creates the Claude Code account. It is
+safe to rerun.
 
-`setup-agent-account.ps1` creates the account, applies the ACLs, then runs
-[`scripts/agent-bootstrap.ps1`](scripts/agent-bootstrap.ps1) as the account through `runas`, which junctions
-the account's `~/dev` onto the owner's, puts `~/.local/bin` on its persistent PATH (the Claude Code installer
-only sets it for its own session), marks the repos safe for git, and installs Claude Code. Back in the elevated
-shell it links the account's profile, WezTerm config, and `~/.claude` entries, since the account has no
-privilege to create symlinks.
+Then by hand:
 
-`runas` saves the account password once, which the `claude` function relies on later. Two interactive steps are
-left: `/login` in an agent session, and `gh auth login` with a read-only PAT.
+- Install [Ziti Desktop Edge](https://github.com/openziti/desktop-edge-win/releases) and
+  [thide](https://github.com/amnweb/thide/releases) (not on winget).
+- Reboot if WSL was just installed.
+- Run `claude`, then `/login`.
+- Run `gh auth login` with a read-only PAT.
+
+## Layouts
+
+The layout picks which GlazeWM config gets linked:
+
+| Layout | Keyboard | Monitors | Config |
+| --- | --- | --- | --- |
+| `Laptop` | builtin, lwin | 1 | [`config_laptop.yaml`](glazewm/config_laptop.yaml) |
+| `Kinesis` | Kinesis, rwin | 1 | [`config_kinesis.yaml`](glazewm/config_kinesis.yaml) |
+| `Desktop` | rwin | 2 | [`config_desktop.yaml`](glazewm/config_desktop.yaml) |
+
+To switch layouts, run this from an elevated pwsh 7 shell in the repo:
+
+```powershell
+.\setup-configs.ps1 -Layout Kinesis
+```
+
+Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/` first.
+
+## Claude Code
+
+Claude Code runs as its own standard Windows account, `claude`. It can edit `~/dev` and nothing else in my
+profile, and it cannot commit, push, or change the scripts and configs that run as me. The `claude` command in
+the PowerShell profile starts a session as that account. Details are in
+[`scripts/setup-agent-account.ps1`](scripts/setup-agent-account.ps1).
+
+- [`claude/context.md`](claude/context.md) holds the working rules. `~/.claude/CLAUDE.md` links to it.
+- [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a
+  guardrail, not a security boundary. The account is the boundary.

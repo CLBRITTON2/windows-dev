@@ -1,0 +1,42 @@
+{
+	"$schema" : "https://aka.ms/winget-packages.schema.2.0.json",
+	"CreationDate" : "2026-09-22T13:57:59.517-00:00",
+	"Sources" :
+	[
+		{
+			"Packages" :
+			[
+				{ "PackageIdentifier" : "Git.Git" },
+				{ "PackageIdentifier" : "GitHub.cli" },
+				{ "PackageIdentifier" : "Microsoft.PowerShell" },
+				{ "PackageIdentifier" : "wez.wezterm" },
+				{ "PackageIdentifier" : "Microsoft.WindowsTerminal" },
+				{ "PackageIdentifier" : "glzr-io.glazewm" },
+				{ "PackageIdentifier" : "glzr-io.zebar" },
+				{ "PackageIdentifier" : "AutoHotkey.AutoHotkey" },
+				{ "PackageIdentifier" : "Microsoft.PowerToys" },
+				{ "PackageIdentifier" : "Henry++.MemReduct" },
+				{ "PackageIdentifier" : "DEVCOM.JetBrainsMonoNerdFont" },
+				{ "PackageIdentifier" : "Google.Chrome" },
+				{ "PackageIdentifier" : "Microsoft.VisualStudioCode" },
+				{ "PackageIdentifier" : "Microsoft.VisualStudio.2022.Community" },
+				{ "PackageIdentifier" : "Kitware.CMake" },
+				{ "PackageIdentifier" : "GoLang.Go" },
+				{ "PackageIdentifier" : "OpenJS.NodeJS.LTS" },
+				{ "PackageIdentifier" : "Notepad++.Notepad++" },
+				{ "PackageIdentifier" : "eza-community.eza" },
+				{ "PackageIdentifier" : "junegunn.fzf" },
+				{ "PackageIdentifier" : "MSYS2.MSYS2" },
+				{ "PackageIdentifier" : "Microsoft.WSL" }
+			],
+			"SourceDetails" :
+			{
+				"Argument" : "https://cdn.winget.microsoft.com/cache",
+				"Identifier" : "Microsoft.Winget.Source_8wekyb3d8bbwe",
+				"Name" : "winget",
+				"Type" : "Microsoft.PreIndexed.Package"
+			}
+		}
+	],
+	"WinGetVersion" : "1.29.380"
+}
