@@ -41,7 +41,7 @@
           "offsetX": "0px",
           "offsetY": "0px",
           "width": "100%",
-          "height": "50px",
+          "height": "54px",
           "monitorSelection": {
             "type": "all"
           },
@@ -86,7 +86,7 @@
           "name": "default",
           "anchor": "top_right",
           "offsetX": "-5px",
-          "offsetY": "55px",
+          "offsetY": "59px",
           "width": "380px",
           "height": "160px",
           "monitorSelection": {

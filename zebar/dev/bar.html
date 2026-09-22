@@ -97,7 +97,7 @@
       await zebar.startWidget("ziti-menu", {
         anchor: "top_left",
         offsetX: `${Math.round(left)}px`,
-        offsetY: "48px",
+        offsetY: "52px",
         width: `${ZITI_MENU_WIDTH}px`,
         height: "160px",
         monitorSelection,
@@ -131,7 +131,7 @@
           title="OpenZiti GitHub"
           onClick={(e) => openZitiMenu(e.currentTarget)}
         >
-          <img className="ziti-icon" src="./assets/icons/Ziti-32.png" alt="ziti" />
+          <img className="icon ziti-icon" src="./assets/icons/Ziti-32.png" alt="ziti" />
           {count != null && <span className="info">{count}</span>}
         </button>
       );

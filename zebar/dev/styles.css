@@ -42,8 +42,10 @@ body,
 /* =========================
    MAIN LAYOUT
 ========================= */
+/* Scales every part of the bar together. height divides by the zoom so the scaled bar still fills the window. */
 .app {
-  height: 100%;
+  zoom: 1.07;
+  height: calc(100% / 1.07);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -106,9 +108,22 @@ body,
   vertical-align: top;
 }
 
+/* Propo gives each icon glyph its real width. The plain Nerd Font squeezes icons into one text cell and they spill
+   right, which throws off centering and the icon-to-text gap. */
+.icon,
+.systray-arrow {
+  font-family: "JetBrainsMono Nerd Font Propo", "JetBrainsMono Nerd Font", monospace;
+}
+
 .icon {
   display: inline-block;
-  margin-right: 0.8rem;
+  font-size: 1.2rem;
+  margin-right: 0.4rem;
+}
+
+/* An icon with nothing after it (wifi, collapsed layout switcher, ziti with no count) stays centered in its box. */
+.icon:last-child {
+  margin-right: 0;
 }
 
 /* =========================
@@ -116,34 +131,26 @@ body,
 ========================= */
 .ethernet-icon {
   color: var(--color-accent);
-  font-size: 1.2rem;
 }
 
 .wifi-icon {
   color: var(--color-accent);
-  font-size: 1.2rem;
-  margin-right: 0.2rem;
 }
 
 .cpu-icon {
   color: var(--color-cyan);
-  font-size: 1.2rem;
 }
 
 .memory-icon {
   color: var(--color-accent-alt);
-  font-size: 1.2rem;
 }
 
 .audio-icon {
   color: var(--color-accent);
-  font-size: 1.2rem;
-  margin-right: 1rem;
 }
 
 .battery-icon {
   color: var(--color-cyan);
-  font-size: 1.2rem;
 }
 
 .battery-icon.low {
@@ -156,12 +163,10 @@ body,
 
 .weather-icon {
   color: var(--color-accent-alt);
-  font-size: 1.2rem;
 }
 
 .date-icon {
   color: var(--color-accent-alt);
-  font-size: 1.2rem;
 }
 
 /* =========================
@@ -303,7 +308,7 @@ body,
   cursor: pointer;
   width: 24px;
   height: 24px;
-  border-radius: 4px;
+  border-radius: 6px;
   flex-shrink: 0;
   transition: background 0.15s ease;
 }
@@ -341,20 +346,17 @@ body,
   width: 18px;
   height: 18px;
   object-fit: contain;
-  margin-right: 0.4rem;
 }
 
 /* =========================
    LAYOUT SWITCHER
 ========================= */
-/* Sized to match the 18px ziti icon beside it. line-height 1 drops the font's line box so the glyph centers. */
+/* line-height 1 drops the font's line box so the glyph centers in the box. */
 .layout-icon {
   display: flex;
   align-items: center;
   color: var(--color-cyan);
-  font-size: 18px;
   line-height: 1;
-  margin-right: 0;
 }
 
 .layout-option {
@@ -363,9 +365,10 @@ body,
   color: var(--color-foreground-muted);
   font: inherit;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 2px 6px;
-  margin-left: 4px;
+  margin: 0 1px;
+  transition: all 0.25s ease;
 }
 
 .layout-option:hover {
