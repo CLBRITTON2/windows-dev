@@ -10,7 +10,6 @@ Claude Code.
 | Terminal | [WezTerm](https://wezfurlong.org/wezterm/) with [lazyvim](https://github.com/CLBRITTON2/lazyvim-config) and [.zshrc](https://github.com/CLBRITTON2/dots) in WSL |
 | App launcher | [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/) |
 | Hide the taskbar | [thide](https://github.com/amnweb/thide) |
-| Free up RAM | [Mem Reduct](https://github.com/henrypp/memreduct) |
 | Visual Studio 2022 | VsVim 2022 (VS keeps ctrl+c, ctrl+f, ctrl+v, VsVim gets everything else) |
 
 ## New machine

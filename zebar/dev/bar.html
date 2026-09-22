@@ -48,7 +48,6 @@
       notepad: "Notepad-32.png",
       obs64: "obs64-32.png",
       obsidian: "Obsidian-32.png",
-      memreduct: "memreduct-32.png",
       mspaint: "mspaint-32.png",
       powerpnt: "POWERPNT-32.png",
       qq: "QQ-32.png",
@@ -453,7 +452,7 @@
               <div className="box" title={[
                 `Total: ${bytesToGigabytes(output.memory.totalMemory)} GB`,
                 output.memory.totalSwap > 0 && `Swap: ${bytesToGigabytes(output.memory.usedSwap)} / ${bytesToGigabytes(output.memory.totalSwap)} GB`,
-              ].filter(Boolean).join('\n')} onClick={() => output.glazewm.runCommand('shell-exec cmd /c start "" "C:\\Program Files\\Mem Reduct\\memreduct.exe"')}>
+              ].filter(Boolean).join('\n')} onClick={() => output.glazewm.runCommand('shell-exec resmon')}>
                 <span className="icon memory-icon"></span>
                 <span className="info">
                   {bytesToGigabytes(output.memory.usedMemory)} GBs
