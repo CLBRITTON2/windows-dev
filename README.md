@@ -26,7 +26,7 @@ Claude Code runs as `claude`, a standard account in `Users` with no administrato
   `.claude`, browser data, is unreadable, and the profile cannot be listed.
 - Write denied on every `.git` under `~/dev`, so add, commit, checkout, and every other ref or index mutation
   fail for the account.
-- Write denied on the dotfiles this repo links into the owner's home and on `install.ps1`, since those execute
+- Write denied on the dotfiles this repo links into the owner's home and on `setup-configs.ps1`, since those execute
   as the owner or elevated.
 - Its own profile, holding its keys, config, and scratch files.
 
@@ -41,8 +41,8 @@ hook. It is a guardrail against habits, not a boundary. The account above is the
 Two scripts, both from an elevated pwsh 7 shell, both safe to rerun:
 
 ```powershell
-# Setup configs
-.\install.ps1
+# Setup configs (-Layout picks the GlazeWM config and reloads GlazeWM if it is running)
+.\setup-configs.ps1 -Layout Laptop|Kinesis|Desktop
 # Setup agent account
 .\scripts\setup-agent-account.ps1
 ```

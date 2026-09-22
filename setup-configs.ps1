@@ -1,6 +1,14 @@
 #Requires -RunAsAdministrator
 #Requires -Version 7
 
+param(
+    # Picks glazewm/config_<layout>.yaml. Laptop binds lwin (builtin keyboard), Kinesis and Desktop bind rwin,
+    # and Desktop spreads workspaces over two monitors.
+    [Parameter(Mandatory)]
+    [ValidateSet('Laptop', 'Kinesis', 'Desktop')]
+    [string]$Layout
+)
+
 $repo = $PSScriptRoot
 $ErrorActionPreference = 'Stop'
 # Backups go outside the linked directories: Zebar and Claude Code scan their config dirs and would
@@ -47,7 +55,15 @@ Link "$HOME\.wezterm.lua" "$repo\wezterm\.wezterm.lua" $backupRoot
 
 # ── GlazeWM ──────────────────────────────────────────────────
 Write-Host "GlazeWM" -ForegroundColor Magenta
-Link "$HOME\.glzr\glazewm\config.yaml" "$repo\glazewm\config.yaml" $backupRoot
+Link "$HOME\.glzr\glazewm\config.yaml" "$repo\glazewm\config_$($Layout.ToLower()).yaml" $backupRoot
+if (Get-Process glazewm -ErrorAction Ignore) {
+    glazewm command wm-reload-config
+}
+# Windows handles Win+L before any keyboard hook, so the win+l focus binding never reaches GlazeWM.
+# This also removes Lock from ctrl+alt+del. Takes effect at next sign-in.
+$lockPolicy = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System'
+New-Item -Path $lockPolicy -Force | Out-Null
+Set-ItemProperty -Path $lockPolicy -Name DisableLockWorkstation -Value 1 -Type DWord
 
 # ── Zebar ────────────────────────────────────────────────────
 # Assets (icons + scripts) are junctioned

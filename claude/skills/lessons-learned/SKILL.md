@@ -36,7 +36,7 @@ dash, no semicolon, wrap at 120 columns. Leave the Verified line alone.
 
 A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.md`, opened with the same
 `Verified against <owner/repo> <short sha> (<date>)` header the other files use, sha read from
-`.git/HEAD` and its ref. The symlink needs the owner's `install.ps1`, so name that as a follow-up.
+`.git/HEAD` and its ref. The symlink needs the owner's `setup-configs.ps1`, so name that as a follow-up.
 
 ## Commit
 

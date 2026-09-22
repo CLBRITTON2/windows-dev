@@ -155,7 +155,7 @@ body,
 }
 
 .weather-icon {
-  color: var(--color-cyan);
+  color: var(--color-accent-alt);
   font-size: 1.2rem;
 }
 

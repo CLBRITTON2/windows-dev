@@ -1,0 +1,241 @@
+general:
+  startup_commands:
+    - 'focus --workspace 1'
+    - 'shell-exec zebar'
+    # Unquoted on purpose: glzr-io/glazewm#1417, the shell-exec parser mishandles quoted paths
+    - 'shell-exec C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe %USERPROFILE%\dev\windows-dev\glazewm\winkey-fix.ahk'
+  shutdown_commands:
+    - 'shell-exec taskkill /IM zebar.exe /F'
+    - 'shell-exec taskkill /IM AutoHotkey64.exe /F'
+  config_reload_commands: []
+  focus_follows_cursor: false
+  toggle_workspace_on_refocus: true
+  cursor_jump:
+    enabled: true
+    trigger: 'monitor_focus'
+  hide_method: 'cloak'
+  show_all_in_taskbar: false
+
+gaps:
+  scale_with_dpi: true
+  inner_gap: '5px'
+  outer_gap:
+    top: '50px'
+    right: '5px'
+    bottom: '5px'
+    left: '5px'
+    
+workspaces:
+  - name: '1'
+  - name: '2'
+  - name: '3'
+  - name: '4'
+  - name: '5'
+  - name: '6'
+  - name: '7'
+  - name: '8'
+  - name: '9'
+  - name: '10'
+
+window_effects:
+  focused_window:
+    border:
+      enabled: true
+      color: '#c4a7e7'
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: true
+      style: 'rounded'
+    transparency:
+      enabled: false
+      opacity: '100%'
+  other_windows:
+    border:
+      enabled: true
+      color: '#404040'
+    hide_title_bar:
+      enabled: false
+    corner_style:
+      enabled: true
+      style: 'rounded'
+    transparency:
+      enabled: false
+      opacity: '100%'
+
+window_behavior:
+  initial_state: 'tiling'
+  state_defaults:
+    floating:
+      centered: true
+      shown_on_top: false
+    fullscreen:
+      maximized: true
+      shown_on_top: false
+
+window_rules:
+  - commands: ['ignore']
+    match:
+      - window_process: { equals: 'zebar' }
+      - window_process: { equals: 'ZitiDesktopEdge' }
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+      - window_process: { equals: 'PowerToys' }
+        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
+      - window_process: { equals: 'PowerToys' }
+        window_title: { regex: '.*? - Peek' }
+      - window_process: { equals: 'Lively' }
+        window_class: { regex: 'HwndWrapper' }
+      - window_process: { equals: 'EXCEL' }
+        window_class: { not_regex: 'XLMAIN' }
+      - window_process: { equals: 'WINWORD' }
+        window_class: { not_regex: 'OpusApp' }
+      - window_process: { equals: 'POWERPNT' }
+        window_class: { not_regex: 'PPTFrameClass' }
+      - window_process: { regex: 'LockApp' }
+
+binding_modes:
+  - name: 'resize'
+    keybindings:
+      - commands: ['resize --width -2%']
+        bindings: ['h', 'left']
+      - commands: ['resize --width +2%']
+        bindings: ['l', 'right']
+      - commands: ['resize --height +2%']
+        bindings: ['k', 'up']
+      - commands: ['resize --height -2%']
+        bindings: ['j', 'down']
+      - commands: ['wm-disable-binding-mode --name resize']
+        bindings: ['escape', 'enter']
+
+keybindings:
+  # APPLICATION LAUNCHES (SUPER key)
+  - commands: ['shell-exec pwsh']
+    bindings: ['lwin+enter']
+  - commands: ['shell-exec chrome']
+    bindings: ['lwin+b']
+  - commands: ['shell-exec explorer']
+    bindings: ['lwin+n']
+  - commands: ['shell-exec devenv']
+    bindings: ['lwin+v']
+
+  # WINDOW MANAGEMENT
+  - commands: ['close']
+    bindings: ['lwin+e']
+  - commands: ['toggle-fullscreen']
+    bindings: ['lwin+f']
+  - commands: ['toggle-fullscreen']
+    bindings: ['lwin+m']
+  - commands: ['toggle-floating --centered']
+    bindings: ['lwin+t']
+  - commands: ['toggle-tiling-direction']
+    bindings: ['lwin+s']
+
+  # FOCUS MOVEMENT (SUPER+H/J/K/L)
+  - commands: ['focus --direction left']
+    bindings: ['lwin+h', 'lwin+left']
+  - commands: ['focus --direction right']
+    bindings: ['lwin+l', 'lwin+right']
+  - commands: ['focus --direction up']
+    bindings: ['lwin+k', 'lwin+up']
+  - commands: ['focus --direction down']
+    bindings: ['lwin+j', 'lwin+down']
+
+  # WINDOW RESIZING (SUPER+SHIFT+H/J/K/L)
+  - commands: ['resize --width -100px']
+    bindings: ['lwin+shift+h']
+  - commands: ['resize --width +100px']
+    bindings: ['lwin+shift+l']
+  - commands: ['resize --height +100px']
+    bindings: ['lwin+shift+j']
+  - commands: ['resize --height -100px']
+    bindings: ['lwin+shift+k']
+
+  # WINDOW SWAPPING (SUPER+ALT+H/J/K/L)
+  - commands: ['move --direction left']
+    bindings: ['lwin+alt+h']
+  - commands: ['move --direction right']
+    bindings: ['lwin+alt+l']
+  - commands: ['move --direction up']
+    bindings: ['lwin+alt+k']
+  - commands: ['move --direction down']
+    bindings: ['lwin+alt+j']
+
+  # SLEEP
+  - commands: ['shell-exec rundll32.exe powrprof.dll,SetSuspendState 0,1,0']
+    bindings: ['lwin+ctrl+s']
+
+  # SYSTEM ACTIONS
+  - commands: ['wm-reload-config']
+    bindings: ['lwin+ctrl+r']
+  # Restart zebar, workaround for zebar#287/#288 stale systray icons
+  - commands: ['shell-exec %userprofile%/.glzr/zebar/dev/assets/scripts/RestartZebar.ahk']
+    bindings: ['lwin+ctrl+b']
+  - commands: ['close']
+    bindings: ['lwin+shift+e']
+  - commands: ['wm-redraw']
+    bindings: ['lwin+shift+w']
+  - commands: ['wm-exit']
+    bindings: ['lwin+shift+q']
+
+  # WORKSPACE SWITCHING (SUPER+1-0)
+  - commands: ['focus --workspace 1']
+    bindings: ['lwin+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['lwin+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['lwin+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['lwin+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['lwin+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['lwin+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['lwin+7']
+  - commands: ['focus --workspace 8']
+    bindings: ['lwin+8']
+  - commands: ['focus --workspace 9']
+    bindings: ['lwin+9']
+  - commands: ['focus --workspace 10']
+    bindings: ['lwin+0']
+
+  # MOVE WINDOW TO WORKSPACE (SUPER+CTRL+1-0)
+  - commands: ['move --workspace 1']
+    bindings: ['lwin+ctrl+1']
+  - commands: ['move --workspace 2']
+    bindings: ['lwin+ctrl+2']
+  - commands: ['move --workspace 3']
+    bindings: ['lwin+ctrl+3']
+  - commands: ['move --workspace 4']
+    bindings: ['lwin+ctrl+4']
+  - commands: ['move --workspace 5']
+    bindings: ['lwin+ctrl+5']
+  - commands: ['move --workspace 6']
+    bindings: ['lwin+ctrl+6']
+  - commands: ['move --workspace 7']
+    bindings: ['lwin+ctrl+7']
+  - commands: ['move --workspace 8']
+    bindings: ['lwin+ctrl+8']
+  - commands: ['move --workspace 9']
+    bindings: ['lwin+ctrl+9']
+  - commands: ['move --workspace 10']
+    bindings: ['lwin+ctrl+0']
+
+  # WORKSPACE CYCLING (SUPER+TAB)
+  - commands: ['focus --next-active-workspace']
+    bindings: ['lwin+tab']
+  - commands: ['focus --prev-active-workspace']
+    bindings: ['lwin+shift+tab']
+  - commands: ['focus --recent-workspace']
+    bindings: ['lwin+d']
+
+  # RESIZE MODE (SUPER+R)
+  - commands: ['wm-enable-binding-mode --name resize']
+    bindings: ['lwin+r']
+
+  # ADDITIONAL BINDINGS
+  - commands: ['wm-toggle-pause']
+    bindings: ['lwin+shift+p']
+  - commands: ['wm-cycle-focus']
+    bindings: ['lwin+space']

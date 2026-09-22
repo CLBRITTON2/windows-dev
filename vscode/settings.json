@@ -103,6 +103,10 @@
       "source.organizeImports": "explicit"
     }
   },
+  "editor.inlayHints.enabled": "offUnlessPressed",
+  "go.inlayHints.assignVariableTypes": true,
+  "go.inlayHints.parameterNames": true,
+  "go.inlayHints.rangeVariableTypes": true,
   "chat.viewSessions.enabled": false,
   "workbench.secondarySideBar.defaultVisibility": "hidden",
   "workbench.colorTheme": "Rosé Pine",

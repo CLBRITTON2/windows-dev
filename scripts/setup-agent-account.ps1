@@ -9,7 +9,7 @@
   The account gets Modify on ~/dev only. Its own profile stays private and yours stays opaque to it (no
   listing, no reading .ssh, .aws, .claude, browser data). Every .git directory under ~/dev is denied write, so
   add, commit, checkout, and every other ref or index mutation fail for the account while you keep full access.
-  This repo's dotfile link targets and install.ps1 are denied write too, because they execute as you or
+  This repo's dotfile link targets and setup-configs.ps1 are denied write too, because they execute as you or
   elevated. The E: drive is denied outright.
 
   Then runs scripts/agent-bootstrap.ps1 as the account (runas prompts for the password it just set, once, and
@@ -44,14 +44,17 @@ $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .g
     Select-Object -ExpandProperty FullName |
     Where-Object { $_ -ne "$devRoot\agents\.git" }
 
-# Linked into the owner's home by install.ps1 and run as the owner, or run elevated during setup. They sit under
+# Linked into the owner's home by setup-configs.ps1 and run as the owner, or run elevated during setup. They sit under
 # the ~/dev grant, so the write bits have to come back off explicitly.
 $ownerExecFiles = @(
     "$repo\powershell\Microsoft.PowerShell_profile.ps1"
     "$repo\wezterm\.wezterm.lua"
-    "$repo\glazewm\config.yaml"
+    "$repo\glazewm\config_laptop.yaml"
+    "$repo\glazewm\config_kinesis.yaml"
+    "$repo\glazewm\config_desktop.yaml"
+    "$repo\glazewm\winkey-fix.ahk"
     "$repo\vscode\settings.json"
-    "$repo\install.ps1"
+    "$repo\setup-configs.ps1"
 )
 
 # /C keeps going past WSL-made symlinks (a .venv lib64), which icacls cannot enumerate and otherwise exits 1920 on.
@@ -70,7 +73,7 @@ foreach ($f in $ownerExecFiles) {
 foreach ($d in $denyDrives) { $aclSteps.Add(@($d, '/deny', "${account}:(OI)(CI)(F)")) }
 
 # Everything the agent needs in its own home. It reads the repo through the ~/dev grant, so these are the same
-# targets install.ps1 makes for you, minus the ones only a human uses.
+# targets setup-configs.ps1 makes for you, minus the ones only a human uses.
 $agentLinks = [System.Collections.Generic.List[pscustomobject]]::new()
 $agentLinks.Add([pscustomobject]@{
         Leaf   = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'

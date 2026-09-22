@@ -80,7 +80,7 @@
 
     const ZITI_MENU_WIDTH = 380;
 
-    // Below this logical width the centre section has no room, so the date moves in beside the app list.
+    // At or below this logical width the centre section has no room, so the date moves in beside the app list.
     const NARROW_SCREEN_WIDTH = 1920;
 
     async function openZitiMenu(buttonEl) {
@@ -199,7 +199,7 @@
       network: { type: "network" },
       glazewm: { type: "glazewm" },
       cpu: { type: "cpu", refreshInterval: 1000 },
-      date: { type: "date", formatting: "EEE d MMM yyyy, t" },
+      date: { type: "date", formatting: "EEE d MMM yyyy, HH:mm" },
       battery: { type: "battery" },
       memory: { type: "memory", refreshInterval: 1000 },
       weather: { type: "weather", ...geo },
@@ -224,7 +224,7 @@
           .then((monitor) => {
             const scale = monitor?.scaleFactor ?? window.devicePixelRatio;
             const width = (monitor?.size.width ?? screen.width * scale) / scale;
-            setNarrowScreen(width < NARROW_SCREEN_WIDTH);
+            setNarrowScreen(width <= NARROW_SCREEN_WIDTH);
           })
           .catch((err) => console.warn("monitor width lookup failed", { err }));
       }, []);

@@ -33,6 +33,13 @@ Set-PSReadLineOption -Colors @{
     Variable           = "`e[38;2;196;167;231m"   # Iris
 }
 
+# ── PATH ──
+# Winget shims are not on PATH by default on this machine.
+$env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\eza-community.eza_Microsoft.Winget.Source_8wekyb3d8bbwe"
+# Prepended so mingw64 gcc/gdb shadow any other toolchain.
+$env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
+
 # ── fzf ──
 # Importing PSFzf costs ~300ms, so defer it to the first idle tick after the prompt is up. The action
 # runs in its own scope (hence -Global) and its errors never reach the console (hence the catch).
