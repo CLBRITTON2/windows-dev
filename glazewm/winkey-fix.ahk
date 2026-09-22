@@ -36,10 +36,9 @@ ExitWhenGlazeWMGone() {
 {
     global g_WinDownAt, g_WinChord
     SetTimer(WatchWinChord, 0)
-    ; Safe to re-fire LWin from inside an LWin hotkey: Send defaults to level 0
-    ; and a hotkey only triggers on input above its own level, so this cannot recurse.
+    ; Ctrl+Esc rather than a sent LWin: on a layout that binds lwin, GlazeWM's hook swallows the sent LWin too.
     if (!g_WinChord && (A_TickCount - g_WinDownAt) < 300)
-        Send "{LWin}"
+        Send "^{Esc}"
 }
 
 WatchWinChord() {
