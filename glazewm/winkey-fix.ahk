@@ -10,7 +10,6 @@
 ; binds lwin, config_kinesis.yaml and config_desktop.yaml bind rwin.
 
 global g_WinDownAt := 0
-global g_WinChord := false
 
 ; GlazeWM starts this script, so exit with it rather than being killed by an image-name taskkill that would take
 ; every other AutoHotkey script down too.
@@ -24,41 +23,19 @@ ExitWhenGlazeWMGone() {
 ~LWin::
 ~RWin::
 {
-    global g_WinDownAt, g_WinChord
+    global g_WinDownAt
     g_WinDownAt := A_TickCount
-    g_WinChord := false
     Send "{Blind}{vkFF}"
-    SetTimer(WatchWinChord, 10)
 }
 
 ~LWin Up::
 ~RWin Up::
 {
-    global g_WinDownAt, g_WinChord
-    SetTimer(WatchWinChord, 0)
+    global g_WinDownAt
+    ; A_PriorKey ignores script-sent input (the vkFF above), so it names the Win key itself only when nothing else was
+    ; pressed during the hold. Polling physical key state instead misread a lone tap as a chord.
+    winKey := SubStr(A_ThisHotkey, 2, 4)
     ; Ctrl+Esc rather than a sent LWin: on a layout that binds lwin, GlazeWM's hook swallows the sent LWin too.
-    if (!g_WinChord && (A_TickCount - g_WinDownAt) < 300)
+    if (A_PriorKey = winKey && (A_TickCount - g_WinDownAt) < 300)
         Send "^{Esc}"
-}
-
-WatchWinChord() {
-    global g_WinChord
-    if (g_WinChord)
-        return
-    static keys := unset
-    if !IsSet(keys) {
-        keys := []
-        Loop 26
-            keys.Push(Format("vk{:X}", 0x40 + A_Index))
-        Loop 10
-            keys.Push(Format("vk{:X}", 0x30 + A_Index - 1))
-        for k in ["Enter", "Tab", "Space", "Left", "Right", "Up", "Down", "Escape"]
-            keys.Push(k)
-    }
-    for k in keys {
-        if (GetKeyState(k, "P")) {
-            g_WinChord := true
-            return
-        }
-    }
 }
