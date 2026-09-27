@@ -11,7 +11,7 @@
 #>
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('Laptop', 'Kinesis', 'Desktop')]
+    [ValidateSet('Single', 'Dual')]
     [string]$Layout
 )
 

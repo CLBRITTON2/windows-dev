@@ -50,9 +50,8 @@ $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .g
 $ownerExecPaths = @(
     "$repo\powershell\Microsoft.PowerShell_profile.ps1"
     "$repo\wezterm\.wezterm.lua"
-    "$repo\glazewm\config_laptop.yaml"
-    "$repo\glazewm\config_kinesis.yaml"
-    "$repo\glazewm\config_desktop.yaml"
+    "$repo\glazewm\config_single.yaml"
+    "$repo\glazewm\config_dual.yaml"
     "$repo\glazewm\winkey-fix.ahk"
     "$repo\vscode\settings.json"
     "$repo\vscode\keybindings.json"

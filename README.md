@@ -22,7 +22,7 @@ WSL uses my [lazyvim config](https://github.com/CLBRITTON2/lazyvim-config) and t
 Open Windows PowerShell as administrator and run, picking your layout:
 
 ```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Laptop
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Single
 ```
 
 [`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, installs every app in
@@ -40,18 +40,18 @@ Then by hand:
 
 ## Layouts
 
-The layout picks which GlazeWM config gets linked:
+The layout picks which GlazeWM config gets linked. Both bind every shortcut on lwin and rwin, and a lone tap of
+either Win key opens Start.
 
-| Layout | Keyboard | Monitors | Config |
-| --- | --- | --- | --- |
-| `Laptop` | builtin, lwin | 1 | [`config_laptop.yaml`](glazewm/config_laptop.yaml) |
-| `Kinesis` | Kinesis, rwin | 1 | [`config_kinesis.yaml`](glazewm/config_kinesis.yaml) |
-| `Desktop` | rwin | 2 | [`config_desktop.yaml`](glazewm/config_desktop.yaml) |
+| Layout | Monitors | Config |
+| --- | --- | --- |
+| `Single` | 1 | [`config_single.yaml`](glazewm/config_single.yaml) |
+| `Dual` | 2 | [`config_dual.yaml`](glazewm/config_dual.yaml) |
 
-To switch layouts, click the keyboard icon in Zebar and pick one, or run:
+To switch layouts, click the monitors icon in Zebar and pick one, or run:
 
 ```powershell
-.\scripts\switch-layout.ps1 -Layout Kinesis
+.\scripts\switch-layout.ps1 -Layout Dual
 ```
 
 It needs Developer Mode (turned on by `setup-configs.ps1`) or an elevated shell to create the symlink.

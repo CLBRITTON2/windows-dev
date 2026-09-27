@@ -214,17 +214,17 @@ function Test-OwnerExecCoverage([string]$repoRoot, [string[]]$protectedPaths, [s
     return $failures
 }
 
-function Test-LayoutParity([string]$repoRoot) {
-    # The Kinesis layout is the laptop layout on the other Win key, nothing else.
-    $laptopPath = Join-Path $repoRoot 'glazewm\config_laptop.yaml'
-    $kinesisPath = Join-Path $repoRoot 'glazewm\config_kinesis.yaml'
-    $expected = @(Get-Content $laptopPath | ForEach-Object { $_ -replace '\blwin\+', 'rwin+' })
-    $actual = @(Get-Content $kinesisPath)
+function Test-WinKeyParity([string]$repoRoot) {
+    # Every layout binds each Win chord on both keys, so either keyboard works with any layout.
     $failures = @()
-    $lineCount = [Math]::Max($expected.Count, $actual.Count)
-    for ($index = 0; $index -lt $lineCount; $index++) {
-        if ($expected[$index] -cne $actual[$index]) {
-            $failures += "${kinesisPath}:$($index + 1): differs from config_laptop.yaml beyond lwin to rwin"
+    foreach ($config in Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter 'config_*.yaml') {
+        $lines = @(Get-Content $config.FullName)
+        for ($index = 0; $index -lt $lines.Count; $index++) {
+            $lwin = @([regex]::Matches($lines[$index], "'lwin\+([^']+)'") | ForEach-Object { $_.Groups[1].Value })
+            $rwin = @([regex]::Matches($lines[$index], "'rwin\+([^']+)'") | ForEach-Object { $_.Groups[1].Value })
+            if (Compare-Object $lwin $rwin -CaseSensitive) {
+                $failures += "$($config.FullName):$($index + 1): lwin and rwin bindings differ"
+            }
         }
     }
     return $failures
@@ -235,7 +235,7 @@ $failures += Test-JsonSyntax (Get-TrackedFile $RepoRoot '*.json')
 $failures += Test-PowerShellSyntax (Get-TrackedFile $RepoRoot '*.ps1')
 $failures += Test-OwnerExecCoverage $RepoRoot (Get-OwnerExecPath $RepoRoot) `
     ((Get-LinkSource $RepoRoot) + (Get-LaunchedScript $RepoRoot))
-$failures += Test-LayoutParity $RepoRoot
+$failures += Test-WinKeyParity $RepoRoot
 
 foreach ($path in Get-TrackedFile $RepoRoot '*.md') {
     $proseLines = Get-ProseLine $path

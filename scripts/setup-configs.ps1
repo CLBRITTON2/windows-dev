@@ -4,7 +4,7 @@
 param(
     # Passed to switch-layout.ps1, which documents the layouts.
     [Parameter(Mandatory)]
-    [ValidateSet('Laptop', 'Kinesis', 'Desktop')]
+    [ValidateSet('Single', 'Dual')]
     [string]$Layout
 )
 

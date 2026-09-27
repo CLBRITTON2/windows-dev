@@ -137,7 +137,7 @@
       );
     }
 
-    const LAYOUTS = ["Laptop", "Kinesis", "Desktop"];
+    const LAYOUTS = ["Single", "Dual"];
 
     function LayoutSwitcher({ glazewm }) {
       const [expanded, setExpanded] = useState(false);
@@ -173,7 +173,7 @@
 
       return (
         <div className="box" title="Switch GlazeWM layout" onClick={toggle}>
-          <span className="icon layout-icon">󰌌</span>
+          <span className="icon layout-icon">󰍺</span>
           {expanded && LAYOUTS.map((layout) => (
             <button
               className={`layout-option ${layout === current ? "active" : ""}`}

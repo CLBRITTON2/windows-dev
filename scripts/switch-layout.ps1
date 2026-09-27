@@ -8,10 +8,9 @@
   Zebar layout button can run this without a UAC prompt.
 #>
 param(
-    # Picks glazewm/config_<layout>.yaml. Laptop binds lwin (builtin keyboard), Kinesis and Desktop bind rwin,
-    # and Desktop spreads workspaces over two monitors.
+    # Picks glazewm/config_<layout>.yaml. Both bind lwin and rwin, and Dual spreads workspaces over two monitors.
     [Parameter(Mandatory)]
-    [ValidateSet('Laptop', 'Kinesis', 'Desktop')]
+    [ValidateSet('Single', 'Dual')]
     [string]$Layout
 )
 
