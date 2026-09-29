@@ -54,6 +54,9 @@ Link "$HOME\_vsvimrc" "$repo\visualstudio\_vsvimrc" $backupRoot
 Write-Host "WezTerm" -ForegroundColor Magenta
 Link "$HOME\.wezterm.lua" "$repo\wezterm\.wezterm.lua" $backupRoot
 
+Write-Host "intarsia" -ForegroundColor Magenta
+Link "$HOME\.config\intarsia" "$repo\intarsia" $backupRoot
+
 Write-Host "Windows Terminal" -ForegroundColor Magenta
 Link "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" `
      "$repo\windows-terminal\settings.json" $backupRoot

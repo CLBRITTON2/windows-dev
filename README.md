@@ -5,6 +5,7 @@ My Windows setup: a tiling window manager, terminal and editor configs, and a sa
 | What | Tool |
 | --- | --- |
 | Window manager | [GlazeWM](https://github.com/glzr-io/glazewm) |
+| Status bar | [intarsia](https://github.com/CLBRITTON2/intarsia), configured in [`intarsia/`](intarsia/) |
 | Terminal | [WezTerm](https://wezfurlong.org/wezterm/) into WSL, see [WSL configs](#wsl-configs) |
 | App launcher | [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/) |
 | Hide the taskbar | [thide](https://github.com/amnweb/thide) |
@@ -52,13 +53,13 @@ either Win key opens Start.
 | `Single` | 1 | [`config_single.yaml`](glazewm/config_single.yaml) |
 | `Dual` | 2 | [`config_dual.yaml`](glazewm/config_dual.yaml) |
 
-To switch layouts, rerun the config script:
+To switch layouts, click `Single` or `Dual` on the bar, or rerun the config script:
 
 ```powershell
 .\setup-configs.ps1 -Layout Dual
 ```
 
-It needs Developer Mode (turned on by `setup-packages.ps1`) or an elevated shell to create the symlinks.
+Both need Developer Mode (turned on by `setup-packages.ps1`) or an elevated shell to create the symlinks.
 
 Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/` first.
 
