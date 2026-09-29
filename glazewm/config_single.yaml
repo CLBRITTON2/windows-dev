@@ -1,7 +1,7 @@
 general:
   startup_commands:
     - 'focus --workspace 1'
-    - 'shell-exec explorer.exe %USERPROFILE%\dev\intarsia\build\release\intarsia.exe'
+    - 'shell-exec %USERPROFILE%/dev/intarsia/build/release/intarsia.exe'
     - 'shell-exec C:/Program Files/thide/bin/thide.exe'
     # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
     - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'

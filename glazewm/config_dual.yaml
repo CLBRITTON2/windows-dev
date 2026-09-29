@@ -1,7 +1,7 @@
 general:
   startup_commands:
     - 'focus --workspace 1'
-    - 'shell-exec explorer.exe %USERPROFILE%\dev\intarsia\build\release\intarsia.exe'
+    - 'shell-exec %USERPROFILE%/dev/intarsia/build/release/intarsia.exe'
     - 'shell-exec C:/Program Files/thide/bin/thide.exe'
     # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
     - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'
@@ -28,36 +28,36 @@ gaps:
     
 workspaces:
   - name: '1'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '2'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '3'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '4'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '5'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '6'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '7'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '8'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '9'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
   - name: '10'
-    bind_to_monitor: 0
+    bind_to_monitor: 1
 
   - name: '11'
-    bind_to_monitor: 1
+    bind_to_monitor: 0
   - name: '12'
-    bind_to_monitor: 1
+    bind_to_monitor: 0
   - name: '13'
-    bind_to_monitor: 1
+    bind_to_monitor: 0
   - name: '14'
-    bind_to_monitor: 1
+    bind_to_monitor: 0
   - name: '15'
-    bind_to_monitor: 1
+    bind_to_monitor: 0
 
 window_effects:
   focused_window:
