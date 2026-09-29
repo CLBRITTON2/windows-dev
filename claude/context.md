@@ -90,6 +90,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
 - When handing me multiple shell commands to run in sequence, output ONLY a single fenced code block with
   the commands back-to-back. No prose between commands. Put any explanation as a `# ...` comment on the line
   above. Prose belongs before or after the block, never interleaved.
+- Every path in a command handed to me is absolute (scripts, configs, logs, build outputs), so it runs from any
+  directory.
 
 ## Dependencies
 
