@@ -161,6 +161,10 @@
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true
   },
+  "statusLine": {
+    "type": "command",
+    "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/statusline.ps1"
+  },
   "outputStyle": "Terse Engineer",
   "feedbackSurveyRate": 0,
   "feedbackDrafts": "off",
