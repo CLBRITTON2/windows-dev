@@ -17,10 +17,11 @@ return {
     window_manager = "glazewm",
 
     -- The lists show modules by the names defined in modules below, left to right. A name in a list that modules
-    -- does not define, or a module no list shows, is an error. style.css styles a module by its name, as #date.
+    -- does not define, or a module no list or group shows, is an error. style.css styles a module by its name, as
+    -- #date.
     modules_left = { "workspaces", "divider", "apps", "divider_date", "date" },
     modules_center = {},
-    modules_right = { "tray", "layout_single", "layout_dual", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
+    modules_right = { "tray", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
 
     -- A layout replaces the three lists above on a bar whose monitor is at least min_length DIPs long along the bar's
     -- edge (its width for a top or bottom bar, pixels divided by the scale). The last layout a monitor reaches wins, so
@@ -31,13 +32,13 @@ return {
             min_length = 1921,
             modules_left = { "workspaces", "divider", "apps" },
             modules_center = { "date" },
-            modules_right = { "tray", "layout_single", "layout_dual", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
+            modules_right = { "tray", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
         },
     },
 
     -- Each module has a name you choose and a type: clock, window, workspaces, windows, binding_mode,
-    -- tiling_direction, divider, cpu, memory, audio, network, battery, tray, custom or counter. One type can appear
-    -- under several names with different settings, such as a second clock with its own format.
+    -- tiling_direction, divider, cpu, memory, audio, network, battery, tray, custom, counter or group. One type can
+    -- appear under several names with different settings, such as a second clock with its own format.
     --
     -- clock, window, cpu, memory, audio, network, battery, custom and counter take optional on_click, on_right_click,
     -- on_middle_click, on_scroll_up and on_scroll_down actions. { program, arguments... } starts a program: it must be an .exe (absolute, or found on PATH when the
@@ -151,6 +152,14 @@ return {
         -- How it unfolds and how the toggle turns is style.css's. While a tray module shows, the bar receives the
         -- icons in the taskbar's place and passes each on to it, so the taskbar still has them all once the bar exits.
         tray = { type = "tray", icon = "\u{F054}" },
+        -- A group folds its members away behind its icon, and a click on the icon unfolds them after it. It starts
+        -- folded. Each member is a module of its own, with its own style, tooltip and actions, that no list and no
+        -- other group shows, and none is a group. How it unfolds and how the icon turns is style.css's, as for the tray.
+        layout = {
+            type = "group",
+            icon = "\u{F037A}",
+            modules = { "layout_single", "layout_dual" }, -- in the order they unfold
+        },
         -- Links the GlazeWM config for one or two monitors. The command only prints the label, so it runs once an hour.
         -- The click relinks only GlazeWM's config: setup-configs.ps1 would also relink this directory under the bar.
         layout_single = {
@@ -160,7 +169,7 @@ return {
             output = "text",
             classes = {},
             format = "{text}",
-            icon = "\u{F037A}",
+            icon = "",
             interval = 3600,
             tooltip = "Link the single monitor GlazeWM config",
             on_click = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
