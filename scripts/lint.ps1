@@ -168,9 +168,10 @@ function Get-LinkSource([string]$repoRoot) {
 }
 
 function Get-LaunchedScript([string]$repoRoot) {
-    # Scripts the profile and GlazeWM start by path.
+    # Scripts the profile, GlazeWM, and the bar start by path.
     $launchers = @(Join-Path $repoRoot 'powershell\Microsoft.PowerShell_profile.ps1') +
-        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName)
+        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName) +
+        @(Join-Path $repoRoot 'intarsia\config.lua')
     $references = @{
         'windows-dev[\\/]([\w\\/.-]+\.(?:ps1|ahk))' = $repoRoot
     }

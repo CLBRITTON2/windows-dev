@@ -53,6 +53,8 @@ $ownerExecPaths = @(
     "$repo\glazewm\config_single.yaml"
     "$repo\glazewm\config_dual.yaml"
     "$repo\glazewm\winkey-fix.ahk"
+    "$repo\glazewm\switch-layout.ps1"
+    "$repo\glazewm\switch-layout.ps1"
     "$repo\vscode\settings.json"
     "$repo\vscode\keybindings.json"
     "$repo\visualstudio\_vsvimrc"

@@ -161,7 +161,8 @@ return {
             modules = { "layout_single", "layout_dual" }, -- in the order they unfold
         },
         -- Links the GlazeWM config for one or two monitors. The command only prints the label, so it runs once an hour.
-        -- The click relinks only GlazeWM's config: setup-configs.ps1 would also relink this directory under the bar.
+        -- The click runs switch-layout.ps1, which relinks only GlazeWM's config: setup-configs.ps1 would also relink
+        -- this directory under the bar.
         layout_single = {
             type = "custom",
             command = { "C:\\Windows\\System32\\cmd.exe", "/d", "/c", "echo", "Single" },
@@ -171,9 +172,9 @@ return {
             format = "{text}",
             icon = "",
             interval = 3600,
-            tooltip = "Link the single monitor GlazeWM config",
+            tooltip = "Link the single monitor GlazeWM config and gather every workspace onto monitor 0",
             on_click = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
-                         [[$ErrorActionPreference = 'Stop'; New-Item -ItemType SymbolicLink -Force -Path "$HOME\.glzr\glazewm\config.yaml" -Target "$HOME\dev\windows-dev\glazewm\config_single.yaml" | Out-Null; glazewm command wm-reload-config]] },
+                         [[& "$HOME\dev\windows-dev\glazewm\switch-layout.ps1" -Layout Single]] },
         },
         layout_dual = {
             type = "custom",
@@ -184,9 +185,9 @@ return {
             format = "{text}",
             icon = "",
             interval = 3600,
-            tooltip = "Link the dual monitor GlazeWM config",
+            tooltip = "Link the dual monitor GlazeWM config and move each workspace to its bound monitor",
             on_click = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
-                         [[$ErrorActionPreference = 'Stop'; New-Item -ItemType SymbolicLink -Force -Path "$HOME\.glzr\glazewm\config.yaml" -Target "$HOME\dev\windows-dev\glazewm\config_dual.yaml" | Out-Null; glazewm command wm-reload-config]] },
+                         [[& "$HOME\dev\windows-dev\glazewm\switch-layout.ps1" -Layout Dual]] },
         },
         -- A window module shows the focused window's title. Add "title" to a list to show it.
         -- title = {
