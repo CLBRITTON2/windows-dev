@@ -1,7 +1,7 @@
 #Requires -Version 7
 <#
 .SYNOPSIS
-  Prepare the agent account's own home. Runs as the agent, launched by scripts/setup-agent-account.ps1.
+  Prepare the agent account's own home. Runs as the agent, launched by setup-claude.ps1.
 
 .DESCRIPTION
   Junctions <agent home>\dev onto the owner's dev root so the ~/dev paths in the shared settings.json resolve

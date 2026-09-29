@@ -31,12 +31,12 @@ if (-not $elevated) { throw "needs an elevated shell" }
 $account = 'claude'
 $devRoot = "$HOME\dev"
 $denyDrives = @('E:\')
-$repo = Split-Path $PSScriptRoot -Parent
-$bootstrap = "$PSScriptRoot\agent-bootstrap.ps1"
+$repo = $PSScriptRoot
+$bootstrap = "$repo\scripts\agent-bootstrap.ps1"
 $marker = "$devRoot\.agent-bootstrap-complete"
 $backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
 
-. "$PSScriptRoot\dotfile-link.ps1"
+. "$repo\scripts\dotfile-link.ps1"
 
 # Depth 2 reaches ~/dev/<repo>/.git and ~/dev/<org>/<repo>/.git. Submodule .git entries are files and skipped.
 # The agents repo stays writable: /lessons-learned commits context files as the account (push stays with the owner).
@@ -57,10 +57,10 @@ $ownerExecPaths = @(
     "$repo\vscode\keybindings.json"
     "$repo\visualstudio\_vsvimrc"
     "$repo\windows-terminal\settings.json"
-    "$repo\scripts\setup-configs.ps1"
-    "$repo\scripts\switch-layout.ps1"
     "$repo\bootstrap.ps1"
-    "$repo\scripts\setup-agent-account.ps1"
+    "$repo\setup-packages.ps1"
+    "$repo\setup-configs.ps1"
+    "$repo\setup-claude.ps1"
     "$repo\scripts\dotfile-link.ps1"
     "$repo\scripts\update-ziti-repos.ps1"
     "$repo\winget\packages.json"

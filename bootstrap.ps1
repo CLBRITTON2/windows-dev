@@ -1,15 +1,15 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Set up a fresh Windows machine: git, this repo, every app in winget/packages.json, configs, and the agent
-  account.
+  Set up a fresh Windows machine: clone this repo, then run setup-packages.ps1, setup-configs.ps1, and
+  setup-claude.ps1 in that order.
 
 .DESCRIPTION
-  Runs under Windows PowerShell 5.1 because a fresh machine has no pwsh 7 yet, then hands off to pwsh 7 for
-  the setup scripts. Safe to rerun: the clone is skipped when the repo exists and installed apps are not
-  upgraded.
+  Runs under Windows PowerShell 5.1 because a fresh machine has no pwsh 7 yet. setup-packages.ps1 installs it,
+  and the other two run under it. Safe to rerun: the clone is skipped when the repo exists.
 #>
 param(
+    # Passed to setup-configs.ps1, which documents the layouts.
     [Parameter(Mandatory)]
     [ValidateSet('Single', 'Dual')]
     [string]$Layout
@@ -20,85 +20,28 @@ $ErrorActionPreference = 'Stop'
 $repoUrl = 'https://github.com/CLBRITTON2/windows-dev'
 $repo = "$HOME\dev\windows-dev"
 $pwsh = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
-$vcpkgRoot = 'C:\vcpkg'
-$vscodeExtensions = @(
-    'anthropic.claude-code'
-    'golang.go'
-    'ms-vscode.cmake-tools'
-    'ms-vscode.cpp-devtools'
-    'ms-vscode.cpptools'
-    'ms-vscode.cpptools-extension-pack'
-    'ms-vscode.cpptools-themes'
-    'mvllow.rose-pine'
-    'vscodevim.vim'
-)
+# Called by full path: this session's PATH predates the git install.
+$git = "$env:ProgramFiles\Git\cmd\git.exe"
 
-function Assert-ExitCode([string]$step) {
-    if ($LASTEXITCODE -ne 0) { throw "$step failed with exit code $LASTEXITCODE" }
-}
-
-function Update-SessionPath {
-    # winget installs update the registry PATH but not this session's copy.
-    $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
-        [Environment]::GetEnvironmentVariable('Path', 'User')
-}
-
-if (-not (Get-Command git -ErrorAction Ignore)) {
+if (-not (Test-Path $git)) {
     Write-Host "Installing git" -ForegroundColor Cyan
     winget install --id Git.Git --exact --source winget --accept-package-agreements --accept-source-agreements
-    Assert-ExitCode 'winget install Git.Git'
-    Update-SessionPath
+    if ($LASTEXITCODE -ne 0) { throw "winget install Git.Git failed with exit code $LASTEXITCODE" }
 }
 
 if (-not (Test-Path $repo)) {
     Write-Host "Cloning $repoUrl" -ForegroundColor Cyan
-    git clone $repoUrl $repo
-    Assert-ExitCode 'git clone'
+    & $git clone $repoUrl $repo
+    if ($LASTEXITCODE -ne 0) { throw "git clone failed with exit code $LASTEXITCODE" }
 }
 
-# The agent account cannot execute the Store pwsh under WindowsApps, and a present Store build satisfies the import
-# below, so swap it for the MSI build first.
-if (Get-AppxPackage Microsoft.PowerShell) {
-    Write-Host "Removing Store pwsh" -ForegroundColor Cyan
-    Get-AppxPackage Microsoft.PowerShell | Remove-AppxPackage
-}
-if (-not (Test-Path $pwsh)) {
-    Write-Host "Installing pwsh (MSI)" -ForegroundColor Cyan
-    winget install --id Microsoft.PowerShell --exact --source winget --installer-type wix --accept-package-agreements --accept-source-agreements
-    Assert-ExitCode 'winget install Microsoft.PowerShell'
-}
+& "$repo\setup-packages.ps1"
 
-Write-Host "Installing apps" -ForegroundColor Cyan
-# --no-upgrade: upgrading an installed app can fail for reasons unrelated to setup (MSYS2 refuses winget upgrades).
-winget import -i "$repo\winget\packages.json" --no-upgrade --accept-package-agreements --accept-source-agreements
-Assert-ExitCode 'winget import'
-Update-SessionPath
+& $pwsh -NoProfile -File "$repo\setup-configs.ps1" -Layout $Layout
+if ($LASTEXITCODE -ne 0) { throw "setup-configs.ps1 failed with exit code $LASTEXITCODE" }
 
-Write-Host "Installing PSFzf" -ForegroundColor Cyan
-# The profile imports it. PSResourceGet ships with pwsh 7.4+, and installing from pwsh puts it in the pwsh module path.
-& $pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -TrustRepository -ErrorAction Stop }"
-Assert-ExitCode 'Install-PSResource PSFzf'
-
-# The CMake presets expect vcpkg at this path. It is a git checkout, not a winget package.
-if (-not (Test-Path $vcpkgRoot)) {
-    Write-Host "Installing vcpkg" -ForegroundColor Cyan
-    git clone https://github.com/microsoft/vcpkg $vcpkgRoot
-    Assert-ExitCode 'git clone vcpkg'
-    & "$vcpkgRoot\bootstrap-vcpkg.bat" -disableMetrics
-    Assert-ExitCode 'bootstrap-vcpkg.bat'
-}
-
-Write-Host "Installing VS Code extensions" -ForegroundColor Cyan
-foreach ($extension in $vscodeExtensions) {
-    code --install-extension $extension
-    Assert-ExitCode "code --install-extension $extension"
-}
-
-& $pwsh -NoProfile -File "$repo\scripts\setup-configs.ps1" -Layout $Layout
-Assert-ExitCode 'setup-configs.ps1'
-
-& $pwsh -NoProfile -File "$repo\scripts\setup-agent-account.ps1"
-Assert-ExitCode 'setup-agent-account.ps1'
+& $pwsh -NoProfile -File "$repo\setup-claude.ps1"
+if ($LASTEXITCODE -ne 0) { throw "setup-claude.ps1 failed with exit code $LASTEXITCODE" }
 
 Write-Host ""
 Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, thide, VsVim, /login, gh auth login." -ForegroundColor Yellow

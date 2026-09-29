@@ -38,9 +38,8 @@ function Format-Size([long]$bytes) {
 [string]$branch = git --no-optional-locks -C $cwd rev-parse --abbrev-ref HEAD 2>$null
 [System.Text.StringBuilder]$line = [System.Text.StringBuilder]::new()
 
-[void]$line.Append("$esc[32m$cwd$esc[0m ")
-if ($branch) { [void]$line.Append("$esc[33m($branch)$esc[0m ") }
-[void]$line.Append("$esc[90m[$(Get-Date -Format 'ddd MMM dd, HH:mm')]$esc[0m")
+[void]$line.Append("$esc[32m$(Split-Path -Leaf $cwd)$esc[0m ")
+if ($branch) { [void]$line.Append("$esc[33m($branch)$esc[0m") }
 [void]$line.Append("$separator$esc[36m $($status.model.display_name)$esc[0m")
 
 # rate_limits is absent for API-key sessions and until the first response of a subscription session.
