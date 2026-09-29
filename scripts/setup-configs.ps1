@@ -10,8 +10,8 @@ param(
 
 $repo = Split-Path $PSScriptRoot -Parent
 $ErrorActionPreference = 'Stop'
-# Backups go outside the linked directories: Zebar and Claude Code scan their config dirs and would
-# pick up a stale sibling copy.
+# Backups go outside the linked directories: Claude Code scans its config dirs and would pick up a stale
+# sibling copy.
 $backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
 
 . "$repo\scripts\dotfile-link.ps1"
@@ -22,7 +22,8 @@ Write-Host ""
 
 # ── PowerShell ──────────────────────────────────────────────
 Write-Host "PowerShell" -ForegroundColor Magenta
-Link "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1" `
+# MyDocuments follows OneDrive folder redirection, which $HOME\Documents does not.
+Link "$([Environment]::GetFolderPath('MyDocuments'))\PowerShell\Microsoft.PowerShell_profile.ps1" `
      "$repo\powershell\Microsoft.PowerShell_profile.ps1" $backupRoot
 
 # Claude Code is not linked here. It runs only as the agent account, whose ~/.claude is linked by
@@ -55,7 +56,7 @@ Link "$HOME\.wezterm.lua" "$repo\wezterm\.wezterm.lua" $backupRoot
 # ── GlazeWM ──────────────────────────────────────────────────
 Write-Host "GlazeWM" -ForegroundColor Magenta
 & "$PSScriptRoot\switch-layout.ps1" -Layout $Layout
-# Lets a non-elevated shell create symlinks, so the Zebar layout button runs switch-layout.ps1 without UAC.
+# Lets a non-elevated shell create symlinks, so switch-layout.ps1 runs without UAC.
 $devModeKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
 New-Item -Path $devModeKey -Force | Out-Null
 Set-ItemProperty -Path $devModeKey -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord
@@ -64,14 +65,6 @@ Set-ItemProperty -Path $devModeKey -Name AllowDevelopmentWithoutDevLicense -Valu
 $lockPolicy = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System'
 New-Item -Path $lockPolicy -Force | Out-Null
 Set-ItemProperty -Path $lockPolicy -Name DisableLockWorkstation -Value 1 -Type DWord
-
-# ── Zebar ────────────────────────────────────────────────────
-# Assets (icons + scripts) are junctioned
-# Config files are symlinked individually.
-Write-Host "Zebar" -ForegroundColor Magenta
-Link "$HOME\.glzr\zebar\normalize.css"   "$repo\zebar\normalize.css" $backupRoot
-Link "$HOME\.glzr\zebar\settings.json"   "$repo\zebar\settings.json" $backupRoot
-Link "$HOME\.glzr\zebar\dev"             "$repo\zebar\dev"           $backupRoot
 
 # ── Windows Terminal ─────────────────────────────────────────
 Write-Host "Windows Terminal" -ForegroundColor Magenta

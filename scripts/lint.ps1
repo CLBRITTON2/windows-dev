@@ -171,13 +171,11 @@ function Get-LinkSource([string]$repoRoot) {
 }
 
 function Get-LaunchedScript([string]$repoRoot) {
-    # Scripts the profile, GlazeWM, and Zebar start by path. Zebar's dev dir is reached through its ~/.glzr link.
+    # Scripts the profile and GlazeWM start by path.
     $launchers = @(Join-Path $repoRoot 'powershell\Microsoft.PowerShell_profile.ps1') +
-        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName) +
-        @(Get-ChildItem (Join-Path $repoRoot 'zebar\dev') -Filter '*.html' | ForEach-Object FullName)
+        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName)
     $references = @{
         'windows-dev[\\/]([\w\\/.-]+\.(?:ps1|ahk))' = $repoRoot
-        '\.glzr[\\/]zebar[\\/]([\w\\/.-]+\.(?:ps1|ahk))' = Join-Path $repoRoot 'zebar'
     }
     $scripts = @()
     foreach ($launcher in $launchers) {

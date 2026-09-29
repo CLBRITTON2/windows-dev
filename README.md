@@ -1,12 +1,10 @@
 # Windows dev environment
 
-My Windows setup: a tiling window manager, a custom status bar, terminal and editor configs, and a sandboxed
-Claude Code.
+My Windows setup: a tiling window manager, terminal and editor configs, and a sandboxed Claude Code.
 
 | What | Tool |
 | --- | --- |
 | Window manager | [GlazeWM](https://github.com/glzr-io/glazewm) |
-| Status bar | [Zebar](https://github.com/glzr-io/zebar) |
 | Terminal | [WezTerm](https://wezfurlong.org/wezterm/) into WSL, see [WSL configs](#wsl-configs) |
 | App launcher | [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/) |
 | Hide the taskbar | [thide](https://github.com/amnweb/thide) |
@@ -48,7 +46,7 @@ either Win key opens Start.
 | `Single` | 1 | [`config_single.yaml`](glazewm/config_single.yaml) |
 | `Dual` | 2 | [`config_dual.yaml`](glazewm/config_dual.yaml) |
 
-To switch layouts, click the monitors icon in Zebar and pick one, or run:
+To switch layouts, run:
 
 ```powershell
 .\scripts\switch-layout.ps1 -Layout Dual

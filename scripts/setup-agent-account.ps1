@@ -44,7 +44,7 @@ $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .g
     Select-Object -ExpandProperty FullName |
     Where-Object { $_ -ne "$devRoot\agents\.git" }
 
-# Run as the owner (linked by setup-configs.ps1 or launched from the profile, GlazeWM, or Zebar) or run elevated
+# Run as the owner (linked by setup-configs.ps1 or launched from the profile or GlazeWM) or run elevated
 # during setup. They sit under the ~/dev grant, so the write bits have to come back off explicitly. A directory
 # entry covers everything under it.
 $ownerExecPaths = @(
@@ -57,7 +57,6 @@ $ownerExecPaths = @(
     "$repo\vscode\keybindings.json"
     "$repo\visualstudio\_vsvimrc"
     "$repo\windows-terminal\settings.json"
-    "$repo\zebar"
     "$repo\scripts\setup-configs.ps1"
     "$repo\scripts\switch-layout.ps1"
     "$repo\bootstrap.ps1"

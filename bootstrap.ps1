@@ -56,6 +56,18 @@ if (-not (Test-Path $repo)) {
     Assert-ExitCode 'git clone'
 }
 
+# The agent account cannot execute the Store pwsh under WindowsApps, and a present Store build satisfies the import
+# below, so swap it for the MSI build first.
+if (Get-AppxPackage Microsoft.PowerShell) {
+    Write-Host "Removing Store pwsh" -ForegroundColor Cyan
+    Get-AppxPackage Microsoft.PowerShell | Remove-AppxPackage
+}
+if (-not (Test-Path $pwsh)) {
+    Write-Host "Installing pwsh (MSI)" -ForegroundColor Cyan
+    winget install --id Microsoft.PowerShell --exact --source winget --installer-type wix --accept-package-agreements --accept-source-agreements
+    Assert-ExitCode 'winget install Microsoft.PowerShell'
+}
+
 Write-Host "Installing apps" -ForegroundColor Cyan
 # --no-upgrade: upgrading an installed app can fail for reasons unrelated to setup (MSYS2 refuses winget upgrades).
 winget import -i "$repo\winget\packages.json" --no-upgrade --accept-package-agreements --accept-source-agreements

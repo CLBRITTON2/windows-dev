@@ -1,11 +1,9 @@
 general:
   startup_commands:
     - 'focus --workspace 1'
-    - 'shell-exec zebar'
     # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
     - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'
-  shutdown_commands:
-    - 'shell-exec taskkill /IM zebar.exe /F'
+  shutdown_commands: []
   config_reload_commands: []
   focus_follows_cursor: false
   toggle_workspace_on_refocus: true
@@ -19,7 +17,7 @@ gaps:
   scale_with_dpi: true
   inner_gap: '5px'
   outer_gap:
-    top: '54px'
+    top: '5px'
     right: '5px'
     bottom: '5px'
     left: '5px'
@@ -75,7 +73,6 @@ window_behavior:
 window_rules:
   - commands: ['ignore']
     match:
-      - window_process: { equals: 'zebar' }
       - window_process: { equals: 'ZitiDesktopEdge' }
       - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
         window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
@@ -111,7 +108,7 @@ keybindings:
   # APPLICATION LAUNCHES (SUPER key)
   - commands: ['shell-exec pwsh']
     bindings: ['lwin+enter', 'rwin+enter']
-  - commands: ['shell-exec chrome']
+  - commands: ['shell-exec firefox']
     bindings: ['lwin+b', 'rwin+b']
   - commands: ['shell-exec explorer']
     bindings: ['lwin+n', 'rwin+n']
@@ -167,9 +164,6 @@ keybindings:
   # SYSTEM ACTIONS
   - commands: ['wm-reload-config']
     bindings: ['lwin+ctrl+r', 'rwin+ctrl+r']
-  # Restart zebar, workaround for zebar#287/#288 stale systray icons
-  - commands: ['shell-exec %userprofile%/.glzr/zebar/dev/assets/scripts/RestartZebar.ahk']
-    bindings: ['lwin+ctrl+b', 'rwin+ctrl+b']
   - commands: ['close']
     bindings: ['lwin+shift+e', 'rwin+shift+e']
   - commands: ['wm-redraw']
