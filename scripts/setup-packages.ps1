@@ -12,7 +12,7 @@ param()
 
 $ErrorActionPreference = 'Stop'
 
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent
 $pwsh = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
 $vcpkgRoot = 'C:\vcpkg'
 $vscodeExtensions = @(

@@ -130,7 +130,7 @@ function Get-RepoPath([System.Management.Automation.Language.ExpandableStringExp
 }
 
 function Get-OwnerExecPath([string]$repoRoot) {
-    $script = Join-Path $repoRoot 'setup-claude.ps1'
+    $script = Join-Path $repoRoot 'scripts\setup-claude.ps1'
     $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
     $assignment = $ast.Find({
             param($node)
@@ -147,7 +147,7 @@ function Get-OwnerExecPath([string]$repoRoot) {
 }
 
 function Get-LinkSource([string]$repoRoot) {
-    $linkScripts = @(Join-Path $repoRoot 'setup-configs.ps1')
+    $linkScripts = @(Join-Path $repoRoot 'scripts\setup-configs.ps1')
     $sources = @()
     foreach ($script in $linkScripts) {
         $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
@@ -204,7 +204,7 @@ function Test-OwnerExecCoverage([string]$repoRoot, [string[]]$protectedPaths, [s
             $path -eq $_ -or $path.StartsWith("$_\", [StringComparison]::OrdinalIgnoreCase)
         }
         if (-not $covered) {
-            $failures += "${path}: runs as the owner but is not in `$ownerExecPaths in setup-claude.ps1"
+            $failures += "${path}: runs as the owner but is not in `$ownerExecPaths in scripts\setup-claude.ps1"
         }
     }
     return $failures

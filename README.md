@@ -27,12 +27,13 @@ Open Windows PowerShell as administrator and run, picking your layout:
 [`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the three setup
 scripts in order. Each one is safe to rerun on its own:
 
-- [`setup-packages.ps1`](setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
-  [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the VS Code extensions, Developer Mode, and Win+L
-  off.
-- [`setup-configs.ps1`](setup-configs.ps1) `-Layout` (pwsh): links every config and the GlazeWM layout.
-- [`setup-claude.ps1`](setup-claude.ps1) (elevated pwsh): the Claude Code account, its permissions, and its
-  `~/.claude`.
+- [`scripts/setup-packages.ps1`](scripts/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
+  [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the VS Code extensions, Developer Mode, and
+  Win+L off.
+- [`scripts/setup-configs.ps1`](scripts/setup-configs.ps1) `-Layout` (pwsh): links every config and the GlazeWM
+  layout.
+- [`scripts/setup-claude.ps1`](scripts/setup-claude.ps1) (elevated pwsh): the Claude Code account, its
+  permissions, and its `~/.claude`.
 
 Then by hand:
 
@@ -56,10 +57,10 @@ either Win key opens Start.
 To switch layouts, click `Single` or `Dual` on the bar, or rerun the config script:
 
 ```powershell
-.\setup-configs.ps1 -Layout Dual
+.\scripts\setup-configs.ps1 -Layout Dual
 ```
 
-Both need Developer Mode (turned on by `setup-packages.ps1`) or an elevated shell to create the symlinks.
+Both need Developer Mode (turned on by `scripts/setup-packages.ps1`) or an elevated shell to create the symlinks.
 
 Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/` first.
 
@@ -68,7 +69,7 @@ Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/
 Claude Code runs as its own standard Windows account, `claude`. It can edit `~/dev` and nothing else in my
 profile, and it cannot commit, push, or change the scripts and configs that run as me. The `claude` command in
 the PowerShell profile starts a session as that account. Details are in
-[`setup-claude.ps1`](setup-claude.ps1).
+[`scripts/setup-claude.ps1`](scripts/setup-claude.ps1).
 
 - [`claude/context.md`](claude/context.md) holds the working rules. `~/.claude/CLAUDE.md` links to it.
 - [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a

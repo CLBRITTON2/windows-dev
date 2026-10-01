@@ -15,7 +15,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent
 # Backups go outside the linked directories: Claude Code scans its config dirs and would pick up a stale
 # sibling copy.
 $backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"

@@ -31,7 +31,7 @@ if (-not $elevated) { throw "needs an elevated shell" }
 $account = 'claude'
 $devRoot = "$HOME\dev"
 $denyDrives = @('E:\')
-$repo = $PSScriptRoot
+$repo = Split-Path $PSScriptRoot -Parent
 $bootstrap = "$repo\scripts\agent-bootstrap.ps1"
 $marker = "$devRoot\.agent-bootstrap-complete"
 $backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
@@ -60,9 +60,9 @@ $ownerExecPaths = @(
     "$repo\visualstudio\_vsvimrc"
     "$repo\windows-terminal\settings.json"
     "$repo\bootstrap.ps1"
-    "$repo\setup-packages.ps1"
-    "$repo\setup-configs.ps1"
-    "$repo\setup-claude.ps1"
+    "$repo\scripts\setup-packages.ps1"
+    "$repo\scripts\setup-configs.ps1"
+    "$repo\scripts\setup-claude.ps1"
     "$repo\scripts\dotfile-link.ps1"
     "$repo\scripts\update-ziti-repos.ps1"
     "$repo\winget\packages.json"

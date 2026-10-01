@@ -35,12 +35,12 @@ if (-not (Test-Path $repo)) {
     if ($LASTEXITCODE -ne 0) { throw "git clone failed with exit code $LASTEXITCODE" }
 }
 
-& "$repo\setup-packages.ps1"
+& "$repo\scripts\setup-packages.ps1"
 
-& $pwsh -NoProfile -File "$repo\setup-configs.ps1" -Layout $Layout
+& $pwsh -NoProfile -File "$repo\scripts\setup-configs.ps1" -Layout $Layout
 if ($LASTEXITCODE -ne 0) { throw "setup-configs.ps1 failed with exit code $LASTEXITCODE" }
 
-& $pwsh -NoProfile -File "$repo\setup-claude.ps1"
+& $pwsh -NoProfile -File "$repo\scripts\setup-claude.ps1"
 if ($LASTEXITCODE -ne 0) { throw "setup-claude.ps1 failed with exit code $LASTEXITCODE" }
 
 Write-Host ""
