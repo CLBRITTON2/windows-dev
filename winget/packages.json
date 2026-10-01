@@ -13,7 +13,7 @@
 				{ "PackageIdentifier" : "Microsoft.WindowsTerminal" },
 				{ "PackageIdentifier" : "glzr-io.glazewm" },
 				{ "PackageIdentifier" : "AutoHotkey.AutoHotkey" },
-				{ "PackageIdentifier" : "Microsoft.PowerToys" },
+				{ "PackageIdentifier" : "Rustlang.Rustup" },
 				{ "PackageIdentifier" : "DEVCOM.JetBrainsMonoNerdFont" },
 				{ "PackageIdentifier" : "Mozilla.Firefox" },
 				{ "PackageIdentifier" : "Microsoft.VisualStudioCode" },

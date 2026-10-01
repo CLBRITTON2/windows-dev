@@ -189,11 +189,12 @@ function Get-LaunchedScript([string]$repoRoot) {
 
 function Test-OwnerExecCoverage([string]$repoRoot, [string[]]$protectedPaths, [string[]]$ownerRunPaths) {
     # Linked on purpose without a write block: the agent can already edit the code the CMake presets configure, and
-    # the Notepad++ themes hold no executable content.
+    # the Notepad++ themes and the carronade config hold no executable content.
     $exempt = @(
         Join-Path $repoRoot 'cmake\CMakeUserPreset.json'
         Join-Path $repoRoot 'cmake\CMakeUserPresets.json'
         Join-Path $repoRoot 'notepadpp\themes'
+        Join-Path $repoRoot 'carronade\config.toml'
     )
     $failures = @()
     foreach ($path in ($ownerRunPaths | Sort-Object -Unique)) {

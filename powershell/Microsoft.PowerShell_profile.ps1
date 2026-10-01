@@ -35,8 +35,8 @@ Set-PSReadLineOption -Colors @{
 
 # ── PATH ──
 # Winget shims are not on PATH by default on this machine.
-$env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe"
-$env:PATH += ";C:\Users\chris\AppData\Local\Microsoft\WinGet\Packages\eza-community.eza_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$env:PATH += ";$env:LOCALAPPDATA\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe"
+$env:PATH += ";$env:LOCALAPPDATA\Microsoft\WinGet\Packages\eza-community.eza_Microsoft.Winget.Source_8wekyb3d8bbwe"
 # Prepended so mingw64 gcc/gdb shadow any other toolchain.
 $env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
 

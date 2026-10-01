@@ -81,10 +81,7 @@ window_rules:
       - window_process: { equals: 'ZitiDesktopEdge' }
       - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
         window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
-      - window_process: { equals: 'PowerToys' }
-        window_class: { regex: 'HwndWrapper\[PowerToys\.PowerAccent.*?\]' }
-      - window_process: { equals: 'PowerToys' }
-        window_title: { regex: '.*? - Peek' }
+      - window_process: { equals: 'carronade' }
       - window_process: { equals: 'Lively' }
         window_class: { regex: 'HwndWrapper' }
       - window_process: { equals: 'EXCEL' }
@@ -113,6 +110,8 @@ keybindings:
   # APPLICATION LAUNCHES (SUPER key)
   - commands: ['shell-exec pwsh']
     bindings: ['lwin+enter', 'rwin+enter']
+  - commands: ['shell-exec %USERPROFILE%/.cargo/bin/carronade.exe drun']
+    bindings: ['lwin+ctrl+enter', 'rwin+ctrl+enter']
   - commands: ['shell-exec firefox']
     bindings: ['lwin+b', 'rwin+b']
   - commands: ['shell-exec explorer']

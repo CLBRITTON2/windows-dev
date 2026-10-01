@@ -22,54 +22,92 @@
  *   group             a group's box, which holds its toggle and, unfolded, its members, each styled by its own name,
  *                     and whose :hover lights the toggle alone
  *
- * transition is none, or a property, a duration in ms or s and a timing function (linear, ease, ease-in, ease-out,
- * ease-in-out), and transform is none or rotate(<n>deg). Only a tray or a group takes them.
+ * border takes none, or a width, solid and a color, for every side at once or one side as border-right. box-shadow
+ * is none or a comma list of inset shadows (x, y, blur, optional spread, color), the first drawn on top. Both apply to
+ * every box and box-shadow to every .item too.
+ *
+ * transition is none, or a comma list of a property, a duration in ms or s and a timing function (linear, ease,
+ * ease-in, ease-out, ease-in-out). A module's box fades its background into its :hover, and an .item its background
+ * and color into its :hover or a new state such as .focused. Only a tray or a group takes width, an .icon's transform
+ * (none or rotate(<n>deg)) and its transition.
+ *
+ * A module's margin sits outside its box: across the bar it shortens the box, and its border with it.
  *
  * Lengths are px. padding and margin take one length, or two: above and below, then left and right. A more specific
  * selector wins, and a later rule wins a tie, as in any CSS.
  */
 
+/*
+ * Every color is set here, and the rules below only use these names. A color's last number is its opacity, from 0
+ * (invisible) to 1 (solid).
+ */
 :root {
-    --foreground: #e0def4;
-    --muted: #908caa;
-    --faint: rgba(224, 222, 244, 0.14);
-    --background: rgba(25, 23, 36, 0.9);
-    --background-alt: #1f1d2e;
-    --border: rgba(110, 106, 134, 0.25);
-    --hover: rgba(64, 61, 82, 0.8);
-    --black: #191724;
+    /* Text, and the dimmer text of empty workspaces and of the layouts not in use. */
+    --text: #e0def4;
+    --dim: #908caa;
+
+    /*
+     * The tint over the frosted glass behind each section, and behind tooltips and menus. backdrop-filter's
+     * brightness() below darkens the glass by more than half, so a light desktop keeps its color through it while the text stays
+     * readable. Raise the opacity toward 1 to hide more of the desktop.
+     */
+    --glass: rgba(14, 12, 22, 0.5);
+    --popup: rgba(14, 12, 22, 0.62);
+
+    /* Light on the glass: its bright top edge, its other edges, and the sheen falling from its top. */
+    --shine: rgba(255, 255, 255, 0.55);
+    --edge: rgba(255, 255, 255, 0.2);
+    --sheen: rgba(255, 255, 255, 0.16);
+
+    /* Behind whatever the cursor is on, and behind the focused window's icon and the binding mode. */
+    --hover: rgba(255, 255, 255, 0.1);
+    --selected: rgba(224, 222, 244, 0.14);
+
+    /* The focused workspace: its glass and its text. */
+    --accent: rgba(235, 188, 186, 0.85);
+    --accent-text: #191724;
+
+    /* Icons, and the colors of a low battery and of an alert. */
     --cyan: #9ccfd8;
     --magenta: #c4a7e7;
-    --red: #eb6f92;
     --rose: #ebbcba;
     --gold: #f6c177;
+    --red: #eb6f92;
 }
 
 * {
     font-family: "JetBrainsMono Nerd Font";
     font-size: 15px;
-    color: var(--foreground);
+    color: var(--text);
 }
 
+/* Lit from above: the bright edge on top, the sheen just under it, and the dimmer edge on the other sides. */
 section {
     margin: 5px;
     padding: 4px;
-    background: var(--background);
-    border: 1px solid var(--border);
+    background: var(--glass);
+    backdrop-filter: blur brightness(0.38) saturate(1.8);
+    border: 1px solid var(--edge);
+    border-top: 1px solid var(--shine);
     border-radius: 14px;
+    box-shadow: inset 0 1px 0 var(--sheen), inset 0 14px 16px -8px var(--sheen);
 }
 
 tooltip {
     padding: 6px;
-    background: var(--background-alt);
-    border: 1px solid var(--border);
+    background: var(--popup);
+    backdrop-filter: blur brightness(0.38) saturate(1.8);
+    border: 1px solid var(--edge);
+    border-top: 1px solid var(--shine);
     border-radius: 12px;
 }
 
 menu {
     padding: 8px;
-    background: var(--background-alt);
-    border: 1px solid var(--muted);
+    background: var(--popup);
+    backdrop-filter: blur brightness(0.38) saturate(1.8);
+    border: 1px solid var(--edge);
+    border-top: 1px solid var(--shine);
     border-radius: 14px;
     max-width: 560px;
     max-height: 420px;
@@ -78,7 +116,7 @@ menu {
 menu .scrollbar {
     width: 4px;
     margin: 4px 3px;
-    background: var(--muted);
+    background: var(--dim);
     border-radius: 2px;
 }
 
@@ -104,6 +142,7 @@ menu .item.active {
 .module {
     padding: 0 9px;
     border-radius: 10px;
+    transition: background 150ms ease;
 }
 
 /* Propo keeps icon glyphs at their natural width, the plain Nerd Font squeezes them into one cell. */
@@ -121,8 +160,10 @@ clock:hover, cpu:hover, memory:hover, audio:hover, network:hover, battery:hover,
     background: var(--hover);
 }
 
+/* The workspaces' margin sets them 5px before the line that opens the apps. */
 #workspaces {
     padding: 0 1px;
+    margin: 0 4px;
 }
 
 /* A one-character name is a circle: its 9px glyph plus 7px each side matches its line's height plus 2px each side. */
@@ -132,53 +173,72 @@ clock:hover, cpu:hover, memory:hover, audio:hover, network:hover, battery:hover,
     border-radius: 999px;
 }
 
+/* Each item fades into its hover and into a new state, as the focus moves from one workspace to the next. */
+.item {
+    transition: background 150ms ease, color 150ms ease;
+}
+
 /* The workspace or window under the cursor. The focused workspace's own rule is more specific, so it keeps its colors. */
 .item:hover {
-    color: var(--foreground);
+    color: var(--text);
     background: var(--hover);
 }
 
-/* Magenta continues the icons' cycle after the date's cyan. */
+/* Tinted glass, lit along its top edge. */
 #workspaces .item.focused {
-    color: var(--black);
-    background: var(--magenta);
+    color: var(--accent-text);
+    background: var(--accent);
     font-weight: bold;
+    box-shadow: inset 0 1px 0 var(--shine);
 }
 
 #workspaces .item.empty {
-    color: var(--muted);
+    color: var(--dim);
 }
 
-/* Every divider. A type alone ranks below .module, so .module is added to win its padding. */
-divider.module {
-    width: 1px;
-    height: 60%;
-    padding: 0 9px;
-    color: var(--border);
+
+/*
+ * Window icons draw at the icon's font-size. The margin across the bar cuts the lines beside them to their height.
+ * With the items' 3px padding and 1.5px margin, the icons sit 13px from each line, as the last number does, and as far
+ * from the section's edge as the first number.
+ */
+#apps, #apps_left {
+    padding: 0 8.5px;
+    margin: 5px 0;
+    border-left: 1px solid var(--shine);
+    /* Square, or the radius bends the line into an arc. */
+    border-radius: 0;
 }
 
-/* Window icons draw at the icon's font-size. */
-#apps {
-    padding: 0 4.5px;
+/* The apps where the date follows them, with a line between. */
+#apps_left {
+    border-right: 1px solid var(--shine);
 }
 
-#apps .item {
+#apps .item, #apps_left .item {
     padding: 3px;
     margin: 0 1.5px;
     border-radius: 6px;
 }
 
-#apps .item.focused {
-    background: var(--faint);
+#apps .item.focused, #apps_left .item.focused {
+    background: var(--selected);
+}
+
+/* As the workspaces' margin does, this sets the date 13px from the line before it, and as far from the section's edge as
+   the first number. */
+#date {
+    margin: 0 4px;
 }
 
 /*
- * Tray icons, and the toggle's chevron after them, draw at the icon's font-size. A tray takes two transitions: its
- * width as it unfolds, and its icon's transform, turning to the .expanded rotation while unfolded.
+ * Tray icons, and the toggle's chevron after them, draw at the icon's font-size. A tray's own list replaces the
+ * module's, so it names the background fade again beside its width as it unfolds. Its icon turns to the .expanded
+ * rotation while unfolded.
  */
 #tray {
     padding: 0 3px;
-    transition: width 400ms ease-out;
+    transition: width 400ms ease-out, background 150ms ease;
 }
 
 #tray .icon {
@@ -204,7 +264,7 @@ divider.module {
 
 /* The layout group unfolds its members as the tray does. Its icon keeps its orientation, so it takes no transform. */
 #layout {
-    transition: width 400ms ease-out;
+    transition: width 400ms ease-out, background 150ms ease;
 }
 
 #layout:hover {
@@ -212,7 +272,7 @@ divider.module {
 }
 
 #layout_single, #layout_dual {
-    color: var(--muted);
+    color: var(--dim);
 }
 
 #layout_single:hover, #layout_dual:hover {
@@ -225,7 +285,7 @@ divider.module {
 
 #mode .item {
     color: var(--magenta);
-    background: var(--faint);
+    background: var(--selected);
     font-weight: bold;
     padding: 2px 8px;
     margin: 0 1px;

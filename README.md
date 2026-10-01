@@ -7,7 +7,7 @@ My Windows setup: a tiling window manager, terminal and editor configs, and a sa
 | Window manager | [GlazeWM](https://github.com/glzr-io/glazewm) |
 | Status bar | [intarsia](https://github.com/CLBRITTON2/intarsia), configured in [`intarsia/`](intarsia/) |
 | Terminal | [WezTerm](https://wezfurlong.org/wezterm/) into WSL, see [WSL configs](#wsl-configs) |
-| App launcher | [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/) |
+| App launcher | [carronade](https://github.com/CLBRITTON2/carronade), configured in [`carronade/`](carronade/) |
 | Hide the taskbar | [thide](https://github.com/amnweb/thide) |
 | Visual Studio 2022 | VsVim 2022 (VS keeps ctrl+c, ctrl+f, ctrl+v, VsVim gets everything else) |
 
@@ -39,6 +39,8 @@ Then by hand:
 
 - Install [Ziti Desktop Edge](https://github.com/openziti/desktop-edge-win/releases) and
   [thide](https://github.com/amnweb/thide/releases) (not on winget).
+- Clone [carronade](https://github.com/CLBRITTON2/carronade) to `~\dev\carronade` and run
+  `cargo install --path ~\dev\carronade`.
 - Install the VsVim 2022 extension from Visual Studio's Extensions menu.
 - Reboot if WSL was just installed.
 - Run `claude`, then `/login`.
