@@ -158,12 +158,12 @@
       }
     ]
   },
-  "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true
-  },
   "statusLine": {
     "type": "command",
     "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/statusline.ps1"
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true
   },
   "outputStyle": "Terse Engineer",
   "feedbackSurveyRate": 0,
@@ -173,5 +173,6 @@
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "theme": "dark",
-  "switchModelsOnFlag": false
+  "switchModelsOnFlag": false,
+  "autoCompactWindow": 200000
 }

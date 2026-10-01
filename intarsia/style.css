@@ -103,9 +103,10 @@ clock:hover, cpu:hover, memory:hover, audio:hover, network:hover, battery:hover,
     background: var(--hover);
 }
 
+/* Magenta continues the icons' cycle after the date's cyan. */
 #workspaces .item.focused {
     color: var(--black);
-    background: var(--cyan);
+    background: var(--magenta);
     font-weight: bold;
 }
 
@@ -171,10 +172,6 @@ divider.module {
     transition: width 400ms ease-out;
 }
 
-#layout .icon {
-    color: var(--cyan);
-}
-
 #layout:hover {
     background: var(--hover);
 }
@@ -200,17 +197,20 @@ divider.module {
     border-radius: 999px;
 }
 
-/* Icons cycle rose, magenta, cyan from left to right: date, tray, tiling, net, cpu, memory, volume, mic, battery. */
-#date .icon, #net .icon, #volume .icon {
-    color: var(--rose);
+/*
+ * Icons cycle cyan, magenta, rose from right to left: battery, mic, volume, memory, cpu, net, tiling, layout, tray,
+ * date. Every module with an icon takes the next color, so a new one goes in its place in the cycle.
+ */
+#battery .icon, #memory .icon, #tiling .icon, #date .icon {
+    color: var(--cyan);
 }
 
-#tray .icon, #cpu .icon, #mic .icon {
+#mic .icon, #cpu .icon, #layout .icon {
     color: var(--magenta);
 }
 
-#tiling .icon, #memory .icon, #battery .icon {
-    color: var(--cyan);
+#volume .icon, #net .icon, #tray .icon {
+    color: var(--rose);
 }
 
 #battery.warning .icon {
