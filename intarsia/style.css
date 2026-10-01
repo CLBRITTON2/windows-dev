@@ -5,7 +5,11 @@
  *   *                 the bar-wide font-family, font-size and color, which every module inherits
  *   section           the box behind each section of modules (left, center, right)
  *   tooltip           the box shown while the cursor rests on a module
- *   .module           every module's box, or one type (clock, cpu, workspaces...) or one module by its name (#date)
+ *   menu              the box a menu action opens, and menu .item its entries, with .active for the entry its command
+ *                     marks active and :hover for the one under the cursor or picked with the arrow keys. Its
+ *                     max-width cuts each entry with an ellipsis, and past its max-height the entries scroll, with
+ *                     menu .scrollbar the thumb beside them (width, background, border-radius and margin)
+ *   .module          every module's box, or one type (clock, cpu, workspaces...) or one module by its name (#date)
  *   .alert            a module's text while it needs attention, such as a failed command
  *   .warning          a battery running low, and .critical nearly empty: its text, or its icon as #battery.warning .icon,
  *                     which take color only
@@ -62,6 +66,37 @@ tooltip {
     border-radius: 12px;
 }
 
+menu {
+    padding: 8px;
+    background: var(--background-alt);
+    border: 1px solid var(--muted);
+    border-radius: 14px;
+    max-width: 560px;
+    max-height: 420px;
+}
+
+menu .scrollbar {
+    width: 4px;
+    margin: 4px 3px;
+    background: var(--muted);
+    border-radius: 2px;
+}
+
+menu .item {
+    padding: 5px 8px;
+    border-radius: 8px;
+}
+
+menu .item:hover {
+    background: var(--hover);
+}
+
+/* The ziti menu marks its section headers active. */
+menu .item.active {
+    color: var(--magenta);
+    font-weight: bold;
+}
+
 /*
  * Every module's content sits 9px inside its box along the bar, so any two neighbours are 18px apart. A module of
  * items takes what its first and last items' padding and margin leave of the 9px.
@@ -82,7 +117,7 @@ tooltip {
     color: var(--red);
 }
 
-clock:hover, cpu:hover, memory:hover, audio:hover, network:hover, battery:hover, tiling_direction:hover {
+clock:hover, cpu:hover, memory:hover, audio:hover, network:hover, battery:hover, tiling_direction:hover, #ziti:hover {
     background: var(--hover);
 }
 
@@ -198,18 +233,18 @@ divider.module {
 }
 
 /*
- * Icons cycle cyan, magenta, rose from right to left: battery, mic, volume, memory, cpu, net, tiling, layout, tray,
- * date. Every module with an icon takes the next color, so a new one goes in its place in the cycle.
+ * Icons cycle cyan, magenta, rose from right to left: battery, mic, volume, memory, cpu, net, tiling, layout, ziti,
+ * tray, date. Every module with an icon takes the next color, so a new one goes in its place in the cycle.
  */
-#battery .icon, #memory .icon, #tiling .icon, #date .icon {
+#battery .icon, #memory .icon, #tiling .icon, #tray .icon {
     color: var(--cyan);
 }
 
-#mic .icon, #cpu .icon, #layout .icon {
+#mic .icon, #cpu .icon, #layout .icon, #date .icon {
     color: var(--magenta);
 }
 
-#volume .icon, #net .icon, #tray .icon {
+#volume .icon, #net .icon, #ziti .icon {
     color: var(--rose);
 }
 

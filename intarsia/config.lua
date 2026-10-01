@@ -21,7 +21,7 @@ return {
     -- #date.
     modules_left = { "workspaces", "divider", "apps", "divider_date", "date" },
     modules_center = {},
-    modules_right = { "tray", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
+    modules_right = { "tray", "ziti", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
 
     -- A layout replaces the three lists above on a bar whose monitor is at least min_length DIPs long along the bar's
     -- edge (its width for a top or bottom bar, pixels divided by the scale). The last layout a monitor reaches wins, so
@@ -32,7 +32,7 @@ return {
             min_length = 1921,
             modules_left = { "workspaces", "divider", "apps" },
             modules_center = { "date" },
-            modules_right = { "tray", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
+            modules_right = { "tray", "ziti", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
         },
     },
 
@@ -44,7 +44,11 @@ return {
     -- on_middle_click, on_scroll_up and on_scroll_down actions. { program, arguments... } starts a program: it must be an .exe (absolute, or found on PATH when the
     -- config loads), and it starts without a shell, so arguments reach it exactly as written.
     -- { window_manager = "focus --next-workspace" } sends the window manager a command in its own syntax instead,
-    -- without starting a process (glazewm only).
+    -- without starting a process (glazewm only). { menu = { command = {...}, timeout = 5, on_select = {...} } } opens a
+    -- menu of what command prints, as {"items":[{"id":"work","text":"Work","active":true,"tooltip":"..."}]} with
+    -- active and tooltip optional and {"separator":true} a blank line between entries. An entry's tooltip shows under
+    -- it while the cursor rests on it, and picking an entry runs on_select with the entry's id as its last argument.
+    -- An id may not start with - or /.
     --
     -- They also take an optional tooltip: a second format for the same value, shown while the cursor rests on the
     -- module. The workspaces module shows why the window manager is disconnected, with no key needed.
@@ -152,6 +156,27 @@ return {
         -- How it unfolds and how the toggle turns is style.css's. While a tray module shows, the bar receives the
         -- icons in the taskbar's place and passes each on to it, so the taskbar still has them all once the bar exits.
         tray = { type = "tray", icon = "\u{F054}" },
+        -- Open OpenZiti and NetFoundry PRs and issues: the count, each section's count in the tooltip, and a click opens
+        -- a menu of them, where picking one opens its page and a section's header opens its search. Each count also
+        -- writes the menu to a file, so opening it only reads that. GitHub allows 10 unauthenticated searches a minute,
+        -- and each count takes three.
+        ziti = {
+            type = "custom",
+            command = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-Command",
+                        [[& "$HOME\dev\windows-dev\intarsia\ziti-github.ps1"]] },
+            run = "interval",
+            timeout = 45,
+            output = "json",
+            classes = {},
+            format = "{text}",
+            icon = "\u{F02A4}",
+            interval = 120,
+            on_click = { menu = {
+                command = { "C:\\Windows\\System32\\cmd.exe", "/d", "/c", "type", [[%LOCALAPPDATA%\intarsia\ziti-menu.json]] },
+                timeout = 5,
+                on_select = { "C:\\Windows\\explorer.exe" },
+            } },
+        },
         -- A group folds its members away behind its icon, and a click on the icon unfolds them after it. It starts
         -- folded. Each member is a module of its own, with its own style, tooltip and actions, that no list and no
         -- other group shows, and none is a group. How it unfolds and how the icon turns is style.css's, as for the tray.
@@ -166,6 +191,7 @@ return {
         layout_single = {
             type = "custom",
             command = { "C:\\Windows\\System32\\cmd.exe", "/d", "/c", "echo", "Single" },
+            run = "interval",
             timeout = 5,
             output = "text",
             classes = {},
@@ -179,6 +205,7 @@ return {
         layout_dual = {
             type = "custom",
             command = { "C:\\Windows\\System32\\cmd.exe", "/d", "/c", "echo", "Dual" },
+            run = "interval",
             timeout = 5,
             output = "text",
             classes = {},
@@ -196,9 +223,11 @@ return {
         --     tooltip = "{title}", -- the whole title
         -- },
         --
-        -- A custom module runs its command every interval and shows what it printed. The command follows the same
-        -- rules as on_click, runs with no window, and is killed with everything it started after timeout seconds.
-        -- output = "text" shows the first line. output = "json" reads one object, { "text": "...", "tooltip": "...",
+        -- A custom module runs its command and shows what it printed. The command follows the same rules as
+        -- on_click and runs with no window. run = "interval" runs it every interval and kills it with everything it
+        -- started after timeout seconds. run = "continuous" takes no timeout: the command keeps running, each line it
+        -- prints replaces the shown value, and when it exits its exit code shows as an alert and it starts again
+        -- interval seconds later. output = "text" shows the first line. output = "json" reads one object, { "text": "...", "tooltip": "...",
         -- "alert": true, "class": "..." }, where only text is required, tooltip may span lines, alert draws the text
         -- in the module's .alert color, and class draws it in the color style.css gives that class, as
         -- #weather.rain. A class must be one the module's classes list, and style.css may style only those.
@@ -208,6 +237,7 @@ return {
         --     type = "custom",
         --     -- Absolute, so another curl.exe earlier on PATH (such as MSYS2's) is never picked instead.
         --     command = { "C:\\Windows\\System32\\curl.exe", "--silent", "--fail", "https://wttr.in/?format=%c%t" },
+        --     run = "interval",
         --     timeout = 10,
         --     output = "text",
         --     classes = {}, -- the classes a JSON output may name
