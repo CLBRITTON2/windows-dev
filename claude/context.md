@@ -75,6 +75,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
   command or a one-line commit message to use, then stop.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually
   uncommitted. Never guess whether I already committed an earlier change.
+- Run `git status` in the same turn before saying anything about what is committed or pending, including "next is
+  the commit" or "still uncommitted". I commit between turns without saying so.
 - Reading is fine: run `git --no-pager diff`, `git log`, `git show`, or `git status` to inspect when you
   need to.
 - Never add a `Co-Authored-By:` trailer to commit messages or PR descriptions, and never suggest one. No
