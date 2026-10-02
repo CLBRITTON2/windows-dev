@@ -47,3 +47,4 @@ cache = true
 [files]
 roots = ['~\dev']
 cache = true
+terminal = 'pwsh'
