@@ -1,5 +1,6 @@
 # ── Prompt ──
 function prompt {
+    if ($PWD.Provider.Name -eq 'FileSystem') { [Environment]::CurrentDirectory = $PWD.ProviderPath }
     $time = Get-Date -Format "HH:mm"
     $user = $env:USERNAME
     $path = $(Get-Location).Path
