@@ -6,7 +6,7 @@ general:
     # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
     - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'
     # Hidden, so the restore report and any watch error go to the logs. watch starts whatever restore exits with.
-    - 'shell-exec --hide-window C:/Program Files/PowerShell/7/pwsh.exe -NoProfile -Command & $HOME/.cargo/bin/rallypoint.exe restore *> $env:TEMP/rallypoint-restore.log; & $HOME/.cargo/bin/rallypoint.exe watch *> $env:TEMP/rallypoint-watch.log'
+    - 'shell-exec --hide-window C:/Program Files/PowerShell/7/pwsh.exe -NoProfile -Command [Console]::OutputEncoding = [Text.UTF8Encoding]::new(); & $HOME/.cargo/bin/rallypoint.exe restore *> $env:TEMP/rallypoint-restore.log; & $HOME/.cargo/bin/rallypoint.exe watch *> $env:TEMP/rallypoint-watch.log'
   shutdown_commands:
     # No /F: each bar handles WM_CLOSE and releases its strip of the work area.
     - 'shell-exec taskkill /IM intarsia.exe'
