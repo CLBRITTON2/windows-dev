@@ -38,6 +38,7 @@ padding = "0.5em"
 radius = "1.5em"
 color = "#ffffff"
 selected = "#ffffff2e"
+highlight = "#60cdff"
 icon = "3em"
 gap = "0.5em"
 
