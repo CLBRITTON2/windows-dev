@@ -5,6 +5,8 @@ general:
     - 'shell-exec C:/Program Files/thide/bin/thide.exe'
     # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
     - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'
+    # Hidden, so the restore report and any watch error go to the logs. watch starts whatever restore exits with.
+    - 'shell-exec --hide-window C:/Program Files/PowerShell/7/pwsh.exe -NoProfile -Command & $HOME/.cargo/bin/rallypoint.exe restore *> $env:TEMP/rallypoint-restore.log; & $HOME/.cargo/bin/rallypoint.exe watch *> $env:TEMP/rallypoint-watch.log'
   shutdown_commands:
     # No /F: each bar handles WM_CLOSE and releases its strip of the work area.
     - 'shell-exec taskkill /IM intarsia.exe'
@@ -164,6 +166,10 @@ keybindings:
   # SLEEP
   - commands: ['shell-exec C:\Windows\System32\rundll32.exe powrprof.dll,SetSuspendState 0,1,0']
     bindings: ['lwin+ctrl+s', 'rwin+ctrl+s']
+
+  # SESSION RESTORE (SUPER+ALT+R), in a pwsh window that stays open to show the report
+  - commands: ['shell-exec C:/Program Files/PowerShell/7/pwsh.exe -NoExit -NoProfile -Command & $HOME/.cargo/bin/rallypoint.exe restore']
+    bindings: ['lwin+alt+r', 'rwin+alt+r']
 
   # SYSTEM ACTIONS
   - commands: ['wm-reload-config']
