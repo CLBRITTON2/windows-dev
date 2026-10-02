@@ -41,7 +41,7 @@ selected = "#ffffff2e"
 icon = "3em"
 gap = "0.5em"
 
-[drun]
+[apps]
 cache = true
 
 [files]
