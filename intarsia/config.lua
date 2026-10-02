@@ -1,5 +1,5 @@
 -- intarsia reads this from %USERPROFILE%\.config\intarsia\config.lua. Every key is required. How the bar looks lives in
--- style.css beside it.
+-- style.conf beside it.
 return {
     bar = {
         edge = "top", -- top, bottom, left or right
@@ -17,8 +17,8 @@ return {
     window_manager = "glazewm",
 
     -- The lists show modules by the names defined in modules below, left to right. A name in a list that modules
-    -- does not define, or a module no list or group shows, is an error. style.css styles a module by its name, as
-    -- #date.
+    -- does not define, or a module no list or group shows, is an error. style.conf styles a module in a block
+    -- named after it, as date.
     modules_left = { "workspaces", "apps_left", "date" },
     modules_center = {},
     modules_right = { "tray", "ziti", "layout", "mode", "tiling", "net", "cpu", "memory", "volume", "mic", "battery" },
@@ -57,7 +57,7 @@ return {
         workspaces = { type = "workspaces" },
         -- One item per window on the displayed workspace, .focused for the focused one. Click one to focus it.
         apps = { type = "windows" },
-        -- The same, where the date follows it in the left section, so style.css can draw a line between them.
+        -- The same, where the date follows it in the left section, so style.conf can draw a line between them.
         apps_left = { type = "windows" },
         -- One item per active binding mode, nothing while none is active.
         mode = { type = "binding_mode" },
@@ -152,7 +152,7 @@ return {
         },
         -- The notification area: every app's tray icons in the order the apps added them, folded away behind a
         -- toggle showing icon until it is clicked. Click an icon for its app's window, right click it for its menu.
-        -- How it unfolds and how the toggle turns is style.css's. While a tray module shows, the bar receives the
+        -- How it unfolds and how the toggle turns is style.conf's. While a tray module shows, the bar receives the
         -- icons in the taskbar's place and passes each on to it, so the taskbar still has them all once the bar exits.
         tray = { type = "tray", icon = "\u{F054}" },
         -- Open OpenZiti and NetFoundry PRs and issues: the count, each section's count in the tooltip, and a click opens
@@ -178,7 +178,7 @@ return {
         },
         -- A group folds its members away behind its icon, and a click on the icon unfolds them after it. It starts
         -- folded. Each member is a module of its own, with its own style, tooltip and actions, that no list and no
-        -- other group shows, and none is a group. How it unfolds and how the icon turns is style.css's, as for the tray.
+        -- other group shows, and none is a group. How it unfolds and how the icon turns is style.conf's, as for the tray.
         layout = {
             type = "group",
             icon = "\u{F037A}",
@@ -228,8 +228,8 @@ return {
         -- prints replaces the shown value, and when it exits its exit code shows as an alert and it starts again
         -- interval seconds later. output = "text" shows the first line. output = "json" reads one object, { "text": "...", "tooltip": "...",
         -- "alert": true, "class": "..." }, where only text is required, tooltip may span lines, alert draws the text
-        -- in the module's .alert color, and class draws it in the color style.css gives that class, as
-        -- #weather.rain. A class must be one the module's classes list, and style.css may style only those.
+        -- in the module's alert color, and class draws it in the color style.conf gives that class, as
+        -- the rain block in weather. A class must be one the module's classes list, and style.conf may style only those.
         -- Control characters (other than line breaks in a tooltip) fail the run, as does a failed command or an
         -- unlisted class, and each shows its reason as an alert. Add "weather" to a list to show it.
         -- weather = {
