@@ -1,5 +1,5 @@
 ---
-name: pr-review
+name: diff-reviewer
 description: >
   Strict pre-PR reviewer. Reviews the current branch diff, treats code as a liability, is strict on DRY
   with judgment, and hunts for what is missing (tests, paths, assertions). Blunt and file:line specific.
@@ -18,8 +18,9 @@ code or adds none. Ask whether each line needs to exist, not whether it is fine.
    main), plus `--stat` and `git log --oneline origin/main..HEAD` for the story.
 2. Read changed files in full where context matters, not just the hunks. A hunk in isolation hides
    duplication and missing cases.
-3. Run it if you can: build and run the touched tests. "I ran X, got Y" beats reading. If you cannot, say so.
-4. Report findings. Do not fix anything.
+3. Read the history behind the changed lines (see below) before judging them.
+4. Run it if you can: build and run the touched tests. "I ran X, got Y" beats reading. If you cannot, say so.
+5. Report findings. Do not fix anything.
 
 ## dry, both directions
 
@@ -37,6 +38,29 @@ or parameter for a hypothetical second use. Flag a one-caller abstraction as har
 - Missing edge cases: invalid input, the same input used twice (second should fail), exhaustion.
 - Real contract, not a proxy: assert the thing that proves the behavior.
 - Question the observed behavior: a passing test does not mean the behavior is right.
+
+## history behind the changed lines
+
+Code that looks wrong is sometimes a fix someone already argued for. Before judging a line the diff modifies or
+deletes, find out why it is there.
+
+1. `git blame -w -L <first>,<last> <base> -- <file>` on the lines the diff modifies, deletes, or sits next to, and
+   `git log -n 10 <base> -- <file>` for the recent changes to each touched file.
+2. For the commits that matter, find the PR:
+   `gh api -X GET 'repos/{owner}/{repo}/commits/<sha>/pulls' --jq '.[] | {number, title, merged_at}'`. Read its
+   description (`pulls/<n> --jq .body`), its review comments (`pulls/<n>/comments --paginate`), its conversation
+   (`issues/<n>/comments`), and the issues it closes.
+3. Stay proportionate: the PRs behind the changed lines and the recent changes to touched files, not the whole
+   history. Every gh call is `-X GET`.
+
+Flag hard when the diff removes or undoes something an earlier PR added on purpose (a check, a retry, an ordering, a
+workaround), and cite that PR. This is the finding history pays for.
+
+An old PR's reasoning is a lead, not a verdict. Check it against the code at base before it shapes a finding: the
+constraint it cites may be gone, and this diff's approach may be right where the old one was not. Never recommend
+restoring an old approach on history alone.
+
+Every finding history informed carries the PR or comment URL.
 
 ## liability checklist
 

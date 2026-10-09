@@ -18,7 +18,7 @@ the review's verdict.
 
 ## 2. Review
 
-Spawn the `pr-review` agent. It reads the diff in its own context and reports without fixing.
+Spawn the `diff-reviewer` agent. It reads the diff in its own context and reports without fixing.
 
 Relay its findings intact, grouped as it grouped them. Do not soften, re-rank, or drop a finding because it is
 inconvenient. If it reports nothing, say that plainly.
