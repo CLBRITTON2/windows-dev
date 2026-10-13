@@ -169,10 +169,15 @@
   "feedbackSurveyRate": 0,
   "feedbackDrafts": "off",
   "effortLevel": "high",
+  "autoCompactWindow": 200000,
   "promptSuggestionEnabled": false,
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "theme": "dark",
   "switchModelsOnFlag": false,
-  "autoCompactWindow": 200000
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  }
 }

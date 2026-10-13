@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<NotepadPlus modelFileLastModifiedDate="20260612" modelDate="20260525">
+<NotepadPlus modelFileLastModifiedDate="20260827" modelDate="20260525">
     <LexerStyles>
         <LexerType name="actionscript" desc="ActionScript" ext="">
             <WordsStyle name="DEFAULT" styleID="11" fgColor="E0DEF4" bgColor="191724" fontName="" fontStyle="0" fontSize="" />
@@ -1952,7 +1952,7 @@
         <WidgetStyle name="Brace highlight style" styleID="34" fgColor="EBBCBA" bgColor="191724" fontName="" fontStyle="1" fontSize="10" />
         <WidgetStyle name="Bad brace colour" styleID="35" fgColor="EB6F92" bgColor="191724" fontName="" fontStyle="0" fontSize="" />
         <WidgetStyle name="Current line background colour" styleID="0" bgColor="21202E" />
-        <WidgetStyle name="Selected text colour" styleID="0" bgColor="F6C177" fgColor="191724" />
+        <WidgetStyle name="Selected text colour" styleID="0" bgColor="524F67" fgColor="E0DEF4" />
         <WidgetStyle name="Caret colour" styleID="2069" fgColor="E0DEF4" />
         <WidgetStyle name="Edge colour" styleID="0" fgColor="9CCFD8" />
         <WidgetStyle name="Line number margin" styleID="33" fgColor="6E6A86" bgColor="1F1D2E" fontName="" fontStyle="0" fontSize="" />
@@ -1972,15 +1972,15 @@
         <WidgetStyle name="Incremental highlight all" styleID="28" bgColor="C4A7E7" />
         <WidgetStyle name="Tags match highlighting" styleID="27" bgColor="6E6A86" />
         <WidgetStyle name="Tags attribute" styleID="26" bgColor="1F1D2E" />
-        <WidgetStyle name="Active tab focused indicator" styleID="0" fgColor="403D52" />
+        <WidgetStyle name="Active tab focused indicator" styleID="0" fgColor="EBBCBA" />
         <WidgetStyle name="Active tab unfocused indicator" styleID="0" fgColor="21202E" />
         <WidgetStyle name="Active tab text" styleID="0" fgColor="E0DEF4" />
-        <WidgetStyle name="Inactive tabs" styleID="0" fgColor="1F1D2E" bgColor="1F1D2E" />
+        <WidgetStyle name="Inactive tabs" styleID="0" fgColor="908CAA" bgColor="1F1D2E" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="C4A7E7" />
         <WidgetStyle name="Document map" styleID="0" fgColor="1F1D2E" bgColor="191724" />
         <WidgetStyle name="EOL custom color" styleID="0" fgColor="6E6A86" />
         <WidgetStyle name="Non-printing characters custom color" styleID="0" fgColor="EBBCBA" />
-        <WidgetStyle name="Multi-selected text color" styleID="0" bgColor="EA9D34" />
+        <WidgetStyle name="Multi-selected text color" styleID="0" bgColor="524F67" />
         <WidgetStyle name="Multi-edit carets color" styleID="0" fgColor="EBBCBA" />
         <WidgetStyle name="Change History modified" styleID="0" fgColor="EBBCBA" bgColor="EBBCBA" />
         <WidgetStyle name="Change History revert modified" styleID="0" fgColor="9CCFD8" bgColor="9CCFD8" />
