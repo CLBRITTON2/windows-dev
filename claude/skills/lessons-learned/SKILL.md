@@ -26,8 +26,8 @@ write nothing and stop after saying so in one line.
 ## Write
 
 The context file is `~/dev/<path>/CLAUDE.md`, a symlink into `~/dev/agents/context/<path>/CLAUDE.md`. Read and
-edit the target under `~/dev/agents/context` directly, never the symlink: the PreToolUse hook refuses writes
-through a link, and Edit requires the target itself to have been read first. A subdirectory file owns its scope,
+edit the target under `~/dev/agents/context` directly, never the symlink: Edit writes a temp file and renames it
+over the path, which replaces the link with a plain file, and Edit requires the target itself to have been read first. A subdirectory file owns its scope,
 the root file owns the rest, and each fact lives in exactly one file. A root file may list detail files (sibling
 `*.md` in the same context dir, read on demand, each with its own read-when trigger) under `## Detail files`: a
 fact that belongs to one of those topics goes there, not into the root. Keep the file's voice, section order, and
@@ -40,8 +40,10 @@ A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.
 
 ## Commit
 
-Run `pwsh -NoProfile -File ~/dev/agents/scripts/commit-context.ps1` once. Never run git add, commit, or
-push directly, and never finish the job by hand when the script throws.
+Run `pwsh -NoProfile -File ~/dev/agents/scripts/commit-context.ps1 <path>...` once, passing every file this run
+wrote relative to `~/dev/agents` (`context/intarsia/CLAUDE.md`). Other sessions may have uncommitted edits in the
+repo, and only the listed paths are committed. Never run git add, commit, or push directly, and never finish the job
+by hand when the script throws.
 
 Report at most three lines: the files edited, the committed subject or `nothing to commit`, or the thrown
 error verbatim.
