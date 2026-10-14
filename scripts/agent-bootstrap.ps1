@@ -41,6 +41,14 @@ if ((git config --global --get-all safe.directory) -notcontains '*') {
     Write-Host "  git safe.directory = *"
 }
 
+# The owner keeps CLAUDE.md links untracked in every repo, so git status would list them in each one.
+$gitIgnore = "$HOME\.config\git\ignore"
+if (-not (Test-Path $gitIgnore) -or (Get-Content -LiteralPath $gitIgnore) -notcontains 'CLAUDE.md') {
+    New-Item -ItemType Directory -Force -Path (Split-Path $gitIgnore) | Out-Null
+    Add-Content -LiteralPath $gitIgnore -Value 'CLAUDE.md'
+    Write-Host "  git global ignore += CLAUDE.md"
+}
+
 if (-not (Test-Path "$binDir\claude.exe")) {
     Write-Host "  installing Claude Code"
     Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression

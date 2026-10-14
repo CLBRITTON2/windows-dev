@@ -78,6 +78,15 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 	
+	# Bash strips unquoted backslashes, so 'C:\Users\x\out.png' becomes a junk file named 'C:Usersxout.png' in the cwd.
+	if ($unquoted -match '(?<![\w/])[A-Za-z]:\\') {
+		@{
+			decision = "block"
+			reason   = "Write Windows paths with forward slashes (C:/Users/...) or quote them. Bash strips unquoted backslashes."
+		} | ConvertTo-Json -Compress
+		exit 0
+	}
+
 	# Duplicating a stream (2>&1) or discarding it (2>/dev/null) writes no file, so tee is no substitute.
 	if (($unquoted -replace '\d*>&\d+|\d*>\s*/dev/null\b', '') -match '[>]{1,2}\s*\S+') {
 		@{

@@ -9,6 +9,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
   descriptions. Never use a double hyphen as a dash. Never use a semicolon in prose. Rewrite instead: split
   the sentence, or use a comma, parentheses, or a colon. Absolute.
 - English only, in prose and code.
+- In text a maintainer reads (issues, PR bodies, chat drafts, comments), name the code's own identifier, not a
+  paraphrase. Before using a precise term (clamp, floor, race, leak), confirm the code does exactly that.
 - When writing markdown to a file, wrap prose at 120 characters per line. Files only, never chat replies.
 
 ## Code style
@@ -20,6 +22,7 @@ This repo is the source of truth. The rules marked absolute do not bend.
 - No default parameter values. Make every parameter explicit.
 - Write pure functions: modify return values, never input parameters or global state.
 - Single purpose per function. No multi-mode behavior, no flag parameters that switch logic.
+- Plain `if`/`else` that assigns in each branch. Never a ternary, and never assign a value then overwrite it.
 - Keep OOP simple and readable with limited inheritance.
 - All imports at the top of the file.
 - Follow DRY, KISS, YAGNI. Check whether the logic already exists before writing new code.
@@ -34,8 +37,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
   to be this way (the reason, not the mechanism), or a pointer (issue number, URL, spec section, upstream
   bug).
 - Never write a comment that narrates the line, restates a well-named identifier (rename it instead), reads
-  as changelog prose ("added this so builds are faster" is a commit message, not a comment), or decorates
-  with banners and `==== section ====` bars.
+  as changelog prose ("added this so builds are faster", a CI run id, a past failure, "slow on the runner"), or
+  decorates with banners and `==== section ====` bars.
 - Comment the surprising line, not every line. A comment on every line means none of them is worth reading.
 - The test before writing one: can the reader see it from the code? If yes, write nothing. Will it still be
   true and useful in a year to someone with no memory of this edit? If it only makes sense as a note about
@@ -72,7 +75,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
 
 - I run all git mutations myself. Never run a mutating git command (add, commit, branch, push, pull, fetch,
   checkout, reset, rebase, restore, clean, merge, tag) and never ask permission to run one. Hand me the
-  command or a one-line commit message to use, then stop.
+  command or a one-line commit message to use, then stop. The one exception is a commit a skill's own steps
+  run.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually
   uncommitted. Never guess whether I already committed an earlier change.
 - Run `git status` in the same turn before saying anything about what is committed or pending, including "next is

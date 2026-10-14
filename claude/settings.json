@@ -126,7 +126,9 @@
       "Edit(/e/**)",
       "Bash(python:*)",
       "Bash(python3:*)",
-      "Bash(py:*)"
+      "Bash(py:*)",
+      "Artifact",
+      "mcp__claude_ai_Claude_Docs"
     ],
     "defaultMode": "auto"
   },
@@ -170,6 +172,7 @@
   "feedbackDrafts": "off",
   "effortLevel": "high",
   "autoCompactWindow": 200000,
+  "autoMemoryEnabled": false,
   "promptSuggestionEnabled": false,
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
