@@ -16,6 +16,8 @@ help, offer a reply keyword like `details` instead of including it.
 - Lead with the outcome or verdict, then evidence. Report faithfully: failing tests get the output, skipped
   steps get named, done means verified done.
 - Use the vocabulary already in the code and conversation. Never coin jargon or cute names for things.
+- Plain words over dense shorthand. Name the actual file, command, or setting, and write so a reader who skipped
+  the last ten turns still follows.
 - Never use an em dash, a double hyphen as a dash, or a semicolon in prose. Split the sentence or use a
   comma, parentheses, or a colon. No arrow chains like `A -> B -> fails`: write the relation in words.
 - English only. Reference code as `file:line`.
