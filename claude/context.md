@@ -86,7 +86,7 @@ This repo is the source of truth. The rules marked absolute do not bend.
 
 - Primary shell is PowerShell. Use PowerShell syntax when targeting it: `$null`, `$env:VAR`, backtick for
   line continuation. Bash is for one-offs and POSIX scripts.
-- Bash cwd does not persist between calls. Every path argument is absolute, never a `cd`.
+- Every path argument is absolute, never a `cd`. Read another repo with `git -C <path>` and a read-only subcommand.
 - Bash, Write, and Edit constraints are enforced by `claude/hooks/pre-tool-use-hook.ps1` (PreToolUse hook),
   so they are not restated here: read the hook for the full list. Prefer `tee` over redirection and `rg`
   over `find` to avoid the hook rejecting the call.

@@ -15,10 +15,13 @@ if ($json.tool_name -eq "Bash") {
         exit 0
     }
 
+    # Global options before the subcommand, including those whose value is a separate word ('-c x=y', '-C <path>').
+    $gitOptions = '(?:(?:-[cC]|--git-dir|--work-tree|--namespace)\s+\S+\s+|-\S+\s+)*'
+
     # Second layer under the settings.json deny list, which misses forms like 'git -c x=y commit'.
-    # Bare 'git branch' lists and stays allowed, so branch is matched only with a mutating flag.
-    if ($cmd -match '\bgit\s+(-\S+\s+)*(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge|tag)\b' -or
-        $cmd -match '\bgit\s+(-\S+\s+)*branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
+    # Bare 'git branch' and the listing forms of 'git tag' stay allowed, so those match only when they mutate.
+    if ($cmd -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge(?!-base)|tag(?!\s+(-l|--list|--contains|--no-contains|--points-at|--merged|--no-merged)\b))\b" -or
+        $cmd -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
         @{
             decision = "block"
             reason   = "Do not mutate the git repo. Hand the command to the user to run instead."
@@ -26,21 +29,25 @@ if ($json.tool_name -eq "Bash") {
         exit 0
     }
 
-    # cwd does not persist between Bash calls.
+    # A cd carries into every later Bash call, so each command's meaning would depend on call history.
     if ($cmd -match '(^|;|\n|&&|\|\|)\s*cd\s') {
         @{
             decision = "block"
-            reason   = "Do not cd. The working directory does not persist between Bash calls. Pass absolute paths to every command instead."
+            reason   = "Do not cd. Pass absolute paths to every command, and read another repo with 'git -C <path>' and a read-only subcommand."
         } | ConvertTo-Json -Compress
         exit 0
     }
 
-	if ($cmd -match '(^|;|\n)\s*git\s+((?:-C\s+\S+)|(?:.*--git-dir=\S+))') {
-		@{
-			decision = "block"
-			reason   = "Do not use 'git -C <path>' or 'git --git-dir=<path>' patterns. Run git from the repo with absolute paths instead."
-		} | ConvertTo-Json -Compress
-		exit 0
+	# Reading another repo needs -C because cd is blocked, so only read-only subcommands may target one.
+	foreach ($git in [regex]::Matches($cmd, "\bgit\s+(?<options>$gitOptions)(?<subcommand>[\w-]+)")) {
+		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and
+			$git.Groups['subcommand'].Value -cnotmatch '^(status|log|diff|show|blame|rev-parse|merge-base|ls-files|grep|describe|shortlog)$') {
+			@{
+				decision = "block"
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, merge-base, ls-files, grep, describe, shortlog)."
+			} | ConvertTo-Json -Compress
+			exit 0
+		}
 	}
 
 	if ($cmd -match '(^|;|\n)\s*find\s+') {
@@ -60,7 +67,10 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 	
-	if ($cmd -match ';') {
+	# Quoted text is an argument (a sed script, a regex, a pwsh -Command), not chaining or redirection.
+	$unquoted = $cmd -replace '''[^'']*''|"(?:[^"\\]|\\.)*"', '""'
+
+	if ($unquoted -match ';') {
 		@{
 			decision = "block"
 			reason   = "Do not chain multiple commands with ';'. Run one command at a time."
@@ -68,7 +78,8 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 	
-	if ($cmd -match '[>]{1,2}\s*\S+') {
+	# Duplicating a stream (2>&1) or discarding it (2>/dev/null) writes no file, so tee is no substitute.
+	if (($unquoted -replace '\d*>&\d+|\d*>\s*/dev/null\b', '') -match '[>]{1,2}\s*\S+') {
 		@{
 			decision = "block"
 			reason   = "Use tee instead of > or >> for output redirection."
