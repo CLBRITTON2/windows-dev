@@ -111,7 +111,9 @@ function Test-Dash([string]$path, [ProseLine[]]$proseLines) {
         if ($proseLine.Text -match "`u{2014}") {
             $failures += "${path}:$($proseLine.Number): em dash, rewrite with a comma, colon, parentheses, or two sentences"
         }
-        if ($proseLine.Text -match '\s--\s|\w--\w') {
+        # Inline code keeps its literal `--`, such as git's pathspec separator.
+        $textOutsideCode = $proseLine.Text -replace '`[^`]*`', ''
+        if ($textOutsideCode -match '\s--\s|\w--\w') {
             $failures += "${path}:$($proseLine.Number): double hyphen used as a dash"
         }
     }
