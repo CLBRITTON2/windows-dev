@@ -68,7 +68,7 @@ return {
         tiling = { type = "tiling_direction", horizontal = "⇄", vertical = "⇵" },
         date = {
             type = "clock",
-            format = "{time:%a %d %b %Y, %H:%M}", -- {time} takes a std::format chrono spec
+            format = "{time:%a %d %b, %H:%M}", -- {time} takes a std::format chrono spec
             tooltip = "{time:%A %d %B %Y, %H:%M:%S}",
             icon = "\u{F1441}",
             interval = 60, -- seconds between redraws, aligned to the clock

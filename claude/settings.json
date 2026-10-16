@@ -171,16 +171,17 @@
   "feedbackSurveyRate": 0,
   "feedbackDrafts": "off",
   "effortLevel": "high",
-  "autoCompactWindow": 200000,
-  "autoMemoryEnabled": false,
-  "promptSuggestionEnabled": false,
-  "autoUpdatesChannel": "latest",
-  "tui": "fullscreen",
-  "theme": "dark",
-  "switchModelsOnFlag": false,
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
-  }
+  },
+  "autoCompactWindow": 200000,
+  "promptSuggestionEnabled": false,
+  "autoUpdatesChannel": "latest",
+  "tui": "fullscreen",
+  "autoMemoryEnabled": false,
+  "theme": "dark",
+  "switchModelsOnFlag": false,
+  "skipWorkflowUsageWarning": true
 }
