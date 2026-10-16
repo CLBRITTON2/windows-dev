@@ -7,9 +7,10 @@ return {
   font = wezterm.font("JetBrainsMono NF"),
   font_size = 16,
   window_decorations = "RESIZE",
+  enable_tab_bar = false,
   color_scheme = "rose-pine",
   window_background_opacity = 0.9,
-  window_padding = { left = 8, right = 8, top = 8, bottom = 8 },
+  window_padding = { left = 16, right = 16, top = 16, bottom = 16 },
   default_cursor_style = "BlinkingBlock",
   keys = {
     -- Make Ctrl+Enter distinguishable from Enter by sending a CSI-u sequence

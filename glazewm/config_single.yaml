@@ -110,7 +110,7 @@ binding_modes:
 
 keybindings:
   # APPLICATION LAUNCHES (SUPER key)
-  - commands: ['shell-exec pwsh']
+  - commands: ['shell-exec wt -w new -f']
     bindings: ['lwin+enter', 'rwin+enter']
   - commands: ['shell-exec %USERPROFILE%/.cargo/bin/carronade.exe apps']
     bindings: ['lwin+ctrl+enter', 'rwin+ctrl+enter']

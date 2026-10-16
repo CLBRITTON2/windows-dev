@@ -4,7 +4,13 @@ function prompt {
     $time = Get-Date -Format "HH:mm"
     $user = $env:USERNAME
     $path = $(Get-Location).Path
-    "┌[$time]-[$user]-[$path]`n└─> "
+    if (([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        $role = "-`e[38;2;235;111;146m[admin]`e[0m"
+    }
+    else {
+        $role = ''
+    }
+    "┌[$time]-[$user]$role-[$path]`n└─> "
 }
 
 # ── PSReadLine ──
