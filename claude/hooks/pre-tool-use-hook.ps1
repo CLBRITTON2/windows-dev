@@ -17,10 +17,11 @@ if ($json.tool_name -eq "Bash") {
 
     # Global options before the subcommand, including those whose value is a separate word ('-c x=y', '-C <path>').
     $gitOptions = '(?:(?:-[cC]|--git-dir|--work-tree|--namespace)\s+\S+\s+|-\S+\s+)*'
+    $tagListing = '\s+(-l|--list|--contains|--no-contains|--points-at|--merged|--no-merged)\b'
 
     # Second layer under the settings.json deny list, which misses forms like 'git -c x=y commit'.
     # Bare 'git branch' and the listing forms of 'git tag' stay allowed, so those match only when they mutate.
-    if ($cmd -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge(?!-base)|tag(?!\s+(-l|--list|--contains|--no-contains|--points-at|--merged|--no-merged)\b))\b" -or
+    if ($cmd -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge(?!-base)|tag(?!$tagListing))\b" -or
         $cmd -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
         @{
             decision = "block"
@@ -39,12 +40,14 @@ if ($json.tool_name -eq "Bash") {
     }
 
 	# Reading another repo needs -C because cd is blocked, so only read-only subcommands may target one.
-	foreach ($git in [regex]::Matches($cmd, "\bgit\s+(?<options>$gitOptions)(?<subcommand>[\w-]+)")) {
-		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and
-			$git.Groups['subcommand'].Value -cnotmatch '^(status|log|diff|show|blame|rev-parse|merge-base|ls-files|grep|describe|shortlog)$') {
+	foreach ($git in [regex]::Matches($cmd, "\bgit\s+(?<options>$gitOptions)(?<subcommand>[\w-]+)(?<rest>[^\n;&|]*)")) {
+		$subcommand = $git.Groups['subcommand'].Value
+		$readOnly = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|check-ignore|grep|describe|shortlog)$' -or
+			($subcommand -ceq 'tag' -and $git.Groups['rest'].Value -match "^$tagListing")
+		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $readOnly) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, merge-base, ls-files, grep, describe, shortlog)."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, check-ignore, grep, describe, shortlog, and the listing forms of tag)."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}
@@ -67,17 +70,8 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 	
-	# Quoted text is an argument (a sed script, a regex, a pwsh -Command), not chaining or redirection.
 	$unquoted = $cmd -replace '''[^'']*''|"(?:[^"\\]|\\.)*"', '""'
 
-	if ($unquoted -match ';') {
-		@{
-			decision = "block"
-			reason   = "Do not chain multiple commands with ';'. Run one command at a time."
-		} | ConvertTo-Json -Compress
-		exit 0
-	}
-	
 	# Bash strips unquoted backslashes, so 'C:\Users\x\out.png' becomes a junk file named 'C:Usersxout.png' in the cwd.
 	if ($unquoted -match '(?<![\w/])[A-Za-z]:\\') {
 		@{
@@ -86,15 +80,6 @@ if ($json.tool_name -eq "Bash") {
 		} | ConvertTo-Json -Compress
 		exit 0
 	}
-
-	# Duplicating a stream (2>&1) or discarding it (2>/dev/null) writes no file, so tee is no substitute.
-	if (($unquoted -replace '\d*>&\d+|\d*>\s*/dev/null\b', '') -match '[>]{1,2}\s*\S+') {
-		@{
-			decision = "block"
-			reason   = "Use tee instead of > or >> for output redirection."
-		} | ConvertTo-Json -Compress
-		exit 0
-    }
 	
 	# Allow the specific PR inline-comments endpoint (the block below is too broad for this case)
 	if ($cmd -match '^gh\s+api\s+-X\s+GET\s+repos/[^/\s]+/[^/\s]+/pulls/\d+/comments\b') {

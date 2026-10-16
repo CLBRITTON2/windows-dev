@@ -92,8 +92,9 @@ This repo is the source of truth. The rules marked absolute do not bend.
   line continuation. Bash is for one-offs and POSIX scripts.
 - Every path argument is absolute, never a `cd`. Read another repo with `git -C <path>` and a read-only subcommand.
 - Bash, Write, and Edit constraints are enforced by `claude/hooks/pre-tool-use-hook.ps1` (PreToolUse hook),
-  so they are not restated here: read the hook for the full list. Prefer `tee` over redirection and `rg`
-  over `find` to avoid the hook rejecting the call.
+  so they are not restated here: read the hook for the full list. Prefer `rg` over `find` to avoid the hook
+  rejecting the call.
+- Python is on the settings deny list. Script in PowerShell or node instead.
 - Prefer `rg` for searching code and files. Prefer non-interactive flags over interactive prompts.
 - When handing me multiple shell commands to run in sequence, output ONLY a single fenced code block with
   the commands back-to-back. No prose between commands. Put any explanation as a `# ...` comment on the line
