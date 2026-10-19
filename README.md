@@ -77,3 +77,5 @@ the PowerShell profile starts a session as that account. Details are in
 - [`claude/context.md`](claude/context.md) holds the working rules. `~/.claude/CLAUDE.md` links to it.
 - [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a
   guardrail, not a security boundary. The account is the boundary.
+- [`scripts/clean-agent.ps1`](scripts/clean-agent.ps1), run as the account, deletes the scratch folders of
+  sessions idle for a week.
