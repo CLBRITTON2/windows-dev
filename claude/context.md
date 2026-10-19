@@ -30,8 +30,9 @@ This repo is the source of truth. The rules marked absolute do not bend.
 
 ## Comments and docs
 
-- A comment earns its place only by saying something the code cannot. If a reader gets it from the code,
-  delete it. English only, terse, one line where you can.
+- Default to writing no comment, especially in tests. Add one only for a case in the next bullet, as one terse line.
+  Never write one that explains a fix, what changed, or how a cause was found: that goes in the commit or the agents
+  repo. Leave existing comments alone unless your change makes one wrong, then fix or delete it. English only.
 - Write a comment for: the purpose of a block whose effect is not visible in the code, a non-obvious
   constraint (ideally on the same line as the purpose), a gotcha or landmine, why arbitrary-looking code has
   to be this way (the reason, not the mechanism), or a pointer (issue number, URL, spec section, upstream
