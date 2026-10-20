@@ -78,8 +78,8 @@ This repo is the source of truth. The rules marked absolute do not bend.
 ## Git
 
 - I run all git mutations myself. Never run a mutating git command (add, commit, branch, push, pull, fetch,
-  checkout, reset, rebase, restore, clean, merge, tag) and never ask permission to run one. Hand me the
-  command or a one-line commit message to use, then stop. The exceptions are a commit a skill's own steps
+  checkout, reset, rebase, restore, clean, merge, tag) and never ask permission to run one. Hand over git
+  commands or a commit message only when I ask for one. The exceptions are a commit a skill's own steps
   run and the context file commit under Knowledge upkeep.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually
   uncommitted. Never guess whether I already committed an earlier change.

@@ -1,10 +1,10 @@
 ---
 name: slop-review
 description: >
-  Interactive self/slop-review of the current branch: find what should not ship, apply the no-brainers for veto,
-  then walk the user through every other finding one change site per message and apply each on approval. Changes
-  no git state. Args: the base branch if it is not origin's default branch.
-disable-model-invocation: true
+  Interactive self/slop-review of the current branch: find what should not ship, then walk the user through it chunk
+  by chunk, one change site per message, and apply each change only after its own approval. Changes no git state. Use
+  when the user asks for a chunk by chunk review, a self review, a slop review, or a review pass of their branch.
+  Args: the base branch if it is not origin's default branch.
 ---
 
 Strip what should not ship from the branch. The user sees only judgment calls, one at a time. Never run a git
@@ -37,12 +37,14 @@ Tag every finding with one category (SCOPE, DEAD, DRY, CHURN, HYGIENE, TEST, COM
 
 ## 3. Triage
 
-- No-brainers (an exact duplicate removed, no behavior change, fewer lines): apply them before the first message.
+- Never edit a repo file before the user approves that change, however small. Drafts live in the scratchpad.
 - Code an approved change leaves with no callers: a one-line FYI, no page or approval of its own.
-- Everything else goes through step 4. Order by dependency: a new helper before its callers, code before the edits to
-  existing comments that describe it. A new comment that ships with new code sits in the same diff.
+- Split the diff into chunks by area (app code, CI and scripts, each source or test folder, docs) and walk them in
+  order. Within a chunk, order by dependency: a new helper before its callers, code before the edits to existing
+  comments that describe it. A new comment that ships with new code sits in the same diff.
+- Drop a finding with no concrete gain (a cosmetic move, a rename nobody asked for) instead of presenting it.
 
-First message: the base sha, `--stat`, and the applied no-brainers as one batch the user can veto.
+First message: the base sha, `--stat`, the chunk list, then the first change site of the first chunk.
 
 ## 4. Present
 
@@ -80,11 +82,14 @@ QUESTION        : could other tests use a tls context built from a provided ca?
 - Approved but criticized: iterate on the weak part, then apply once.
 - Conditional approval: meet the condition, then say in one message that it was met and the change applied.
 - Asked "why": one sentence first, detail only on request.
+- Told to match a reference (another repo's tests, upstream): mirror what it does. Do not redesign or extend it.
+- A claim about behavior (what a command deletes, what a probe returns) needs a command output or a source line behind
+  it. Run the check before answering, or label the claim a hypothesis.
+- Propose the smallest change that answers the finding. Offer more only when asked.
 - Record a withdrawn finding with its reason for the final report.
 - Build the touched project after each applied change, per its `CLAUDE.md`.
 
 ## 6. Finish
 
 Run the project's test commands. Report what was applied, what was withdrawn and why, and any verification not run.
-Run `git status` and `git log`, then hand over the `git add` and a one-line `git commit -m` built from what is
-actually uncommitted.
+Hand over no git commands or commit message unless the user asks for one.
