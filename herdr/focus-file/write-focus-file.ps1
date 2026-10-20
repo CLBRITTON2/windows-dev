@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
-Writes the working directory of the focused herdr pane to ~\dev\.herdr-focus.
+Writes the directory the focused herdr pane's Claude session last edited in, or else the pane's working directory, to
+~\dev\.herdr-focus.
 
 .DESCRIPTION
 herdr runs this as the agent account on startup and on every pane focus change. The owner's perusal follows the file
@@ -15,6 +16,7 @@ pane id in its event.
 $ErrorActionPreference = 'Stop'
 
 $focusFile = Join-Path $HOME 'dev\.herdr-focus'
+$editedDirs = Join-Path $env:LOCALAPPDATA 'windows-dev\edited-dirs'
 $mutexTimeoutMs = 10000
 
 function Get-FocusedPaneDirectory {
@@ -27,10 +29,18 @@ function Get-FocusedPaneDirectory {
     if ($focused.Count -ne 1) {
         throw "herdr pane list has $($focused.Count) focused panes, want 1: $output"
     }
-    if (-not $focused[0].cwd) {
-        throw "herdr pane list returned no cwd for focused pane $($focused[0].pane_id): $output"
+    $pane = $focused[0]
+    # record-edited-dir.ps1 writes these, named by the Claude session id herdr reports for the pane.
+    if ($pane.agent_session.value) {
+        $edited = Join-Path $editedDirs $pane.agent_session.value
+        if (Test-Path -LiteralPath $edited -PathType Leaf) {
+            return [System.IO.File]::ReadAllText($edited)
+        }
     }
-    return $focused[0].cwd
+    if (-not $pane.cwd) {
+        throw "herdr pane list returned no cwd for focused pane $($pane.pane_id): $output"
+    }
+    return $pane.cwd
 }
 
 # Replace instead of overwrite, so a reader never sees a half-written path.

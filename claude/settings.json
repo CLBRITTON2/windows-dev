@@ -146,6 +146,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File ~/dev/windows-dev/herdr/focus-file/record-edited-dir.ps1",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "matcher": "",
