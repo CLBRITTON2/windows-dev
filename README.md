@@ -6,9 +6,11 @@ My Windows setup: a tiling window manager, terminal and editor configs, and a sa
 | --- | --- |
 | Window manager | [GlazeWM](https://github.com/glzr-io/glazewm) |
 | Status bar | [intarsia](https://github.com/CLBRITTON2/intarsia), configured in [`intarsia/`](intarsia/) |
-| Terminal | [WezTerm](https://wezfurlong.org/wezterm/) into WSL, see [WSL configs](#wsl-configs) |
+| Terminal | Windows Terminal, [WezTerm](https://wezfurlong.org/wezterm/) for WSL, Claude Code and herdr |
 | App launcher | [carronade](https://github.com/CLBRITTON2/carronade), configured in [`carronade/`](carronade/) |
 | Session restore | [rallypoint](https://github.com/CLBRITTON2/rallypoint), started by the GlazeWM layouts |
+| Agent multiplexer | [herdr](https://herdr.dev), with the [`herdr/focus-file`](herdr/focus-file/) plugin |
+| Diff reviewer | perusal, configured in [`perusal/`](perusal/), started by `pfc` in the profile |
 | Hide the taskbar | [thide](https://github.com/amnweb/thide) |
 | Visual Studio 2022 | VsVim 2022 (VS keeps ctrl+c, ctrl+f, ctrl+v, VsVim gets everything else) |
 
@@ -25,7 +27,7 @@ Open Windows PowerShell as administrator and run, picking your layout:
 & ([scriptblock]::Create((irm -UseBasicParsing https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Single
 ```
 
-[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the three setup
+[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the four setup
 scripts in order. Each one is safe to rerun on its own:
 
 - [`scripts/setup-packages.ps1`](scripts/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
@@ -33,17 +35,19 @@ scripts in order. Each one is safe to rerun on its own:
   Win+L off.
 - [`scripts/setup-configs.ps1`](scripts/setup-configs.ps1) `-Layout` (pwsh): links every config and the GlazeWM
   layout.
+- [`scripts/setup-tools.ps1`](scripts/setup-tools.ps1) (elevated pwsh): the Visual Studio C++ workload, the MSYS2
+  compilers, and carronade, rallypoint, and intarsia built from `~\dev` (cloned when missing).
 - [`scripts/setup-claude.ps1`](scripts/setup-claude.ps1) (elevated pwsh): the Claude Code account, its
-  permissions, and its `~/.claude`.
+  permissions, and its `~/.claude`. Its [`agent-bootstrap.ps1`](scripts/agent-bootstrap.ps1) installs Claude Code
+  and herdr for the account and links the herdr plugin.
 
 Then by hand:
 
 - Install [Ziti Desktop Edge](https://github.com/openziti/desktop-edge-win/releases) and
   [thide](https://github.com/amnweb/thide/releases) (not on winget).
-- Clone [carronade](https://github.com/CLBRITTON2/carronade) to `~\dev\carronade` and run
-  `cargo install --path ~\dev\carronade`. Do the same for [rallypoint](https://github.com/CLBRITTON2/rallypoint).
 - Install the VsVim 2022 extension from Visual Studio's Extensions menu.
-- Reboot if WSL was just installed.
+- Reboot, then install a WSL distro with `wsl --install Ubuntu`.
+- Copy perusal to `~\dev\perusal` (it has no remote) and run `go -C ~\dev\perusal install ./cmd/perusal`.
 - Run `claude`, then `/login`.
 - Run `gh auth login` with a read-only PAT.
 
@@ -77,5 +81,6 @@ the PowerShell profile starts a session as that account. Details are in
 - [`claude/context.md`](claude/context.md) holds the working rules. `~/.claude/CLAUDE.md` links to it.
 - [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a
   guardrail, not a security boundary. The account is the boundary.
+- [`claude/statusline.ps1`](claude/statusline.ps1) draws the status line.
 - [`scripts/clean-agent.ps1`](scripts/clean-agent.ps1), run as the account, deletes the scratch folders of
   sessions idle for a week.
