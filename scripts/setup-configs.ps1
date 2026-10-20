@@ -60,6 +60,9 @@ Link "$HOME\.config\intarsia" "$repo\intarsia" $backupRoot
 Write-Host "carronade" -ForegroundColor Magenta
 Link "$env:APPDATA\carronade\config.toml" "$repo\carronade\config.toml" $backupRoot
 
+Write-Host "perusal" -ForegroundColor Magenta
+Link "$env:APPDATA\perusal\config.json" "$repo\perusal\config.json" $backupRoot
+
 Write-Host "Windows Terminal" -ForegroundColor Magenta
 Link "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json" `
      "$repo\windows-terminal\settings.json" $backupRoot

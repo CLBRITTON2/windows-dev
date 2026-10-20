@@ -67,6 +67,7 @@ $ownerExecPaths = @(
     "$repo\scripts\update-ziti-repos.ps1"
     "$repo\winget\packages.json"
     "$repo\intarsia"
+    "$repo\perusal\config.json"
 )
 
 # Without this the account could rename a parent directory aside and recreate it with its own copy of a denied
