@@ -1,0 +1,13 @@
+id = "windows-dev.focus-file"
+name = "Focus file"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+platforms = ["windows"]
+
+[[startup]]
+command = ["pwsh", "-NoProfile", "-NonInteractive", "-File", "write-focus-file.ps1"]
+
+# A workspace switch also emits pane.focused, so this one hook covers both.
+[[events]]
+on = "pane.focused"
+command = ["pwsh", "-NoProfile", "-NonInteractive", "-File", "write-focus-file.ps1"]
