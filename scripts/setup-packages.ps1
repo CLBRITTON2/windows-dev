@@ -1,8 +1,8 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Install every app in winget/packages.json plus PSFzf, vcpkg, and the VS Code extensions, and set the machine
-  settings the configs rely on.
+  Install every app in winget/packages.json plus PSFzf, vcpkg, the MSYS2 compilers, the VS Code extensions, and the
+  latest carronade, rallypoint, and intarsia releases, and set the machine settings the configs rely on.
 
 .DESCRIPTION
   Runs under Windows PowerShell 5.1 because a fresh machine has no pwsh 7 yet. Safe to rerun: installed apps are
@@ -25,6 +25,23 @@ $vscodeExtensions = @(
     'ms-vscode.cpptools-themes'
     'mvllow.rose-pine'
     'vscodevim.vim'
+)
+# The profile puts mingw64 first on PATH, and cmake/CMakeUserPreset.json builds with its gcc, ninja, pkg-config, and
+# OpenSSL.
+$msysPackages = @(
+    'mingw-w64-x86_64-gcc'
+    'mingw-w64-x86_64-gdb'
+    'mingw-w64-x86_64-ninja'
+    'mingw-w64-x86_64-pkgconf'
+    'mingw-w64-x86_64-openssl'
+)
+# GlazeWM starts each exe from its Dir.
+$releaseTools = @(
+    [pscustomobject]@{ Repo = 'carronade'; Exes = @('carronade.exe'); Dir = "$HOME\.cargo\bin" }
+    [pscustomobject]@{ Repo = 'rallypoint'; Exes = @('rallypoint.exe'); Dir = "$HOME\.cargo\bin" }
+    [pscustomobject]@{
+        Repo = 'intarsia'; Exes = @('intarsia.exe', 'intarsia-cli.exe'); Dir = "$env:LOCALAPPDATA\Programs\intarsia"
+    }
 )
 
 function Assert-ExitCode([string]$step) {
@@ -67,6 +84,27 @@ if (-not (Test-Path $vcpkgRoot)) {
     Assert-ExitCode 'git clone vcpkg'
     & "$vcpkgRoot\bootstrap-vcpkg.bat" -disableMetrics
     Assert-ExitCode 'bootstrap-vcpkg.bat'
+}
+
+Write-Host "Installing MSYS2 packages" -ForegroundColor Cyan
+# A login shell, so the first run initializes the pacman keyring.
+& 'C:\msys64\usr\bin\bash.exe' -lc "pacman -S --needed --noconfirm $($msysPackages -join ' ')"
+Assert-ExitCode 'pacman -S'
+
+Write-Host "Installing carronade, rallypoint, and intarsia releases" -ForegroundColor Cyan
+foreach ($tool in $releaseTools) {
+    if (Test-Path "$($tool.Dir)\$($tool.Exes[0])") { continue }
+    $release = Invoke-RestMethod "https://api.github.com/repos/CLBRITTON2/$($tool.Repo)/releases/latest"
+    $zip = Join-Path $env:TEMP "$($tool.Repo).zip"
+    $unpacked = Join-Path $env:TEMP $tool.Repo
+    Invoke-WebRequest $release.assets[0].browser_download_url -OutFile $zip -UseBasicParsing
+    Expand-Archive $zip $unpacked -Force
+    New-Item -ItemType Directory -Force $tool.Dir | Out-Null
+    foreach ($exe in $tool.Exes) {
+        $found = @(Get-ChildItem $unpacked -Recurse -Filter $exe)
+        if ($found.Count -ne 1) { throw "$($release.assets[0].name) has $($found.Count) copies of $exe, expected 1" }
+        Copy-Item $found[0].FullName $tool.Dir
+    }
 }
 
 Write-Host "Installing VS Code extensions" -ForegroundColor Cyan

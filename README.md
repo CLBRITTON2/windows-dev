@@ -27,16 +27,14 @@ Open Windows PowerShell as administrator and run, picking your layout:
 & ([scriptblock]::Create((irm -UseBasicParsing https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Single
 ```
 
-[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the four setup
+[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the three setup
 scripts in order. Each one is safe to rerun on its own:
 
 - [`scripts/setup-packages.ps1`](scripts/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
-  [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the VS Code extensions, Developer Mode, and
-  Win+L off.
+  [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the MSYS2 compilers, the VS Code extensions, the
+  latest carronade, rallypoint, and intarsia releases, Developer Mode, and Win+L off.
 - [`scripts/setup-configs.ps1`](scripts/setup-configs.ps1) `-Layout` (pwsh): links every config and the GlazeWM
   layout.
-- [`scripts/setup-tools.ps1`](scripts/setup-tools.ps1) (elevated pwsh): the Visual Studio C++ workload, the MSYS2
-  compilers, and carronade, rallypoint, and intarsia built from `~\dev` (cloned when missing).
 - [`scripts/setup-claude.ps1`](scripts/setup-claude.ps1) (elevated pwsh): the Claude Code account, its
   permissions, and its `~/.claude`. Its [`agent-bootstrap.ps1`](scripts/agent-bootstrap.ps1) installs Claude Code
   and herdr for the account and links the herdr plugin.
