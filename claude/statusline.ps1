@@ -3,17 +3,45 @@
 
 $ErrorActionPreference = 'Stop'
 
-# Explicit UTF-8: the default console input encoding is the OEM code page, which mangles non-ASCII paths.
+# Explicit UTF-8 both ways: the default console encoding is the OEM code page, which mangles paths and glyphs.
 $reader = [System.IO.StreamReader]::new([Console]::OpenStandardInput(), [System.Text.UTF8Encoding]::new($false))
 $status = $reader.ReadToEnd() | ConvertFrom-Json
 
 $esc = [char]27
-$separator = "$esc[90m  |$esc[0m"
+
+# Rose Pine as in intarsia/style.conf, in truecolor: the terminal's 16-color scheme maps green and cyan to one foam.
+[string]$base = '191724'
+[string]$text = 'e0def4'
+[string]$subtle = '908caa'
+[string]$rose = 'ebbcba'
+[string]$iris = 'c4a7e7'
+[string]$foam = '9ccfd8'
+[string]$gold = 'f6c177'
+[string]$love = 'eb6f92'
+
+# Nerd Font glyphs: powerline branch, clock, calendar, database, file-text.
+[string]$iconBranch = [char]0xE0A0
+[string]$iconFiveHour = [char]0xF017
+[string]$iconWeek = [char]0xF073
+[string]$iconContext = [char]0xF1C0
+[string]$iconTranscript = [char]0xF15C
+[string]$iconColor = $iris
+
+function Get-Rgb([string]$hex) {
+    [int]$red = [Convert]::ToInt32($hex.Substring(0, 2), 16)
+    [int]$green = [Convert]::ToInt32($hex.Substring(2, 2), 16)
+    [int]$blue = [Convert]::ToInt32($hex.Substring(4, 2), 16)
+    return "$red;$green;$blue"
+}
+
+function Format-Color([string]$hex, [string]$value) {
+    return "$esc[38;2;$(Get-Rgb $hex)m$value$esc[0m"
+}
 
 function Get-PercentColor([double]$percent) {
-    if ($percent -ge 85) { return 31 }
-    if ($percent -ge 60) { return 33 }
-    return 32
+    if ($percent -ge 85) { return $love }
+    if ($percent -ge 60) { return $gold }
+    return $text
 }
 
 function Format-Until([long]$epoch) {
@@ -23,9 +51,9 @@ function Format-Until([long]$epoch) {
     return '{0}m' -f [math]::Floor($seconds / 60)
 }
 
-function Format-Segment([string]$label, [double]$percent, [string]$suffix) {
-    $color = Get-PercentColor $percent
-    return "$separator$esc[90m $label $esc[0m$esc[${color}m$([math]::Floor($percent))%$esc[0m$esc[90m$suffix$esc[0m"
+function Format-Segment([string]$icon, [double]$percent, [string]$suffix) {
+    [string]$value = Format-Color (Get-PercentColor $percent) "$([math]::Floor($percent))%"
+    return "$(Format-Color $iconColor $icon) $value$(Format-Color $subtle $suffix)"
 }
 
 function Format-Size([long]$bytes) {
@@ -34,24 +62,41 @@ function Format-Size([long]$bytes) {
     return "${bytes}B"
 }
 
+# Sums one column of `git diff --numstat`, skipping the "-" it prints for binary files.
+function Measure-NumstatColumn([string[]]$numstat, [int]$column) {
+    [long[]]$counts = @($numstat | ForEach-Object { "$_".Split("`t")[$column] } | Where-Object { $_ -match '^\d+$' })
+    return [long]($counts | Measure-Object -Sum).Sum
+}
+
 [string]$cwd = $status.workspace.current_dir
 [string]$branch = git --no-optional-locks -C $cwd rev-parse --abbrev-ref HEAD 2>$null
-[System.Text.StringBuilder]$line = [System.Text.StringBuilder]::new()
+[System.Collections.Generic.List[string]]$segments = [System.Collections.Generic.List[string]]::new()
 
-[void]$line.Append("$esc[32m$(Split-Path -Leaf $cwd)$esc[0m ")
-if ($branch) { [void]$line.Append("$esc[33m($branch)$esc[0m") }
-[void]$line.Append("$separator$esc[36m $($status.model.display_name)$esc[0m")
+[string]$location = Format-Color $rose (Split-Path -Leaf $cwd)
+if ($branch) {
+    $location += " $(Format-Color $iris "$iconBranch $branch")"
+    # Staged and unstaged edits against HEAD. Untracked files are not counted.
+    [string[]]$numstat = git --no-optional-locks -C $cwd diff HEAD --numstat 2>$null
+    [long]$added = Measure-NumstatColumn $numstat 0
+    [long]$removed = Measure-NumstatColumn $numstat 1
+    if ($added -gt 0 -or $removed -gt 0) {
+        $location += " $(Format-Color $foam "+$added") $(Format-Color $love "-$removed")"
+    }
+}
+$segments.Add($location)
+
+$segments.Add((Format-Color $foam $status.model.display_name))
 
 # rate_limits is absent for API-key sessions and until the first response of a subscription session.
 $fiveHour = $status.rate_limits.five_hour
 if ($null -ne $fiveHour) {
     [string]$until = Format-Until ([long]$fiveHour.resets_at)
-    [string]$suffix = if ($until) { " ($until)" } else { '' }
-    [void]$line.Append((Format-Segment '5h' ([double]$fiveHour.used_percentage) $suffix))
+    if ($until) { [string]$suffix = " $until" } else { [string]$suffix = '' }
+    $segments.Add((Format-Segment $iconFiveHour ([double]$fiveHour.used_percentage) $suffix))
 }
 $sevenDay = $status.rate_limits.seven_day
 if ($null -ne $sevenDay) {
-    [void]$line.Append((Format-Segment 'wk' ([double]$sevenDay.used_percentage) ''))
+    $segments.Add((Format-Segment $iconWeek ([double]$sevenDay.used_percentage) ''))
 }
 
 # Absolute token thresholds, not percentages: every turn resends the whole context, so cost tracks raw size.
@@ -59,17 +104,23 @@ $context = $status.context_window
 if ($null -ne $context.used_percentage) {
     [long]$used = $context.total_input_tokens
     [string]$tokens = '{0}k/{1}k' -f [math]::Floor($used / 1000), [math]::Floor($context.context_window_size / 1000)
-    if ($used -ge 300000) { [void]$line.Append("$separator$esc[1;97;41m  ctx $tokens  /compact or /clear  $esc[0m") }
-    elseif ($used -ge 200000) { [void]$line.Append("$separator$esc[1;33m ctx $tokens getting expensive$esc[0m") }
-    else { [void]$line.Append((Format-Segment 'ctx' ([double]$context.used_percentage) " $tokens")) }
+    if ($used -ge 300000) {
+        $segments.Add("$esc[1;38;2;$(Get-Rgb $base);48;2;$(Get-Rgb $love)m $iconContext $tokens  /compact or /clear $esc[0m")
+    }
+    elseif ($used -ge 200000) { $segments.Add("$esc[1m$(Format-Color $gold "$iconContext $tokens getting expensive")") }
+    else { $segments.Add((Format-Segment $iconContext ([double]$context.used_percentage) " $tokens")) }
 }
 
 # A large transcript means slower resumes and more compaction.
 [string]$transcript = $status.transcript_path
 if ($transcript -and (Test-Path -LiteralPath $transcript)) {
     [long]$bytes = (Get-Item -LiteralPath $transcript).Length
-    [int]$color = if ($bytes -ge 50MB) { 31 } elseif ($bytes -ge 20MB) { 33 } else { 90 }
-    [void]$line.Append("$separator$esc[${color}m tx $(Format-Size $bytes)$esc[0m")
+    if ($bytes -ge 50MB) { [string]$color = $love }
+    elseif ($bytes -ge 20MB) { [string]$color = $gold }
+    else { [string]$color = $subtle }
+    $segments.Add("$(Format-Color $iconColor $iconTranscript) $(Format-Color $color (Format-Size $bytes))")
 }
 
-[Console]::Out.Write($line.ToString())
+$writer = [System.IO.StreamWriter]::new([Console]::OpenStandardOutput(), [System.Text.UTF8Encoding]::new($false))
+$writer.Write($segments -join (Format-Color $subtle '  │  '))
+$writer.Flush()
