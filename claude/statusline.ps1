@@ -10,7 +10,6 @@ $status = $reader.ReadToEnd() | ConvertFrom-Json
 $esc = [char]27
 
 # Rose Pine as in intarsia/style.conf, in truecolor: the terminal's 16-color scheme maps green and cyan to one foam.
-[string]$base = '191724'
 [string]$text = 'e0def4'
 [string]$subtle = '908caa'
 [string]$rose = 'ebbcba'
@@ -68,6 +67,17 @@ function Measure-NumstatColumn([string[]]$numstat, [int]$column) {
     return [long]($counts | Measure-Object -Sum).Sum
 }
 
+# The payload carries only the model's window, so this reads the compact window as Claude Code does: the environment
+# variable over the user settings key. A window saved by /autocompact or set in project settings is not seen here.
+function Get-CompactWindow([long]$modelWindow) {
+    [string]$fromEnvironment = $env:CLAUDE_CODE_AUTO_COMPACT_WINDOW
+    if ($fromEnvironment) { return [math]::Min([long]$fromEnvironment, $modelWindow) }
+    $setting = (Get-Content -Raw -LiteralPath (Join-Path $HOME '.claude/settings.json') | ConvertFrom-Json).autoCompactWindow
+    if ($setting -is [long]) { return [math]::Min($setting, $modelWindow) }
+    # Unset or "auto": Claude Code tunes the window per model, and the payload does not carry it.
+    return $modelWindow
+}
+
 [string]$cwd = $status.workspace.current_dir
 [string]$branch = git --no-optional-locks -C $cwd rev-parse --abbrev-ref HEAD 2>$null
 [System.Collections.Generic.List[string]]$segments = [System.Collections.Generic.List[string]]::new()
@@ -99,16 +109,12 @@ if ($null -ne $sevenDay) {
     $segments.Add((Format-Segment $iconWeek ([double]$sevenDay.used_percentage) ''))
 }
 
-# Absolute token thresholds, not percentages: every turn resends the whole context, so cost tracks raw size.
 $context = $status.context_window
 if ($null -ne $context.used_percentage) {
     [long]$used = $context.total_input_tokens
-    [string]$tokens = '{0}k/{1}k' -f [math]::Floor($used / 1000), [math]::Floor($context.context_window_size / 1000)
-    if ($used -ge 300000) {
-        $segments.Add("$esc[1;38;2;$(Get-Rgb $base);48;2;$(Get-Rgb $love)m $iconContext $tokens  /compact or /clear $esc[0m")
-    }
-    elseif ($used -ge 200000) { $segments.Add("$esc[1m$(Format-Color $gold "$iconContext $tokens getting expensive")") }
-    else { $segments.Add((Format-Segment $iconContext ([double]$context.used_percentage) " $tokens")) }
+    [long]$window = Get-CompactWindow ([long]$context.context_window_size)
+    [string]$tokens = '{0}k/{1}k' -f [math]::Floor($used / 1000), [math]::Floor($window / 1000)
+    $segments.Add((Format-Segment $iconContext (100 * $used / $window) " $tokens"))
 }
 
 # A large transcript means slower resumes and more compaction.

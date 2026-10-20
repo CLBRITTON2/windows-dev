@@ -117,6 +117,7 @@ function ... { Set-Location ..\.. }
 function cdzet { Set-Location '~\dev\openziti\ziti-tunnel-sdk-c' }
 function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
 function udoz-repos { & "~\dev\windows-dev\scripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
+function pfc { perusal follow claude }
 
 # Claude Code runs as its own unprivileged account, see scripts/setup-agent-account.ps1. The agent shares this
 # profile, so the guard keeps its own `claude` resolving to the binary instead of recursing into runas.
@@ -134,6 +135,9 @@ if ($env:USERNAME -ne 'claude') {
         # so the output can be read, since runas cannot pipe it back.
         $command = "claude $($args -join ' ')"
         Start-Process runas -ArgumentList "/user:claude /savecred `"pwsh -NoLogo -NoExit -Command $command`""
+    }
+    function herdr {
+        Start-Process runas -WindowStyle Hidden -ArgumentList "/user:claude /savecred `"wezterm-gui.exe start -- herdr`""
     }
 }
 
