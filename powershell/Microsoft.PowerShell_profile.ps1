@@ -117,7 +117,7 @@ function ... { Set-Location ..\.. }
 function cdzet { Set-Location '~\dev\openziti\ziti-tunnel-sdk-c' }
 function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
 function udoz-repos { & "~\dev\windows-dev\scripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
-function pfc { perusal follow claude }
+function pfc { perusal follow }
 
 # Claude Code runs as its own unprivileged account, see scripts/setup-agent-account.ps1. The agent shares this
 # profile, so the guard keeps its own `claude` resolving to the binary instead of recursing into runas.
