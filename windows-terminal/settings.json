@@ -4,9 +4,8 @@
     "actions": [],
     "copyFormatting": "none",
     "copyOnSelect": true,
-    "launchMode": "focus",
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-    "keybindings": 
+    "keybindings":
     [
         {
             "id": "Terminal.CopyToClipboard",
@@ -21,16 +20,20 @@
             "keys": "alt+shift+d"
         }
     ],
-    "newTabMenu": 
+    "launchMode": "focus",
+    "newTabMenu":
     [
         {
             "type": "remainingProfiles"
         }
     ],
-    "profiles": 
+    "profiles":
     {
-        "defaults": { "padding": "10" },
-        "list": 
+        "defaults":
+        {
+            "padding": "10"
+        },
+        "list":
         [
             {
                 "commandline": "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
@@ -53,7 +56,7 @@
             {
                 "colorScheme": "Ros\u00e9 Pine",
                 "cursorShape": "filledBox",
-                "font": 
+                "font":
                 {
                     "face": "JetBrainsMono Nerd Font"
                 },
@@ -86,10 +89,16 @@
                 "hidden": false,
                 "name": "Ubuntu-26.04",
                 "source": "Microsoft.WSL"
+            },
+            {
+                "guid": "{5fb123f1-af88-5b5c-8953-d14a8def1978}",
+                "hidden": false,
+                "name": "PowerShell 7",
+                "source": "Windows.Terminal.PowershellCore"
             }
         ]
     },
-    "schemes": 
+    "schemes":
     [
         {
             "background": "#191724",
