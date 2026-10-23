@@ -82,11 +82,10 @@ $ownerExecAncestors = $ownerExecPaths |
     Sort-Object -Unique |
     Where-Object { $_ -notin $ownerExecPaths }
 
-# /C keeps going past WSL-made symlinks (a .venv lib64), which icacls cannot enumerate and otherwise exits 1920 on.
 # The .git deny lists write bits explicitly: the simple (W) includes SYNCHRONIZE, which every open requests, so
 # it would block reads too and git would not see the repo. /remove:d first keeps a rerun from stacking ACEs.
 $aclSteps = [System.Collections.Generic.List[string[]]]::new()
-$aclSteps.Add(@($devRoot, '/grant', "${account}:(OI)(CI)(M)", '/T', '/C'))
+$aclSteps.Add(@($devRoot, '/grant', "${account}:(OI)(CI)(M)"))
 foreach ($g in $gitDirs) {
     $aclSteps.Add(@($g, '/remove:d', $account))
     $aclSteps.Add(@($g, '/deny', "${account}:(OI)(CI)(WD,AD,WEA,WA,DE,DC)"))
@@ -119,7 +118,7 @@ foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
     $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
 }
 
-$bootstrapArgs = "pwsh -NoLogo -NoProfile -File `"$bootstrap`" -OwnerDevRoot `"$devRoot`""
+$bootstrapArgs = "`"$env:ProgramFiles\PowerShell\7\pwsh.exe`" -NoLogo -NoProfile -File `"$bootstrap`" -OwnerDevRoot `"$devRoot`""
 
 Write-Host "setup-agent-account" -ForegroundColor Cyan
 Write-Host "  account    : $account (standard user, group Users only)"

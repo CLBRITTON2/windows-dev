@@ -32,7 +32,8 @@ scripts in order. Each one is safe to rerun on its own:
 
 - [`scripts/setup-packages.ps1`](scripts/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
   [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the MSYS2 compilers, the VS Code extensions, the
-  latest carronade, rallypoint, and intarsia releases, Developer Mode, and Win+L off.
+  latest carronade, rallypoint, and intarsia releases, Developer Mode, and the registry access
+  `glazewm/winkey-fix.ahk` needs to hand Win+L to GlazeWM.
 - [`scripts/setup-configs.ps1`](scripts/setup-configs.ps1) `-Layout` (pwsh): links every config and the GlazeWM
   layout.
 - [`scripts/setup-claude.ps1`](scripts/setup-claude.ps1) (elevated pwsh): the Claude Code account, its

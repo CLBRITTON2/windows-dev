@@ -118,8 +118,12 @@ Write-Host "Machine settings" -ForegroundColor Cyan
 $devModeKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
 New-Item -Path $devModeKey -Force | Out-Null
 Set-ItemProperty -Path $devModeKey -Name AllowDevelopmentWithoutDevLicense -Value 1 -Type DWord
-# Windows handles Win+L before any keyboard hook, so the win+l focus binding never reaches GlazeWM.
-# This also removes Lock from ctrl+alt+del. Takes effect at next sign-in.
+# glazewm/winkey-fix.ahk sets DisableLockWorkstation while a Win key is held, so Win+L reaches GlazeWM's focus
+# binding, and the Policies key is otherwise read-only to a non-elevated process. CreateSubKey because AutoHotkey's
+# RegWrite opens the key with KEY_WRITE.
 $lockPolicy = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\System'
 New-Item -Path $lockPolicy -Force | Out-Null
-Set-ItemProperty -Path $lockPolicy -Name DisableLockWorkstation -Value 1 -Type DWord
+$lockPolicyAcl = Get-Acl $lockPolicy
+$lockPolicyAcl.AddAccessRule([Security.AccessControl.RegistryAccessRule]::new(
+        "$env:USERDOMAIN\$env:USERNAME", 'SetValue, CreateSubKey', 'Allow'))
+Set-Acl $lockPolicy $lockPolicyAcl

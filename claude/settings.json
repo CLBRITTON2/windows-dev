@@ -132,7 +132,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus[1m]",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -204,7 +204,7 @@
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
+  "skipWorkflowUsageWarning": true,
   "theme": "dark",
-  "switchModelsOnFlag": false,
-  "skipWorkflowUsageWarning": true
+  "switchModelsOnFlag": false
 }
