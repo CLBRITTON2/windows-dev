@@ -1,12 +1,40 @@
 {
     "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
-    "actions": [],
+    "actions":
+    [
+        {
+            "command":
+            {
+                "action": "adjustOpacity",
+                "opacity": 100,
+                "relative": false
+            },
+            "id": "User.SolidBackground"
+        },
+        {
+            "command":
+            {
+                "action": "adjustOpacity",
+                "opacity": 90,
+                "relative": false
+            },
+            "id": "User.UsualBackground"
+        }
+    ],
     "copyFormatting": "none",
     "copyOnSelect": true,
     "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
     "keybindings":
     [
+        {
+            "id": "User.SolidBackground",
+            "keys": "ctrl+shift+f11"
+        },
+        {
+            "id": "User.UsualBackground",
+            "keys": "ctrl+shift+f12"
+        },
         {
             "id": "Terminal.CopyToClipboard",
             "keys": "ctrl+c"

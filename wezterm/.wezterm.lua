@@ -18,5 +18,15 @@ return {
     -- a TUI that exits without popping the protocol stack leaves shifted keys
     -- emitting CSI-u, which readline and plain WSL shells do not parse.
     { key = 'Enter', mods = 'CTRL', action = act.SendString('\x1b[13;5u') },
+    -- Not ctrl+o, which Claude Code and Neovim use.
+    { key = 'o', mods = 'CTRL|SHIFT', action = wezterm.action_callback(function(window)
+      local overrides = window:get_config_overrides() or {}
+      if overrides.window_background_opacity then
+        overrides.window_background_opacity = nil
+      else
+        overrides.window_background_opacity = 1.0
+      end
+      window:set_config_overrides(overrides)
+    end) },
   },
 }

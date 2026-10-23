@@ -5,6 +5,7 @@ general:
     - 'shell-exec C:/Program Files/thide/bin/thide.exe'
     # Launched through the .ahk file association because the AutoHotkey install path differs per machine.
     - 'shell-exec %USERPROFILE%/dev/windows-dev/glazewm/winkey-fix.ahk'
+    - 'shell-exec %USERPROFILE%/dev/windows-dev/windows-terminal/opacity-toggle.ahk'
     # Hidden, so the restore report and any watch error go to the logs. watch starts whatever restore exits with.
     - 'shell-exec --hide-window C:/Program Files/PowerShell/7/pwsh.exe -NoProfile -Command [Console]::OutputEncoding = [Text.UTF8Encoding]::new(); & $HOME/.cargo/bin/rallypoint.exe restore *> $env:TEMP/rallypoint-restore.log; & $HOME/.cargo/bin/rallypoint.exe watch *> $env:TEMP/rallypoint-watch.log'
   shutdown_commands:
