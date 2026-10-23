@@ -2,8 +2,7 @@
 name: lessons-learned
 description: >
   Close out the session: distill what it settled about the projects touched into their context files
-  (the per-project CLAUDE.md under ~/dev/agents/context), then commit the agents repo with a subject
-  written from the diff. Never pushes. No args.
+  (the per-project CLAUDE.md under ~/dev/agents/context), and leave them uncommitted for the owner. No args.
 ---
 
 Type `~` paths literally and unquoted so bash expands them.
@@ -39,12 +38,7 @@ A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.
 `Verified against <owner/repo> <short sha> (<date>)` header the other files use, sha read from
 `.git/HEAD` and its ref. The symlink needs the owner's `setup-configs.ps1`, so name that as a follow-up.
 
-## Commit
+## Report
 
-Run `pwsh -NoProfile -File ~/dev/agents/scripts/commit-context.ps1 <path>...` once, passing every file this run
-wrote relative to `~/dev/agents` (`context/intarsia/CLAUDE.md`). Other sessions may have uncommitted edits in the
-repo, and only the listed paths are committed. Never run git add, commit, or push directly, and never finish the job
-by hand when the script throws.
-
-Report at most three lines: the files edited, the committed subject or `nothing to commit`, or the thrown
-error verbatim.
+The owner commits the agents repo, so never run git. Report at most three lines: the absolute path of every file
+edited, or that nothing settled.

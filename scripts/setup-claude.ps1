@@ -39,10 +39,8 @@ $backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmm
 . "$repo\scripts\dotfile-link.ps1"
 
 # Depth 2 reaches ~/dev/<repo>/.git and ~/dev/<org>/<repo>/.git. Submodule .git entries are files and skipped.
-# The agents repo stays writable: /lessons-learned commits context files as the account (push stays with the owner).
 $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .git |
-    Select-Object -ExpandProperty FullName |
-    Where-Object { $_ -ne "$devRoot\agents\.git" }
+    Select-Object -ExpandProperty FullName
 
 # Run as the owner (linked by setup-configs.ps1 or launched from the profile or GlazeWM) or run elevated
 # during setup. They sit under the ~/dev grant, so the write bits have to come back off explicitly. A directory

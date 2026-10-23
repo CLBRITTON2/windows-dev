@@ -79,8 +79,7 @@ This repo is the source of truth. The rules marked absolute do not bend.
 
 - I run all git mutations myself. Never run a mutating git command (add, commit, branch, push, pull, fetch,
   checkout, reset, rebase, restore, clean, merge, tag) and never ask permission to run one. Hand over git
-  commands or a commit message only when I ask for one. The exceptions are a commit a skill's own steps
-  run and the context file commit under Knowledge upkeep.
+  commands or a commit message only when I ask for one.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually
   uncommitted. Never guess whether I already committed an earlier change.
 - Run `git status` in the same turn before saying anything about what is committed or pending, including "next is
@@ -125,9 +124,7 @@ This repo is the source of truth. The rules marked absolute do not bend.
   assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
   asked (terms go in its `## Vocabulary` section). Current state only, no changelog.
 - Durable findings about a project go in its context file in the agents repo, never in auto-memory or ad hoc
-  files. After creating or editing one, commit it in the same turn with
-  `pwsh -NoProfile -File ~/dev/agents/scripts/commit-context.ps1 <path>...`, passing only the files this session
-  wrote, relative to `~/dev/agents`.
+  files. Leave it uncommitted: I commit the agents repo myself.
 
 ## Security
 
