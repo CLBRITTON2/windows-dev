@@ -80,7 +80,33 @@ if ($json.tool_name -eq "Bash") {
 		} | ConvertTo-Json -Compress
 		exit 0
 	}
-	
+
+	# The owner reviews repo changes as Edit and Write diffs, which a Bash write never shows.
+	$slashed = $cmd -replace '\\', '/'
+	$repoRoot = '(?:(?:[a-z]:|/[a-z])?/users/(?:chris|claude)/dev/|~/dev/|\$\{?home\}?/dev/)'
+	$rootVars = @([regex]::Matches($slashed, "(?i)(?:\b(?<name>\w+)=[""']?|\bfor\s+(?<name>\w+)\s+in\s+[""']?)$repoRoot") |
+		ForEach-Object { $_.Groups['name'].Value })
+	if ($rootVars.Count -gt 0) {
+		$derivedVars = @([regex]::Matches($slashed, "\b(?<name>\w+)=[""']?\$\{?(?:$($rootVars -join '|'))\b") |
+			ForEach-Object { $_.Groups['name'].Value })
+		$repoTarget = "(?:$repoRoot|\$\{?(?:$(($rootVars + $derivedVars) -join '|'))\b)"
+	}
+	else {
+		$repoTarget = $repoRoot
+	}
+	# Single-quoted sed scripts are dropped so their ';' and '|' do not end the command segment early.
+	$scriptless = ($cmd -replace "'[^']*'", "''") -replace '\\', '/'
+	$inPlace = "\b(?:sed|perl)(?:\s+[^\n;&|]*?)?\s(?-i:-[a-z]*i|--in-place)\S*\s[^\n;&|]*$repoTarget"
+	$redirect = "(?:(?<![=-])>{1,2}|\btee\s+(?:-a\s+)?)\s*[""']?$repoTarget"
+	$writeCall = '\b(?:writeFileSync|appendFileSync|writeFile|appendFile|createWriteStream)\s*\(|\b(?:Set-Content|Add-Content|Out-File)\s'
+	if ($scriptless -match "(?i)$inPlace" -or $slashed -match "(?i)$redirect" -or ($slashed -match "(?i)$writeCall" -and $slashed -match "(?i)$repoRoot")) {
+		@{
+			decision = "block"
+			reason   = "Change files under ~/dev only with the Edit or Write tool, so the owner sees the diff. Bash may write only into the scratchpad: to process a repo file there, copy it into the scratchpad in its own call first."
+		} | ConvertTo-Json -Compress
+		exit 0
+	}
+
 	# Allow the specific PR inline-comments endpoint (the block below is too broad for this case)
 	if ($cmd -match '^gh\s+api\s+-X\s+GET\s+repos/[^/\s]+/[^/\s]+/pulls/\d+/comments\b') {
 		@{

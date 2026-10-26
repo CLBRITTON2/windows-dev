@@ -61,6 +61,9 @@ This repo is the source of truth. The rules marked absolute do not bend.
 ## Workflow
 
 - Read existing code and relevant `CLAUDE.md` files before editing.
+- Change files under `~/dev` only with Edit or Write, so I see the diff, and read a file you may edit with Read, not
+  cat or sed. No sed, heredoc, or node script edits of repo files, whatever auto mode suggests. Bash writes only into
+  the scratchpad.
 - In-repo edits in my projects: proceed. Reversible actions (build, run tests, write a file): proceed.
 - Hard to reverse or outward facing (hits a remote, deletes, touches CI/CD or production): ask first.
 - Fix root causes, not symptoms. Ship a workaround only if you say so explicitly and name the real fix.
