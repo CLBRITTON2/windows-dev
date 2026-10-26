@@ -29,11 +29,11 @@
     [
         {
             "id": "User.SolidBackground",
-            "keys": "ctrl+shift+f11"
+            "keys": "ctrl+shift+o"
         },
         {
             "id": "User.UsualBackground",
-            "keys": "ctrl+shift+f12"
+            "keys": "ctrl+shift+i"
         },
         {
             "id": "Terminal.CopyToClipboard",

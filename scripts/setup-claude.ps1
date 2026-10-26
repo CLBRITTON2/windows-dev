@@ -56,7 +56,6 @@ $ownerExecPaths = @(
     "$repo\vscode\keybindings.json"
     "$repo\visualstudio\_vsvimrc"
     "$repo\windows-terminal\settings.json"
-    "$repo\windows-terminal\opacity-toggle.ahk"
     "$repo\bootstrap.ps1"
     "$repo\scripts\setup-packages.ps1"
     "$repo\scripts\setup-configs.ps1"
