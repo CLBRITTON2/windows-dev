@@ -26,6 +26,7 @@ This repo is the source of truth. The rules marked absolute do not bend.
 - Keep OOP simple and readable with limited inheritance.
 - All imports at the top of the file.
 - Follow DRY, KISS, YAGNI. Check whether the logic already exists before writing new code.
+- No function with one caller and no constant used once: write the code or value where it is used.
 - Never add `!important` to css rules.
 
 ## Comments and docs
