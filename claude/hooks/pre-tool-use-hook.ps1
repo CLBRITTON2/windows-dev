@@ -17,11 +17,12 @@ if ($json.tool_name -eq "Bash") {
 
     # Global options before the subcommand, including those whose value is a separate word ('-c x=y', '-C <path>').
     $gitOptions = '(?:(?:-[cC]|--git-dir|--work-tree|--namespace)\s+\S+\s+|-\S+\s+)*'
-    $tagListing = '\s+(-l|--list|--contains|--no-contains|--points-at|--merged|--no-merged)\b'
+    # '--sort' alone does not put 'git tag' in list mode, so it counts only before a listing flag or the end.
+    $tagListing = '(?:\s+(?:--sort|--format|--color|--column)=\S+)*(?:\s+(?:-l|--list|--contains|--no-contains|--points-at|--merged|--no-merged|-n\d*)\b|\s*(?:$|[;&|)\n]|\d*>))'
 
     # Second layer under the settings.json deny list, which misses forms like 'git -c x=y commit'.
     # Bare 'git branch' and the listing forms of 'git tag' stay allowed, so those match only when they mutate.
-    if ($cmd -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge(?!-base)|tag(?!$tagListing))\b" -or
+    if ($cmd -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge|tag(?!$tagListing))(?![\w-])" -or
         $cmd -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
         @{
             decision = "block"
@@ -42,12 +43,22 @@ if ($json.tool_name -eq "Bash") {
 	# Reading another repo needs -C because cd is blocked, so only read-only subcommands may target one.
 	foreach ($git in [regex]::Matches($cmd, "\bgit\s+(?<options>$gitOptions)(?<subcommand>[\w-]+)(?<rest>[^\n;&|]*)")) {
 		$subcommand = $git.Groups['subcommand'].Value
-		$readOnly = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|check-ignore|grep|describe|shortlog)$' -or
-			($subcommand -ceq 'tag' -and $git.Groups['rest'].Value -match "^$tagListing")
+		$rest = $git.Groups['rest'].Value
+		$operands = @(($rest -replace '\s\d*>.*', '').Trim() -split '\s+' | Where-Object { $_ -and $_ -notlike '-*' })
+		# config, remote, branch, reflog, worktree and stash also write, so only their reading forms pass.
+		$readOnly = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file)$' -or
+			($subcommand -ceq 'tag' -and $rest -match "^$tagListing") -or
+			($subcommand -ceq 'config' -and $rest -notmatch '\s(--unset\S*|--add|--replace-all|--rename-section|--remove-section|--edit|-e)\b' -and
+				($rest -match '^\s+(get|list)\b|\s(--get\S*|--list|-l)\b' -or $operands.Count -eq 1)) -or
+			($subcommand -ceq 'remote' -and $rest -notmatch '^\s+(add|remove|rm|rename|set-\S+|prune|update)\b') -or
+			($subcommand -ceq 'branch' -and ($rest -match '\s(--list|-l|--show-current)\b' -or $operands.Count -eq 0)) -or
+			($subcommand -ceq 'reflog' -and $rest -notmatch '^\s+(expire|delete)\b') -or
+			($subcommand -ceq 'worktree' -and $rest -match '^\s+list\b') -or
+			($subcommand -ceq 'stash' -and $rest -match '^\s+(list|show)\b')
 		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $readOnly) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, check-ignore, grep, describe, shortlog, and the listing forms of tag)."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file) and the reading forms of tag, config, remote, branch, reflog, worktree list and stash list/show."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}
