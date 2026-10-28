@@ -7,14 +7,6 @@ $json = $rawInput | ConvertFrom-Json
 if ($json.tool_name -eq "Bash") {
     $cmd = $json.tool_input.command
 
-    if ($cmd -match 'co-authored-by') {
-        @{
-            decision = "block"
-            reason   = "Never add a Co-Authored-By trailer to a commit message or PR description, and never suggest one. No attribution line of any kind."
-        } | ConvertTo-Json -Compress
-        exit 0
-    }
-
     # Global options before the subcommand, including those whose value is a separate word ('-c x=y', '-C <path>').
     $gitOptions = '(?:(?:-[cC]|--git-dir|--work-tree|--namespace)\s+\S+\s+|-\S+\s+)*'
     # '--sort' alone does not put 'git tag' in list mode, so it counts only before a listing flag or the end.
@@ -62,14 +54,6 @@ if ($json.tool_name -eq "Bash") {
 			} | ConvertTo-Json -Compress
 			exit 0
 		}
-	}
-
-	if ($cmd -match '(^|;|\n)\s*find\s+') {
-		@{
-			decision = "block"
-			reason   = "Do not use 'find' in bash. Use glob patterns instead."
-		} | ConvertTo-Json -Compress
-		exit 0
 	}
 
 	# Docker: forbid inline env-var prefixes; env must be passed via flags

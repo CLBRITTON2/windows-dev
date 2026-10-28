@@ -33,8 +33,6 @@
       "Bash(gh status:*)",
       "Bash(gh search:*)",
       "Bash(mkdir:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)",
       "Bash(timeout:*)",
       "Bash(sleep:*)",
       "Bash(go mod:*)",
@@ -51,7 +49,6 @@
       "Bash(rm -rf ./node_modules)",
       "Bash(pkill -f node)",
       "Bash(pkill -f dev-server)",
-      "Bash(echo:*)",
       "Bash(xargs grep :*)",
       "Bash(ziti:*)",
       "Bash(go build:*)",
@@ -65,7 +62,6 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Skill(code-review)",
-      "Bash(tee:*)",
       "Bash(curl:*)",
       "Bash(go *)",
       "Bash(gofmt *)",
@@ -115,6 +111,9 @@
       "Read(./.env.*)",
       "Read(**/.env)",
       "Read(**/.env.*)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Bash(find *)",
       "Read(./secrets/**)",
       "Read(~/.encrypted/**)",
       "Read(~/.aws/**)",
@@ -129,11 +128,17 @@
     ],
     "defaultMode": "auto"
   },
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Shell writes to repo files: creating, changing, renaming or deleting files under ~/dev through a shell command, interpreter or script, including relative paths, since the shell starts inside a repo. Examples: sed -i, perl -i, redirection or heredoc, tee, cp, mv, rm, touch, patch, git apply, Set-Content, Out-File, [IO.File] writes, and node, pwsh or other scripts that write files, including a script written elsewhere that then writes into ~/dev. Repo changes go through the Edit or Write tool so the owner reviews the diff. Not this rule: package managers, builds, tests, formatters and code generators writing their usual outputs (node_modules, build and dist directories, lockfiles, go.sum, gofmt -w), and any write outside ~/dev, such as the session scratchpad."
+    ]
+  },
   "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "",
+        "matcher": "Bash|Edit|Write",
         "hooks": [
           {
             "type": "command",
@@ -208,6 +213,7 @@
     }
   },
   "autoCompactWindow": 200000,
+  "bashOutputMaxChars": 10000,
   "promptSuggestionEnabled": false,
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
