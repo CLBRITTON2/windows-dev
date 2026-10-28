@@ -112,6 +112,7 @@ $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\CLAUDE.md'; Source = "$repo\c
 $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\settings.json'; Source = "$repo\claude\settings.json" })
 $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\agents'; Source = "$repo\claude\agents" })
 $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\output-styles'; Source = "$repo\claude\output-styles" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\rules'; Source = "$repo\claude\rules" })
 foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
     $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
 }

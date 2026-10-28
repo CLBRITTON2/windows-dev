@@ -1,10 +1,8 @@
 {
-  "includeCoAuthoredBy": false,
+  "attribution": false,
   "permissions": {
     "allow": [
-      "Bash(ls:*)",
       "Bash(ls *)",
-      "Bash(/usr/bin/ls:*)",
       "Bash(/usr/bin/ls *)",
       "Bash(cat:*)",
       "Bash(head:*)",
@@ -97,7 +95,6 @@
       "Bash(git branch -d*)",
       "Bash(git branch -m*)",
       "Bash(git branch -c*)",
-      "Bash(git checkout -b*)",
       "Bash(git switch -c*)",
       "Bash(gh pr create*)",
       "Bash(gh pr edit*)",
@@ -121,6 +118,7 @@
       "Read(./secrets/**)",
       "Read(~/.encrypted/**)",
       "Read(~/.aws/**)",
+      "Read(~/.ssh/**)",
       "Read(/e/**)",
       "Edit(/e/**)",
       "Bash(python:*)",
