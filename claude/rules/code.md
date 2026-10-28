@@ -24,6 +24,29 @@ paths:
 - Follow DRY, KISS, YAGNI. Check whether the logic already exists before writing new code.
 - No function with one caller and no constant used once: write the code or value where it is used.
 
+## Naming
+
+- Where a file already has a naming pattern (casing, initialisms, prefixes), match it over these rules.
+- Name a variable for what it holds, never a generic word (`found`, `status`, `props`, `added`) or a letter or number
+  (`zetA`, `$wad1`): `identityViewModel`, `zetClient`, `authStatusEvent`, `addResp`.
+- No ad hoc abbreviations (`vm`, `evt`). Short forms the codebase already uses everywhere (`id`, `ctx`, `cfg`, `resp`,
+  `dir`) are fine.
+- Name a function for the steps it performs or the command it calls, not a generic verb: `EnrollAndEnableMFA`, not
+  `SetupMFA`. `SendPendingNotifications`, not `Flush`.
+- Name for the concept, not the tool or transport behind it: `OpenCommandPipe`, not `DialIPC`. `DriveIdPFlow`, not
+  `DrivePKCEFlow`.
+- A method that only returns a value is a noun, with no `Get` or `Resolve`: `PayloadEnrollMode`, `SavedZetConfig`.
+- A parameter says what it is for, not its shape: `destination`, not `folder`.
+- When a change alters what a thing does or holds (scheme, unit, one vs many), rename it in the same change:
+  `HttpUrl` to `HttpsUrl`, `StableFrameTimeoutMs` to `StableFrameMaxCaptures`, `PurgeIdentitiesByExternalId` to
+  `PurgeIdentityByExternalId`.
+- A bare number or time carries its unit in the name: `PollIntervalMs`, `savedAtUtc`. A typed duration needs none.
+- An assert helper names the exact fact it checks: `assertMfaEnabled`, not `assertValidMfaIdState`.
+- A test name states operation, outcome and condition: `reauthAcceptsValidTotp`,
+  `enrollToNoneRejectsInvalidProvider`. Not `withValidTotp` or `invalidProviderFails`.
+- Drop words the context already says: `RunWithTimeout` in a test package, not `RunTestWithTimeout`.
+- One concept gets one name across files, not a synonym per file.
+
 ## Comments and docs
 
 - Default to writing no comment, especially in tests. Add one only for a case in the next bullet, as one terse line.
