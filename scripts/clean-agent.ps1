@@ -25,6 +25,7 @@ enum SessionAction {
     Delete
     KeepResumed
     KeepActive
+    KeepUnreadable
 }
 
 class SessionFolder {
@@ -55,7 +56,11 @@ function Get-SessionFolder([string]$scratchRoot, [string]$transcriptRoot, [strin
             if ($sessionDir.Name -notmatch $sessionIdPattern) {
                 continue
             }
-            $files = @(Get-ChildItem $sessionDir.FullName -Recurse -File -Force)
+            # A repro can leave a deny ACE in its scratchpad: report and keep that session instead of aborting the run
+            $files = @(Get-ChildItem $sessionDir.FullName -Recurse -File -Force -ErrorAction SilentlyContinue -ErrorVariable scanErrors)
+            foreach ($scanError in $scanErrors) {
+                Write-Warning "Cannot scan $($sessionDir.FullName), keeping it: $($scanError.Exception.Message)"
+            }
             $times = @($sessionDir.LastWriteTime) + @($files | ForEach-Object LastWriteTime)
             $transcript = Join-Path $transcriptRoot "$($projectDir.Name)\$($sessionDir.Name).jsonl"
             if (Test-Path -LiteralPath $transcript) {
@@ -68,7 +73,9 @@ function Get-SessionFolder([string]$scratchRoot, [string]$transcriptRoot, [strin
             $session.Path = $sessionDir.FullName
             $session.SizeGB = [math]::Round(($files | Measure-Object Length -Sum).Sum / 1GB, 2)
             $session.LastActive = ($times | Sort-Object -Descending | Select-Object -First 1)
-            if ($sessionDir.Name -in $resumedIds) {
+            if ($scanErrors.Count -gt 0) {
+                $session.Action = [SessionAction]::KeepUnreadable
+            } elseif ($sessionDir.Name -in $resumedIds) {
                 $session.Action = [SessionAction]::KeepResumed
             } elseif ($session.LastActive -gt $cutoff) {
                 $session.Action = [SessionAction]::KeepActive

@@ -73,5 +73,6 @@ paths:
 - Error messages must be clear, actionable, and carry enough context to debug: request params, response
   body, status codes.
 - No fallbacks unless I explicitly ask for them.
-- External API or service calls: retry with warnings, then raise the last error.
+- Retry external API or service calls only in long-running processes (services, daemons, UI clients): warn on each
+  retry, then raise the last error. Scripts and CI steps call once and fail, since a rerun is the retry.
 - Logging uses structured fields, not dynamic values interpolated into the message string.
