@@ -6,6 +6,18 @@ $json = $rawInput | ConvertFrom-Json
 
 if ($json.tool_name -eq "Bash") {
     $cmd = $json.tool_input.command
+    $quotedString = '''[^'']*''|"(?:[^"\\]|\\.)*"'
+    # Quoted text is data such as a search pattern or a message, except a code string after an interpreter's flag.
+    # One pass, so quotes nested inside a kept code string are not stripped on their own.
+    $dataUnquoted = [regex]::Replace($cmd, "(?<codeFlag>(?<=^|\s)(?:-c|-e|--eval|-[Cc]ommand)\s+)?(?<quoted>$quotedString)", {
+            param($quotedMatch)
+            if ($quotedMatch.Groups['codeFlag'].Success) {
+                $quotedMatch.Value
+            }
+            else {
+                '""'
+            }
+        })
 
     # Global options before the subcommand, including those whose value is a separate word ('-c x=y', '-C <path>').
     $gitOptions = '(?:(?:-[cC]|--git-dir|--work-tree|--namespace)\s+\S+\s+|-\S+\s+)*'
@@ -14,8 +26,8 @@ if ($json.tool_name -eq "Bash") {
 
     # Second layer under the settings.json deny list, which misses forms like 'git -c x=y commit'.
     # Bare 'git branch' and the listing forms of 'git tag' stay allowed, so those match only when they mutate.
-    if ($cmd -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge|tag(?!$tagListing))(?![\w-])" -or
-        $cmd -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
+    if ($dataUnquoted -match "\bgit\s+$gitOptions(add|commit|push|pull|fetch|checkout|switch|rebase|reset|restore|clean|merge|tag(?!$tagListing))(?![\w-])" -or
+        $dataUnquoted -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
         @{
             decision = "block"
             reason   = "Do not mutate the git repo. Hand the command to the user to run instead."
@@ -38,7 +50,7 @@ if ($json.tool_name -eq "Bash") {
 		$rest = $git.Groups['rest'].Value
 		$operands = @(($rest -replace '\s\d*>.*', '').Trim() -split '\s+' | Where-Object { $_ -and $_ -notlike '-*' })
 		# config, remote, branch, reflog, worktree and stash also write, so only their reading forms pass.
-		$readOnly = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file)$' -or
+		$readOnly = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file|fsck)$' -or
 			($subcommand -ceq 'tag' -and $rest -match "^$tagListing") -or
 			($subcommand -ceq 'config' -and $rest -notmatch '\s(--unset\S*|--add|--replace-all|--rename-section|--remove-section|--edit|-e)\b' -and
 				($rest -match '^\s+(get|list)\b|\s(--get\S*|--list|-l)\b' -or $operands.Count -eq 1)) -or
@@ -50,7 +62,7 @@ if ($json.tool_name -eq "Bash") {
 		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $readOnly) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file) and the reading forms of tag, config, remote, branch, reflog, worktree list and stash list/show."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list and stash list/show."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}
@@ -65,7 +77,7 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 	
-	$unquoted = $cmd -replace '''[^'']*''|"(?:[^"\\]|\\.)*"', '""'
+	$unquoted = $cmd -replace $quotedString, '""'
 
 	# Bash strips unquoted backslashes, so 'C:\Users\x\out.png' becomes a junk file named 'C:Usersxout.png' in the cwd.
 	if ($unquoted -match '(?<![\w/])[A-Za-z]:\\') {
