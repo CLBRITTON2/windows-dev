@@ -10,7 +10,7 @@ background = "#141418e0"
 border = "3px"
 border_color = "#ffffff59"
 radius = "1em"
-image = '~\Downloads\wallpaper.jpg'
+image = '~\Downloads\mountain-lake.jpg'
 
 [input]
 margin = "3em"

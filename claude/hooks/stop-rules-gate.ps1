@@ -45,7 +45,7 @@ for ($i = $lines.Count - 1; $i -ge 0; $i--) {
     if (-not $lines[$i]) {
         continue
     }
-    $entry = $lines[$i] | ConvertFrom-Json
+    $entry = $lines[$i] | ConvertFrom-Json -AsHashtable
     $isToolResult = @($entry.message.content | Where-Object { $_.type -eq 'tool_result' }).Count -gt 0
     if ($entry.type -eq 'user' -and -not $entry.isMeta -and -not $isToolResult) {
         break
