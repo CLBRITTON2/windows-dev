@@ -120,9 +120,6 @@
       "Read(~/.ssh/**)",
       "Read(/e/**)",
       "Edit(/e/**)",
-      "Bash(python:*)",
-      "Bash(python3:*)",
-      "Bash(py:*)",
       "Artifact",
       "mcp__claude_ai_Claude_Docs"
     ],

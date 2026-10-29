@@ -4,7 +4,7 @@ Keeps Claude Code from ending a turn whose code edits break the rules in claude/
 
 .DESCRIPTION
 Claude Code runs this as a Stop hook. It collects the successful Edit and Write calls since the last user prompt on
-files the rules' paths: globs match, and has Haiku check the text they wrote against the rules in a nested claude -p
+files under ~/dev that the rules' paths: globs match, and has Haiku check the text they wrote against the rules in a nested claude -p
 run. Findings come back as a block reason, which sends Claude back to fix them or say why a finding is wrong. A turn
 already continuing because of a Stop hook is not checked again, so each turn gets one correction round.
 #>
@@ -59,7 +59,8 @@ $codeEdits = @($turn | Where-Object { $_.type -eq 'assistant' } | ForEach-Object
     Where-Object { $_.type -eq 'tool_use' -and $_.name -in 'Edit', 'Write' -and $_.id -notin $failedIds } |
     Where-Object {
         $path = $_.input.file_path -replace '\\', '/'
-        @($pathPatterns | Where-Object { $path -match $_ }).Count -gt 0
+        # Only repo code under either account's ~/dev, so throwaway scratchpad scripts are not held to the rules.
+        $path -match '^[a-z]:/users/[^/]+/dev/' -and @($pathPatterns | Where-Object { $path -match $_ }).Count -gt 0
     })
 if ($codeEdits.Count -eq 0) {
     exit 0
