@@ -105,6 +105,7 @@ if ($PSVersionTable.PSVersion.Major -ge 7) {
 # ── Aliases ──
 Set-Alias -Name c     -Value Clear-Host
 Set-Alias -Name which -Value Get-Command
+Set-Alias -Name np    -Value "$env:ProgramFiles\Notepad++\notepad++.exe"
 
 Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
 Remove-Item Alias:ll -Force -ErrorAction SilentlyContinue
