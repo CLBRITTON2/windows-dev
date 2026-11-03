@@ -11,3 +11,7 @@ command = ["pwsh", "-NoProfile", "-NonInteractive", "-File", "write-focus-file.p
 [[events]]
 on = "pane.focused"
 command = ["pwsh", "-NoProfile", "-NonInteractive", "-File", "write-focus-file.ps1"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["pwsh", "-NoProfile", "-NonInteractive", "-File", "write-focus-file.ps1"]
