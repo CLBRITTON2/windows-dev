@@ -117,7 +117,8 @@ if ($json.tool_name -eq "Bash") {
 	# Single-quoted sed scripts are dropped so their ';' and '|' do not end the command segment early.
 	$scriptless = ($cmd -replace "'[^']*'", "''") -replace '\\', '/'
 	$inPlace = "\b(?:sed|perl)(?:\s+[^\n;&|]*?)?\s(?-i:-[a-z]*i|--in-place)\S*\s[^\n;&|]*$repoTarget"
-	$redirect = "(?:(?<![=-])>{1,2}|\btee\s+(?:-a\s+)?)\s*[""']?$repoTarget"
+	# 'git diff', 'log' and 'show' write a file with --output, and their allow rules skip the classifier.
+	$redirect = "(?:(?<![=-])>{1,2}|\btee\s+(?:-a\s+)?|\bgit\s[^\n;&|]*\s--output[=\s])\s*[""']?$repoTarget"
 	$writeCall = '\b(?:writeFileSync|appendFileSync|writeFile|appendFile|createWriteStream)\s*\(|\b(?:Set-Content|Add-Content|Out-File)\s'
 	if ($scriptless -match "(?i)$inPlace" -or $slashed -match "(?i)$redirect" -or ($slashed -match "(?i)$writeCall" -and $slashed -match "(?i)$repoRoot")) {
 		@{
@@ -127,22 +128,18 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 
-	# Allow the specific PR inline-comments endpoint (the block below is too broad for this case)
-	if ($cmd -match '^gh\s+api\s+-X\s+GET\s+repos/[^/\s]+/[^/\s]+/pulls/\d+/comments\b') {
-		@{
-			decision = "approve"
-			reason   = "gh api .../pulls/<n>/comments is the correct endpoint for inline review comments."
-		} | ConvertTo-Json -Compress
-		exit 0
-	}
-	
-	# gh api must ALWAYS start with gh api -X GET immediately after gh api
-	if ($cmd -match '^gh\s+api\b' -and $cmd -notmatch '^gh\s+api\s+-X\s+GET\b') {
-		@{
-			decision = "block"
-			reason   = "gh api calls must start with: gh api -X GET"
-		} | ConvertTo-Json -Compress
-		exit 0
+	# 'Bash(gh api -X GET:*)' skips the auto mode classifier, and gh uses the last method flag, so a later
+	# '-X POST', '-iX POST' or '--method' would send a write through unreviewed.
+	foreach ($ghApi in [regex]::Matches($dataUnquoted, '(?:^|[;&|(\n]|\$\()\s*gh\s+api\b(?<rest>[^\n;&|]*)')) {
+		$rest = $ghApi.Groups['rest'].Value
+		$methodFlags = [regex]::Matches($rest, '(?:^|\s)(?:-[A-Za-z]*X|--method\b)')
+		if ($rest -notmatch '^\s+-X\s+GET\b' -or $methodFlags.Count -ne 1) {
+			@{
+				decision = "block"
+				reason   = "gh api calls must start with 'gh api -X GET' and carry no other -X or --method flag."
+			} | ConvertTo-Json -Compress
+			exit 0
+		}
 	}
 }
 

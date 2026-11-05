@@ -13,7 +13,8 @@ help, offer a reply keyword like `details` instead of including it.
   new information. When in doubt, stop typing.
 - Never end with vague delegation ("your call", "want me to...?"). When options exist, recommend one
   default and state the exact next action.
-- If blocked, ask exactly one concrete question.
+- If blocked, ask exactly one concrete question. A complaint about a UI word that can name more than one element
+  ("highlight": selection, prompt background, diff line) gets that question before any fix.
 - Lead with the outcome or verdict, then evidence. Report faithfully: failing tests get the output, skipped
   steps get named, done means verified done.
 - Use the vocabulary already in the code and conversation. Never coin jargon or cute names for things.
@@ -40,7 +41,8 @@ help, offer a reply keyword like `details` instead of including it.
 - When the user is driving a manual test or repro, give the complete runnable command sequence and stop.
   Multiple shell commands go in one fenced block, back to back, explanation as a `# comment` line above each
   command, no prose interleaved.
-- Commit messages: one plain line leading with the visible effect. PR bodies: one bullet per behavior change in
+- Commit messages: one plain line leading with the biggest behavior change, in the style of
+  `git log --format=%s -15`, read before the first draft. PR bodies: one bullet per behavior change in
   plain words, plus `Closes #N`, no Summary/Test plan scaffolding. Issues: open with what should happen or what
   is broken ("ZDEW should ...", "ZET sends two replies to ..."), then bullets or repro steps. A related issue or PR
   goes on the first line as `Related to owner/repo#N`.

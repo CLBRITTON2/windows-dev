@@ -13,8 +13,7 @@
   elevated. The E: drive is denied outright.
 
   Then runs scripts/agent-bootstrap.ps1 as the account (runas prompts for the password it just set, once, and
-  saves it for the claude function in the PowerShell profile) and links the account's dotfiles from here,
-  because the account itself has no privilege to create symlinks.
+  saves it for the claude function in the PowerShell profile), which also links the account's dotfiles.
 
   Left to do by hand afterwards, both interactive: claude then /login in an agent session, and gh auth login
   with a read-only PAT.
@@ -34,9 +33,12 @@ $denyDrives = @('E:\')
 $repo = Split-Path $PSScriptRoot -Parent
 $bootstrap = "$repo\scripts\agent-bootstrap.ps1"
 $marker = "$devRoot\.agent-bootstrap-complete"
-$backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
 
-. "$repo\scripts\dotfile-link.ps1"
+$developerMode = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock' `
+    AllowDevelopmentWithoutDevLicense -ErrorAction Ignore
+if ($developerMode -ne 1) {
+    throw "Developer Mode is off, and agent-bootstrap.ps1 needs it to link the account's dotfiles. Run setup-packages.ps1 first"
+}
 
 # Depth 2 reaches ~/dev/<repo>/.git and ~/dev/<org>/<repo>/.git. Submodule .git entries are files and skipped.
 $gitDirs = Get-ChildItem $devRoot -Directory -Recurse -Depth 2 -Force -Filter .git |
@@ -65,7 +67,10 @@ $ownerExecPaths = @(
     "$repo\winget\packages.json"
     "$repo\intarsia"
     "$repo\perusal\config.json"
+    "$repo\carronade\config.toml"
 )
+$missing = @($ownerExecPaths | Where-Object { -not (Test-Path -LiteralPath $_) })
+if ($missing) { throw "owner-exec path missing, fix the list: $($missing -join ', ')" }
 
 # Without this the account could rename a parent directory aside and recreate it with its own copy of a denied
 # file at the same path. Deny is this-folder-only so the directory's other contents stay editable.
@@ -80,16 +85,39 @@ $ownerExecAncestors = $ownerExecPaths |
     Sort-Object -Unique |
     Where-Object { $_ -notin $ownerExecPaths }
 
+# An owner holds WRITE_DAC whatever a deny says, and Edit replaces a file through a rename, so whatever the agent
+# once wrote under a protected path stays its own until ownership comes back here. Get-ChildItem lists a junction
+# without entering it (icacls /T would follow it), and any link stops the run before an elevated icacls acts on it.
+$protectedRoots = @(@($gitDirs) + $ownerExecPaths + $ownerExecAncestors |
+        ForEach-Object { Get-Item -LiteralPath $_ -Force })
+$protectedItems = $protectedRoots + @(
+    $protectedRoots |
+        Where-Object { $_.PSIsContainer -and -not $_.LinkType -and $_.FullName -notin $ownerExecAncestors } |
+        Get-ChildItem -Recurse -Force
+)
+# A hard link (a local clone makes them in .git\objects) names the same file, so icacls cannot be redirected through it.
+$links = @($protectedItems | Where-Object LinkType -In 'Junction', 'SymbolicLink' | ForEach-Object FullName)
+if ($links) { throw "link under a protected path, check where it points and remove it: $($links -join ', ')" }
+$owner = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+$agentSid = (Get-LocalUser -Name $account -ErrorAction Ignore).SID
+if ($agentSid) {
+    $agentOwned = @($protectedItems |
+            Where-Object { (Get-Acl -LiteralPath $_.FullName).GetOwner([Security.Principal.SecurityIdentifier]) -eq $agentSid } |
+            ForEach-Object FullName)
+} else {
+    $agentOwned = @()
+}
+
 # The .git deny lists write bits explicitly: the simple (W) includes SYNCHRONIZE, which every open requests, so
 # it would block reads too and git would not see the repo. /remove:d first keeps a rerun from stacking ACEs.
 $aclSteps = [System.Collections.Generic.List[string[]]]::new()
 $aclSteps.Add(@($devRoot, '/grant', "${account}:(OI)(CI)(M)"))
+foreach ($item in $agentOwned) { $aclSteps.Add(@($item, '/setowner', $owner, '/L')) }
 foreach ($g in $gitDirs) {
     $aclSteps.Add(@($g, '/remove:d', $account))
     $aclSteps.Add(@($g, '/deny', "${account}:(OI)(CI)(WD,AD,WEA,WA,DE,DC)"))
 }
 foreach ($p in $ownerExecPaths) {
-    if (-not (Test-Path $p)) { throw "owner-exec path missing, fix the list: $p" }
     $inherit = if (Test-Path $p -PathType Container) { '(OI)(CI)' } else { '' }
     $aclSteps.Add(@($p, '/remove:d', $account))
     $aclSteps.Add(@($p, '/deny', "${account}:${inherit}(WD,AD,WEA,WA,DE,DC)"))
@@ -100,23 +128,6 @@ foreach ($a in $ownerExecAncestors) {
 }
 foreach ($d in $denyDrives) { $aclSteps.Add(@($d, '/deny', "${account}:(OI)(CI)(F)")) }
 
-# Everything the agent needs in its own home. It reads the repo through the ~/dev grant, so these are the same
-# targets setup-configs.ps1 makes for you, minus the ones only a human uses.
-$agentLinks = [System.Collections.Generic.List[pscustomobject]]::new()
-$agentLinks.Add([pscustomobject]@{
-        Leaf   = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'
-        Source = "$repo\powershell\Microsoft.PowerShell_profile.ps1"
-    })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.wezterm.lua'; Source = "$repo\wezterm\.wezterm.lua" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\CLAUDE.md'; Source = "$repo\claude\context.md" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\settings.json'; Source = "$repo\claude\settings.json" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\agents'; Source = "$repo\claude\agents" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\output-styles'; Source = "$repo\claude\output-styles" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\rules'; Source = "$repo\claude\rules" })
-foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
-    $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
-}
-
 $bootstrapArgs = "`"$env:ProgramFiles\PowerShell\7\pwsh.exe`" -NoLogo -NoProfile -File `"$bootstrap`" -OwnerDevRoot `"$devRoot`""
 
 Write-Host "setup-agent-account" -ForegroundColor Cyan
@@ -124,8 +135,8 @@ Write-Host "  account    : $account (standard user, group Users only)"
 Write-Host "  dev root   : $devRoot (Modify)"
 Write-Host "  .git denied: $($gitDirs.Count) repos"
 Write-Host "  write denied: $($ownerExecPaths.Count) owner-exec paths, $($ownerExecAncestors.Count) parent dirs"
+Write-Host "  owner reset: $($agentOwned.Count) agent-owned items under protected paths"
 Write-Host "  drives     : $($denyDrives -join ', ') (denied)"
-Write-Host "  home links : $($agentLinks.Count)"
 Write-Host ""
 
 if (-not (Get-LocalUser -Name $account -ErrorAction Ignore)) {
@@ -157,13 +168,6 @@ while (-not (Test-Path $marker)) {
     Start-Sleep -Seconds 2
 }
 Remove-Item $marker -Force
-
-$sid = (Get-LocalUser -Name $account).SID.Value
-$agentHome = (Get-CimInstance Win32_UserProfile -Filter "SID='$sid'").LocalPath
-if (-not $agentHome) { throw "no profile directory for $account even though bootstrap reported success" }
-
-Write-Host "linking $agentHome" -ForegroundColor Cyan
-foreach ($l in $agentLinks) { Link "$agentHome\$($l.Leaf)" $l.Source $backupRoot }
 
 Write-Host ""
 Write-Host 'done. two interactive steps are left, both inside an agent session (claude in a new shell):' -ForegroundColor Green

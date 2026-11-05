@@ -66,10 +66,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Skill(code-review)",
-      "Bash(curl:*)",
       "Bash(go *)",
       "Bash(gofmt *)",
-      "Bash(ssh.exe *)",
       "Bash(git merge-tree*)",
       "Bash(git ls-tree *)",
       "Bash(git ls-remote *)",
@@ -197,7 +195,8 @@
     "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/statusline.ps1"
   },
   "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true
+    "gopls-lsp@claude-plugins-official": true,
+    "csharp-lsp@claude-plugins-official": true
   },
   "outputStyle": "Terse Engineer",
   "feedbackSurveyRate": 0,

@@ -9,8 +9,9 @@
   sets it for the session it runs in), marks the owner's repos safe for git, installs Claude Code and herdr, and
   links this repo's herdr focus-file plugin.
 
-  Symlinks are not created here. The account has no SeCreateSymbolicLinkPrivilege, so its dotfile links are
-  made by the elevated caller. Junctions need no privilege, hence the one below.
+  Also links the account's dotfiles from this repo. File symlinks need Developer Mode (setup-packages.ps1 turns it
+  on). Linking here instead of in the elevated caller means no elevated write lands in a home this account
+  controls, where a junction it planted could redirect the write.
 
   Signals completion by writing $OwnerDevRoot\.agent-bootstrap-complete, which the caller polls for because
   runas returns as soon as it has spawned the child.
@@ -26,6 +27,10 @@ $binDir = "$HOME\.local\bin"
 $herdr = "$env:LOCALAPPDATA\Programs\Herdr\bin\herdr.exe"
 $focusPluginId = 'windows-dev.focus-file'
 $focusPlugin = "$OwnerDevRoot\windows-dev\herdr\focus-file"
+$repo = Split-Path $PSScriptRoot -Parent
+$backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
+
+. "$repo\scripts\dotfile-link.ps1"
 
 Write-Host "agent-bootstrap as $env:USERNAME" -ForegroundColor Cyan
 
@@ -71,6 +76,24 @@ if ($plugins.result.plugins.plugin_id -notcontains $focusPluginId) {
     if ($LASTEXITCODE -ne 0) { throw "herdr plugin link $focusPlugin failed with exit code $LASTEXITCODE" }
     Write-Host "  herdr plugin linked: $focusPlugin"
 }
+
+# The same targets setup-configs.ps1 makes for the owner, minus the ones only a human uses.
+$agentLinks = [System.Collections.Generic.List[pscustomobject]]::new()
+$agentLinks.Add([pscustomobject]@{
+        Leaf   = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'
+        Source = "$repo\powershell\Microsoft.PowerShell_profile.ps1"
+    })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.wezterm.lua'; Source = "$repo\wezterm\.wezterm.lua" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\CLAUDE.md'; Source = "$repo\claude\context.md" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\settings.json'; Source = "$repo\claude\settings.json" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\agents'; Source = "$repo\claude\agents" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\output-styles'; Source = "$repo\claude\output-styles" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\rules'; Source = "$repo\claude\rules" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\themes'; Source = "$repo\claude\themes" })
+foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
+    $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
+}
+foreach ($l in $agentLinks) { Link "$HOME\$($l.Leaf)" $l.Source $backupRoot }
 
 'ok' | Set-Content -LiteralPath "$OwnerDevRoot\.agent-bootstrap-complete"
 Write-Host "agent-bootstrap done" -ForegroundColor Green
