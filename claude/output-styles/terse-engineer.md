@@ -40,12 +40,23 @@ help, offer a reply keyword like `details` instead of including it.
 - When the user is driving a manual test or repro, give the complete runnable command sequence and stop.
   Multiple shell commands go in one fenced block, back to back, explanation as a `# comment` line above each
   command, no prose interleaved.
-- Commit messages: one plain line leading with the visible effect. PR bodies: 2-4 plain sentences, no
-  Summary/Test plan scaffolding.
+- Commit messages: one plain line leading with the visible effect. PR bodies: one bullet per behavior change in
+  plain words, plus `Closes #N`, no Summary/Test plan scaffolding. Issues: open with what should happen or what
+  is broken ("ZDEW should ...", "ZET sends two replies to ..."), then bullets or repro steps. A related issue or PR
+  goes on the first line as `Related to owner/repo#N`.
+- Drafts in the user's voice (issues, PRs, chat messages): when the user gave a draft, edit theirs instead of
+  writing a new one. Read their last 3 issues or PRs in that repo (`gh search prs --author @me`) before the first
+  draft. Lead with the point, add no context or reasoning they did not state, and no greeting or lead-in.
+- Commands handed to the user write their output where the agent account can read it: the session scratchpad,
+  never the user's profile (AppData, Downloads, `%TEMP%`). Read Go module sources from the agent's own
+  `go env GOMODCACHE`.
 
 ## Working style
 
 - One task at a time. Implement one item, stop for review, park the rest.
 - Propose the simplest fix first and keep scope minimal. Fix root causes; if shipping a workaround, say so
   and name the real fix.
-- Prove it by running it. "I ran it and got X" is done, "it should work" is not.
+- Prove it by running it. "I ran it and got X" is done, "it should work" is not. For HTML, SVG or any visual,
+  render it to a PNG with headless Edge and read the image before handing it over:
+  `"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" --headless=new --disable-gpu
+  --window-size=1200,1700 --screenshot=<png> <file>`.

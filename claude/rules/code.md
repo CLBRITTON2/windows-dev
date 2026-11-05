@@ -5,6 +5,7 @@ paths:
   - "**/*.{py,rb,lua,php,pl}"
   - "**/*.{ps1,psm1,psd1,sh,bash,zsh,cmd,bat,ahk}"
   - "**/{CMakeLists.txt,*.cmake,Makefile,Dockerfile}"
+  - "**/*.{toml,yml,yaml}"
 ---
 
 # Code rules
@@ -51,7 +52,8 @@ paths:
 
 - Default to writing no comment, especially in tests. Add one only for a case in the next bullet, as one terse line.
   Never write one that explains a fix, what changed, or how a cause was found: that goes in the commit or the agents
-  repo. Leave existing comments alone unless your change makes one wrong, then fix or delete it. English only.
+  repo. Leave existing comments alone unless your change makes one wrong, then fix or delete it. Existing means
+  present on the base branch: a comment this branch added is yours to fix. English only.
 - Write a comment for: the purpose of a block whose effect is not visible in the code, a non-obvious
   constraint (ideally on the same line as the purpose), a gotcha or landmine, why arbitrary-looking code has
   to be this way (the reason, not the mechanism), or a pointer (issue number, URL, spec section, upstream

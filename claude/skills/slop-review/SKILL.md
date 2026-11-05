@@ -16,6 +16,20 @@ mutation.
   alone: that hides what the branch costs against the base.
 - Every line changed against the base has a cost, including rewording, recasing and reordering untouched code.
 
+## Ledger
+
+A review outlives compaction and sessions only through its ledger at
+`~/dev/agents/context/<repo>/reviews/slop-<branch>.md` (`/` in the branch name becomes `-`). The agents repo's
+`.gitignore` keeps it out of commits.
+
+- At the start, read it when it exists and resume from its first pending item. Rerun Find only for files changed
+  since the head it names.
+- It holds: `Base: <sha>` and `Head: <sha>`, the chunk list with each chunk's state (`pending`, `in progress`,
+  `done`), and one line per finding: `SLOP-<n> <category> file:line <state> what it is`. State is `pending`,
+  `applied`, `declined` or `withdrawn: <reason>`.
+- Write it after Triage and after every decision in Decide, before the next message. Never say the review is done
+  while any chunk or finding is `pending`.
+
 ## 2. Find
 
 Spawn the `diff-reviewer` agent for candidates, then read the full diff yourself for what it does not weigh:
@@ -91,5 +105,6 @@ QUESTION        : could other tests use a tls context built from a provided ca?
 
 ## 6. Finish
 
-Run the project's test commands. Report what was applied, what was withdrawn and why, and any verification not run.
+Run the project's test commands. Report from the ledger what was applied, what was withdrawn and why, and any
+verification not run. Then delete the ledger, unless a chunk or finding is still `pending`.
 Hand over no git commands or commit message unless the user asks for one.

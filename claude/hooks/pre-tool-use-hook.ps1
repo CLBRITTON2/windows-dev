@@ -44,6 +44,15 @@ if ($json.tool_name -eq "Bash") {
         exit 0
     }
 
+    # settings.json denies 'Bash(find *)' with no reason, which reads as if the whole command was refused.
+    if ($dataUnquoted -match '(?:^|[;&|(\n]|\$\(|\bxargs\s+(?:-\S+\s+)*)\s*find(?=\s|$)') {
+        @{
+            decision = "block"
+            reason   = "find is denied. Use the Glob tool or 'rg --files -g <glob> <dir>'. Nothing else in this command was refused, rerun the rest without find."
+        } | ConvertTo-Json -Compress
+        exit 0
+    }
+
 	# Reading another repo needs -C because cd is blocked, so only read-only subcommands may target one.
 	foreach ($git in [regex]::Matches($cmd, "\bgit\s+(?<options>$gitOptions)(?<subcommand>[\w-]+)(?<rest>[^\n;&|]*)")) {
 		$subcommand = $git.Groups['subcommand'].Value
@@ -55,14 +64,18 @@ if ($json.tool_name -eq "Bash") {
 			($subcommand -ceq 'config' -and $rest -notmatch '\s(--unset\S*|--add|--replace-all|--rename-section|--remove-section|--edit|-e)\b' -and
 				($rest -match '^\s+(get|list)\b|\s(--get\S*|--list|-l)\b' -or $operands.Count -eq 1)) -or
 			($subcommand -ceq 'remote' -and $rest -notmatch '^\s+(add|remove|rm|rename|set-\S+|prune|update)\b') -or
-			($subcommand -ceq 'branch' -and ($rest -match '\s(--list|-l|--show-current)\b' -or $operands.Count -eq 0)) -or
+			# git lists when given any of these flags, and refuses a branch name after -a or -r.
+			($subcommand -ceq 'branch' -and ($rest -match '\s(--(list|show-current|contains|no-contains|merged|no-merged|points-at|verbose|all|remotes)\b|-[alrv]+\b)' -or $operands.Count -eq 0)) -or
+			($subcommand -ceq 'archive' -and ($rest -replace '\\', '/') -notmatch '(?i)(?:-o\s*|--output[=\s]\s*)["'']?(?:(?:[a-z]:|/[a-z])?/users/(?:chris|claude)/dev/|~/dev/)') -or
+			($subcommand -ceq 'hash-object' -and $rest -notmatch '\s-w\b') -or
+			($subcommand -ceq 'symbolic-ref' -and $rest -notmatch '\s(-d|--delete)\b' -and $operands.Count -le 1) -or
 			($subcommand -ceq 'reflog' -and $rest -notmatch '^\s+(expire|delete)\b') -or
 			($subcommand -ceq 'worktree' -and $rest -match '^\s+list\b') -or
 			($subcommand -ceq 'stash' -and $rest -match '^\s+(list|show)\b')
 		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $readOnly) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list and stash list/show."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}

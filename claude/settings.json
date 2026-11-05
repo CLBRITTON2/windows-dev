@@ -1,5 +1,9 @@
 {
-  "attribution": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "permissions": {
     "allow": [
       "Bash(ls *)",
@@ -125,12 +129,6 @@
     ],
     "defaultMode": "auto"
   },
-  "autoMode": {
-    "soft_deny": [
-      "$defaults",
-      "Shell writes to repo files: creating, changing, renaming or deleting files under ~/dev through a shell command, interpreter or script, including relative paths, since the shell starts inside a repo. Examples: sed -i, perl -i, redirection or heredoc, tee, cp, mv, rm, touch, patch, git apply, Set-Content, Out-File, [IO.File] writes, and node, pwsh or other scripts that write files, including a script written elsewhere that then writes into ~/dev. Repo changes go through the Edit or Write tool so the owner reviews the diff. Not this rule: package managers, builds, tests, formatters and code generators writing their usual outputs (node_modules, build and dist directories, lockfiles, go.sum, gofmt -w), and any write outside ~/dev, such as the session scratchpad."
-    ]
-  },
   "model": "opus",
   "hooks": {
     "PreToolUse": [
@@ -193,6 +191,7 @@
       }
     ]
   },
+  "bashOutputMaxChars": 10000,
   "statusLine": {
     "type": "command",
     "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/statusline.ps1"
@@ -206,16 +205,21 @@
   "effortLevel": "high",
   "modelSettings": {
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "xhigh"
     }
   },
   "autoCompactWindow": 200000,
-  "bashOutputMaxChars": 10000,
   "promptSuggestionEnabled": false,
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "autoMemoryEnabled": false,
   "skipWorkflowUsageWarning": true,
-  "theme": "dark",
-  "switchModelsOnFlag": false
+  "theme": "custom:terminal",
+  "switchModelsOnFlag": false,
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Shell writes to repo files: creating, changing, renaming or deleting files under ~/dev through a shell command, interpreter or script, including relative paths, since the shell starts inside a repo. Examples: sed -i, perl -i, redirection or heredoc, tee, cp, mv, rm, touch, patch, git apply, Set-Content, Out-File, [IO.File] writes, and node, pwsh or other scripts that write files, including a script written elsewhere that then writes into ~/dev. Repo changes go through the Edit or Write tool so the owner reviews the diff. Not this rule: package managers, builds, tests, formatters and code generators writing their usual outputs (node_modules, build and dist directories, lockfiles, go.sum, gofmt -w), and any write outside ~/dev, such as the session scratchpad."
+    ]
+  }
 }

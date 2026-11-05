@@ -79,7 +79,8 @@ a code file is touched.
 
 ## Environment
 
-- WSL (zsh) for POSIX work.
-- Build mostly in Go, CMake, and node (npm and yarn). I work in the openziti and netfoundry ecosystems,
-  `ziti` CLI is on my path.
+- I use WSL (zsh) for POSIX work. The agent account has its own distro, `Ubuntu-24.04` (bash as root, with go, jq,
+  curl and unzip), stored in `~\VMs\wsl-ubuntu`.
+- Build mostly in Go, CMake, and node (npm and yarn). I work in the openziti and netfoundry ecosystems.
+  `ziti` is on my PATH but not the agent's, which runs the builds kept in `~\VMs\bins\ziti\<version>\ziti.exe`.
 - Match the toolchain already present in a repo. Do not introduce a new build system.

@@ -5,8 +5,9 @@ Keeps Claude Code from ending a turn whose code edits break the rules in claude/
 .DESCRIPTION
 Claude Code runs this as a Stop hook. It collects the successful Edit and Write calls since the last user prompt on
 files under ~/dev that the rules' paths: globs match, and has Haiku check the text they wrote against the rules in a nested claude -p
-run. Findings come back as a block reason, which sends Claude back to fix them or say why a finding is wrong. A turn
-already continuing because of a Stop hook is not checked again, so each turn gets one correction round.
+run. Findings come back as a block reason, which sends Claude back to fix them or say why a finding is wrong. The edits
+made after that feedback are checked once more, so a rewrite that keeps a violation is caught. A turn gets at most two
+checks.
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -18,9 +19,6 @@ $attempts = 3
 
 $reader = [System.IO.StreamReader]::new([Console]::OpenStandardInput(), [System.Text.UTF8Encoding]::new($false))
 $payload = $reader.ReadToEnd() | ConvertFrom-Json
-if ($payload.stop_hook_active) {
-    exit 0
-}
 
 $rulesText = [System.IO.File]::ReadAllText($rulesPath)
 $rulesParts = [regex]::Match($rulesText, '\A---\r?\n(?<head>.*?)\r?\n---\r?\n(?<body>.*)\z', 'Singleline')
@@ -51,6 +49,18 @@ for ($i = $lines.Count - 1; $i -ge 0; $i--) {
         break
     }
     $turn.Insert(0, $entry)
+}
+
+$feedbackPrefix = 'A Haiku check against ~/.claude/rules/code.md flagged'
+[int[]]$feedbackIndexes = @(0..($turn.Count - 1) | Where-Object {
+        $turn[$_].type -eq 'user' -and $turn[$_].isMeta -and "$($turn[$_].message.content)".Contains($feedbackPrefix)
+    })
+if ($payload.stop_hook_active) {
+    # Zero means another Stop hook continued the turn after this one passed it. Two means the re-check already ran.
+    if ($feedbackIndexes.Count -ne 1) {
+        exit 0
+    }
+    $turn = [System.Collections.Generic.List[psobject]]@($turn | Select-Object -Skip ($feedbackIndexes[0] + 1))
 }
 
 [string[]]$failedIds = @($turn | ForEach-Object { $_.message.content } |
@@ -110,5 +120,5 @@ if ($violations.Count -eq 0) {
 $findings = ($violations | ForEach-Object { "- $($_.file): ``$($_.quote)`` breaks: $($_.rule)" }) -join "`n"
 @{
     decision = 'block'
-    reason   = "A Haiku check against ~/.claude/rules/code.md flagged lines written this turn. Fix each one, or say in your reply why a finding is wrong:`n$findings"
+    reason   = "$feedbackPrefix lines written this turn. Fix each one, or say in your reply why a finding is wrong:`n$findings"
 } | ConvertTo-Json -Compress
