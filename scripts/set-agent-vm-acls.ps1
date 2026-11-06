@@ -1,0 +1,63 @@
+#Requires -Version 7.4
+#Requires -RunAsAdministrator
+<#
+.SYNOPSIS
+  Limit the agent VM's network adapter to DHCP, the internet and ssh from the host with extended port ACLs.
+
+.DESCRIPTION
+  Denies, in both directions, every private, link-local, CGNAT and multicast range, IPv6, and each public address the
+  host's ziti tunnel intercepts. The VM sits on the Default Switch, where the host routes its traffic, so an
+  intercepted public address would reach the owner's ziti services. Rerun after adding a ziti service that intercepts
+  a public address. The rules also deny the switch's DNS proxy on the host, so the guest must use public DNS servers.
+
+  Keep this script in $ownerExecPaths in setup-claude.ps1, so the agent account cannot change the rules it runs under.
+#>
+param(
+    [Parameter(Mandatory)] [string] $VmName
+)
+$ErrorActionPreference = 'Stop'
+
+$blockedRanges = '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '169.254.0.0/16', '100.64.0.0/10', '224.0.0.0/4'
+
+# Get-NetRoute throws when ziti-tun0 is missing, so a stopped tunnel cannot leave its intercepts out.
+$interceptedPrefixes = @(Get-NetRoute -InterfaceAlias ziti-tun0 -AddressFamily IPv4 |
+    ForEach-Object DestinationPrefix | Sort-Object -Unique |
+    Where-Object {
+        $routePrefix = $_
+        $routeNetwork = [Net.IPNetwork]::Parse($routePrefix)
+        $coveringRanges = @($blockedRanges | Where-Object {
+            $blockedNetwork = [Net.IPNetwork]::Parse($_)
+            $routeNetwork.PrefixLength -ge $blockedNetwork.PrefixLength -and $blockedNetwork.Contains($routeNetwork.BaseAddress)
+        })
+        # The tunnel's limited broadcast route is not an intercept.
+        $routePrefix -ne '255.255.255.255/32' -and -not $coveringRanges
+    })
+Write-Host "==> ziti intercepts denied besides the blocked ranges: $($interceptedPrefixes -join ', ')"
+
+# The new rules take the weight bank the old ones do not use and the old ones go after, so the VM is never without
+# its denies. Higher weight applies first.
+$oldRules = @(Get-VMNetworkAdapterExtendedAcl -VMName $VmName)
+if ($oldRules | Where-Object Weight -ge 500) {
+    $bankBase = 0
+} else {
+    $bankBase = 500
+}
+
+Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Outbound -Protocol UDP -LocalPort 68 -RemotePort 67 -Weight ($bankBase + 400)
+Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Inbound -Protocol UDP -LocalPort 68 -RemotePort 67 -Weight ($bankBase + 399)
+# Stateful, so the VM's packets to the host pass only as replies on an ssh connection the host opened.
+Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Inbound -Protocol TCP -LocalPort 22 -Stateful $true -Weight ($bankBase + 450)
+
+$deniedPrefixes = @($blockedRanges) + $interceptedPrefixes + '::/0'
+for ($prefixIndex = 0; $prefixIndex -lt $deniedPrefixes.Count; $prefixIndex++) {
+    $outboundWeight = $bankBase + 300 - 2 * $prefixIndex
+    Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Deny -Direction Outbound -RemoteIPAddress $deniedPrefixes[$prefixIndex] -Weight $outboundWeight
+    Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Deny -Direction Inbound -RemoteIPAddress $deniedPrefixes[$prefixIndex] -Weight ($outboundWeight - 1)
+}
+
+if ($oldRules) {
+    $oldRules | Remove-VMNetworkAdapterExtendedAcl
+}
+
+Get-VMNetworkAdapterExtendedAcl -VMName $VmName | Sort-Object Weight -Descending |
+    Format-Table Weight, Direction, Action, RemoteIPAddress, Protocol, LocalPort, RemotePort

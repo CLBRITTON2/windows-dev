@@ -137,8 +137,12 @@ if ($env:USERNAME -ne 'claude') {
         $command = "claude $($args -join ' ')"
         Start-Process runas -ArgumentList "/user:claude /savecred `"pwsh -NoLogo -NoExit -Command $command`""
     }
+    # herdr's server and its Claude panes run in claude-vm (scripts/new-agent-vm.ps1), reached through the claude-vm
+    # alias in ~\.ssh\config. The local client attaches over ssh because mouse clicks do not survive `ssh -t` into the
+    # VM. The binary is the owner's own install, never the agent's copy, which the agent can replace.
     function herdr {
-        Start-Process runas -WindowStyle Hidden -ArgumentList "/user:claude /savecred `"wezterm-gui.exe start -- herdr`""
+        Start-Process wezterm-gui.exe -ArgumentList 'start', '--', "$env:LOCALAPPDATA\Programs\Herdr\bin\herdr.exe",
+            '--remote', 'claude-vm'
     }
 }
 
