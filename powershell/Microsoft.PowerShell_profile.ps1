@@ -1,3 +1,7 @@
+# An ssh command without a terminal, such as perusal's session or its git fetches, skips the profile's 200 ms. sshd hands
+# the shell a single option, so DefaultShellCommandOption cannot add -NoProfile.
+if ($env:SSH_CONNECTION -and [Console]::IsInputRedirected) { return }
+
 # ── Prompt ──
 function prompt {
     if ($PWD.Provider.Name -eq 'FileSystem') { [Environment]::CurrentDirectory = $PWD.ProviderPath }

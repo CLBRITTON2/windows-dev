@@ -81,6 +81,10 @@ Install-WingetPackage Microsoft.PowerShell @('--installer-type', 'wix', '--scope
 New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Force `
     -Value "$env:ProgramFiles\PowerShell\7\pwsh.exe" | Out-Null
 
+# Nothing in the VM searches, and the indexer took most of a core while perusal polled.
+Stop-Service WSearch -Force
+Set-Service WSearch -StartupType Disabled
+
 # winget installs update the registry PATH but not this session's copy.
 $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
     [Environment]::GetEnvironmentVariable('Path', 'User')
