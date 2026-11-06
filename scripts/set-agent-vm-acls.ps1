@@ -10,8 +10,6 @@
   traffic, so an intercepted public address would reach the owner's ziti services. Rerun after starting a ziti tunnel
   or adding a ziti service that intercepts a public address. The rules also deny the switch's DNS proxy on the host,
   so the guest must use public DNS servers.
-
-  Keep this script in $ownerExecPaths in setup-claude.ps1, so the agent account cannot change the rules it runs under.
 #>
 param(
     [Parameter(Mandatory)] [string] $VmName

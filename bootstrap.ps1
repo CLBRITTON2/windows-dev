@@ -1,12 +1,11 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Set up a fresh Windows machine: clone this repo, then run setup-packages.ps1, setup-configs.ps1, and
-  setup-claude.ps1 in that order.
+  Set up a fresh Windows machine: clone this repo, then run setup-packages.ps1 and setup-configs.ps1 in that order.
 
 .DESCRIPTION
   Runs under Windows PowerShell 5.1 because a fresh machine has no pwsh 7 yet. setup-packages.ps1 installs it,
-  and the other two run under it. Safe to rerun: the clone is skipped when the repo exists.
+  and setup-configs.ps1 runs under it. Safe to rerun: the clone is skipped when the repo exists.
 #>
 param(
     # Passed to setup-configs.ps1, which documents the layouts.
@@ -40,8 +39,5 @@ if (-not (Test-Path $repo)) {
 & $pwsh -NoProfile -File "$repo\scripts\setup-configs.ps1" -Layout $Layout
 if ($LASTEXITCODE -ne 0) { throw "setup-configs.ps1 failed with exit code $LASTEXITCODE" }
 
-& $pwsh -NoProfile -File "$repo\scripts\setup-claude.ps1"
-if ($LASTEXITCODE -ne 0) { throw "setup-claude.ps1 failed with exit code $LASTEXITCODE" }
-
 Write-Host ""
-Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, thide, VsVim, /login, gh auth login." -ForegroundColor Yellow
+Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, thide, VsVim, new-agent-vm.ps1." -ForegroundColor Yellow

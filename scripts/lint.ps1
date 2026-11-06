@@ -120,98 +120,6 @@ function Test-Dash([string]$path, [ProseLine[]]$proseLines) {
     return $failures
 }
 
-function Get-RepoPath([System.Management.Automation.Language.ExpandableStringExpressionAst]$string, [string]$repoRoot) {
-    # $repo becomes the repo root. Any other embedded expression, such as $($Layout.ToLower()), becomes a wildcard so
-    # the path covers every value it can take.
-    $path = $string.Value
-    foreach ($nested in $string.NestedExpressions) {
-        $replacement = if ($nested.Extent.Text -eq '$repo') { $repoRoot } else { '*' }
-        $path = $path.Replace($nested.Extent.Text, $replacement)
-    }
-    return $path
-}
-
-function Get-OwnerExecPath([string]$repoRoot) {
-    $script = Join-Path $repoRoot 'scripts\setup-claude.ps1'
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
-    $assignment = $ast.Find({
-            param($node)
-            $node -is [System.Management.Automation.Language.AssignmentStatementAst] -and
-            $node.Left.Extent.Text -eq '$ownerExecPaths'
-        }, $true)
-    if (-not $assignment) {
-        throw "no `$ownerExecPaths assignment in ${script}"
-    }
-    $strings = $assignment.Right.FindAll({
-            param($node) $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
-        }, $true)
-    return @($strings | ForEach-Object { Get-RepoPath $_ $repoRoot })
-}
-
-function Get-LinkSource([string]$repoRoot) {
-    $linkScripts = @(Join-Path $repoRoot 'scripts\setup-configs.ps1')
-    $sources = @()
-    foreach ($script in $linkScripts) {
-        $ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
-        $links = $ast.FindAll({
-                param($node)
-                $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -eq 'Link'
-            }, $true)
-        foreach ($link in $links) {
-            $pattern = Get-RepoPath $link.CommandElements[2] $repoRoot
-            $matched = @(Get-Item -Path $pattern -Force -ErrorAction Ignore)
-            if ($matched.Count -eq 0) {
-                throw "Link source ${pattern} in ${script}:$($link.Extent.StartLineNumber) matches no file"
-            }
-            $sources += $matched.FullName
-        }
-    }
-    return $sources
-}
-
-function Get-LaunchedScript([string]$repoRoot) {
-    # Scripts the profile, GlazeWM, and the bar start by path.
-    $launchers = @(Join-Path $repoRoot 'powershell\Microsoft.PowerShell_profile.ps1') +
-        @(Get-ChildItem (Join-Path $repoRoot 'glazewm') -Filter '*.yaml' | ForEach-Object FullName) +
-        @(Join-Path $repoRoot 'intarsia\config.lua')
-    $references = @{
-        'windows-dev[\\/]([\w\\/.-]+\.(?:ps1|ahk))' = $repoRoot
-    }
-    $scripts = @()
-    foreach ($launcher in $launchers) {
-        $text = Get-Content $launcher -Raw
-        foreach ($reference in $references.GetEnumerator()) {
-            foreach ($match in [regex]::Matches($text, $reference.Key)) {
-                $scripts += Join-Path $reference.Value ($match.Groups[1].Value -replace '/', '\')
-            }
-        }
-    }
-    return $scripts
-}
-
-function Test-OwnerExecCoverage([string]$repoRoot, [string[]]$protectedPaths, [string[]]$ownerRunPaths) {
-    # Linked on purpose without a write block: the agent can already edit the code the CMake presets configure, and
-    # the Notepad++ themes hold no executable content.
-    $exempt = @(
-        Join-Path $repoRoot 'cmake\CMakeUserPreset.json'
-        Join-Path $repoRoot 'cmake\CMakeUserPresets.json'
-        Join-Path $repoRoot 'notepadpp\themes'
-    )
-    $failures = @()
-    foreach ($path in ($ownerRunPaths | Sort-Object -Unique)) {
-        if ($path -in $exempt) {
-            continue
-        }
-        $covered = $protectedPaths | Where-Object {
-            $path -eq $_ -or $path.StartsWith("$_\", [StringComparison]::OrdinalIgnoreCase)
-        }
-        if (-not $covered) {
-            $failures += "${path}: runs as the owner but is not in `$ownerExecPaths in scripts\setup-claude.ps1"
-        }
-    }
-    return $failures
-}
-
 function Test-WinKeyParity([string]$repoRoot) {
     # Every layout binds each Win chord on both keys, so either keyboard works with any layout.
     $failures = @()
@@ -231,8 +139,6 @@ function Test-WinKeyParity([string]$repoRoot) {
 $failures = @()
 $failures += Test-JsonSyntax (Get-TrackedFile $RepoRoot '*.json')
 $failures += Test-PowerShellSyntax (Get-TrackedFile $RepoRoot '*.ps1')
-$failures += Test-OwnerExecCoverage $RepoRoot (Get-OwnerExecPath $RepoRoot) `
-    ((Get-LinkSource $RepoRoot) + (Get-LaunchedScript $RepoRoot))
 $failures += Test-WinKeyParity $RepoRoot
 
 foreach ($path in Get-TrackedFile $RepoRoot '*.md') {

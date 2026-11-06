@@ -27,7 +27,7 @@ Open Windows PowerShell as administrator and run, picking your layout:
 & ([scriptblock]::Create((irm -UseBasicParsing https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Single
 ```
 
-[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the three setup
+[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the two setup
 scripts in order. Each one is safe to rerun on its own:
 
 - [`scripts/setup-packages.ps1`](scripts/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
@@ -36,9 +36,6 @@ scripts in order. Each one is safe to rerun on its own:
   `glazewm/winkey-fix.ahk` needs to hand Win+L to GlazeWM.
 - [`scripts/setup-configs.ps1`](scripts/setup-configs.ps1) `-Layout` (pwsh): links every config and the GlazeWM
   layout.
-- [`scripts/setup-claude.ps1`](scripts/setup-claude.ps1) (elevated pwsh): the Claude Code account, its
-  permissions, and its `~/.claude`. Its [`agent-bootstrap.ps1`](scripts/agent-bootstrap.ps1) installs Claude Code
-  and herdr for the account and links the herdr plugin.
 
 Then by hand:
 
@@ -47,8 +44,8 @@ Then by hand:
 - Install the VsVim 2022 extension from Visual Studio's Extensions menu.
 - Reboot, then install a WSL distro with `wsl --install Ubuntu`.
 - Copy perusal to `~\dev\perusal` (it has no remote) and run `go -C ~\dev\perusal install ./cmd/perusal`.
-- Run `claude`, then `/login`.
-- Run `gh auth login` with a read-only PAT.
+- Build the agent VM with [`scripts/new-agent-vm.ps1`](scripts/new-agent-vm.ps1), then run `claude` there and
+  `/login`.
 
 ## Layouts
 
@@ -72,14 +69,13 @@ Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/
 
 ## Claude Code
 
-Claude Code runs as its own standard Windows account, `claude`. It can edit `~/dev` and nothing else in my
-profile, and it cannot commit, push, or change the scripts and configs that run as me. The `claude` command in
-the PowerShell profile starts a session as that account. Details are in
-[`scripts/setup-claude.ps1`](scripts/setup-claude.ps1).
+Claude Code runs as the account `claude` in a Hyper-V VM built by
+[`scripts/new-agent-vm.ps1`](scripts/new-agent-vm.ps1). The VM reaches the internet but not the host, the LAN, or
+my ziti services, and its `gh` token is read-only.
 
 - [`claude/context.md`](claude/context.md) holds the working rules. `~/.claude/CLAUDE.md` links to it.
 - [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a
-  guardrail, not a security boundary. The account is the boundary.
+  guardrail, not a security boundary. The VM is the boundary.
 - [`claude/statusline.ps1`](claude/statusline.ps1) draws the status line.
 - [`scripts/clean-agent.ps1`](scripts/clean-agent.ps1), run as the account, deletes the scratch folders of
   sessions idle for a week.

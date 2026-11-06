@@ -1,7 +1,7 @@
 #Requires -Version 7
 <#
 .SYNOPSIS
-  Prepare the agent account's own home. Runs as the agent, launched by setup-claude.ps1.
+  Prepare the agent account's own home. Runs as the agent in the agent VM, started by agent-vm-bootstrap.ps1.
 
 .DESCRIPTION
   Junctions <agent home>\dev onto the owner's dev root so the ~/dev paths in the shared settings.json resolve
@@ -9,12 +9,7 @@
   sets it for the session it runs in), marks the owner's repos safe for git, installs Claude Code and herdr, and
   links this repo's herdr focus-file plugin.
 
-  Also links the account's dotfiles from this repo. File symlinks need Developer Mode (setup-packages.ps1 turns it
-  on). Linking here instead of in the elevated caller means no elevated write lands in a home this account
-  controls, where a junction it planted could redirect the write.
-
-  Signals completion by writing $OwnerDevRoot\.agent-bootstrap-complete, which the caller polls for because
-  runas returns as soon as it has spawned the child.
+  Also links the account's dotfiles from this repo.
 #>
 [CmdletBinding()]
 param(
@@ -96,5 +91,4 @@ foreach ($skill in Get-ChildItem "$repo\claude\skills" -Directory) {
 }
 foreach ($l in $agentLinks) { Link "$HOME\$($l.Leaf)" $l.Source $backupRoot }
 
-'ok' | Set-Content -LiteralPath "$OwnerDevRoot\.agent-bootstrap-complete"
 Write-Host "agent-bootstrap done" -ForegroundColor Green

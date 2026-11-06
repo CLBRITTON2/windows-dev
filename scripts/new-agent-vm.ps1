@@ -13,7 +13,7 @@
 
   Runs elevated, so the agent account on the host must not be able to change anything it reads: -VmDir must not
   exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus Hyper-V Administrators), and
-  -InstallIso must be in your profile outside ~\dev. Keep this script in $ownerExecPaths in setup-claude.ps1.
+  -InstallIso must be in your profile outside ~\dev, where perusal mirrors the agent's edits.
 
   The guest Administrator password stays in -VmDir\administrator.password, for PowerShell Direct from the host.
 
