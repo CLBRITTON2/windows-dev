@@ -11,11 +11,13 @@
   not the host, the LAN, or the owner's ziti services, and only the host and its other Default Switch VMs can open a
   connection to it, on ssh.
 
-  Runs elevated, so the agent must not be able to change anything it reads: -VmDir must not
-  exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus Hyper-V Administrators), and
-  -InstallIso must be in your profile outside ~\dev, where perusal mirrors the agent's edits.
+  Runs elevated, so the agent must not be able to change anything it reads: the VM's folder,
+  %ProgramData%\<VmName>, must not exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus
+  Hyper-V Administrators), and -InstallIso must be in your profile outside ~\dev, where perusal mirrors the agent's
+  edits.
 
-  The guest Administrator password stays in -VmDir\administrator.password, for PowerShell Direct from the host.
+  The guest Administrator password stays in %ProgramData%\<VmName>\administrator.password, for PowerShell Direct
+  from the host.
 
   Then it trusts the guest's ssh host key in ~\.ssh\known_hosts, and over ssh runs agent-vm-bootstrap.ps1 in the
   guest, which installs the toolchain, logs gh in with the token this script asks for first, and clones every
@@ -25,8 +27,7 @@
 param(
     [Parameter(Mandatory)] [string] $InstallIso,
     [Parameter(Mandatory)] [string] $AuthorizedKeyPath,
-    [Parameter(Mandatory)] [string] $VmName,
-    [Parameter(Mandatory)] [string] $VmDir
+    [Parameter(Mandatory)] [string] $VmName
 )
 $ErrorActionPreference = 'Stop'
 # Full paths, since this runs elevated and a PATH folder the agent can write could otherwise supply the tool.
@@ -38,6 +39,8 @@ $icacls = "$env:SystemRoot\System32\icacls.exe"
 # characters.
 if ($VmName -notmatch '^[A-Za-z][A-Za-z0-9-]{0,14}$') { throw "VmName must be a computer name of 1 to 15 letters, digits and hyphens: $VmName" }
 $vmHost = "$VmName.mshome.net".ToLowerInvariant()
+# Holds the VM, its disk, the guest password and the answer file.
+$vmDir = Join-Path $env:ProgramData $VmName
 
 # Checked first, so a wrong Host entry does not fail the run after the 45 minute install. Without one, ssh -G gives
 # the name itself as the hostname.
@@ -94,14 +97,14 @@ if ($authorizedKey -notmatch '^(ssh-ed25519|ecdsa-sha2-nistp256|ssh-rsa) [A-Za-z
 
 if (Get-VM -Name $VmName -ErrorAction SilentlyContinue) { throw "VM $VmName already exists" }
 # Any user can create a folder under ProgramData and would own it, and an owner can always rewrite its ACL.
-if (Test-Path -LiteralPath $VmDir) { throw "$VmDir already exists. Check who owns it, delete it, and rerun" }
-New-Item -ItemType Directory -Path $VmDir | Out-Null
-& $icacls $VmDir /inheritance:r /grant:r '*S-1-5-32-544:(OI)(CI)(F)' '*S-1-5-18:(OI)(CI)(F)' `
+if (Test-Path -LiteralPath $vmDir) { throw "$vmDir already exists. Check who owns it, delete it, and rerun" }
+New-Item -ItemType Directory -Path $vmDir | Out-Null
+& $icacls $vmDir /inheritance:r /grant:r '*S-1-5-32-544:(OI)(CI)(F)' '*S-1-5-18:(OI)(CI)(F)' `
     '*S-1-5-83-0:(R,WD,AD)' '*S-1-5-83-0:(CI)(IO)(GR,WD,AD)'
-if ($LASTEXITCODE -ne 0) { throw "icacls on $VmDir failed (exit $LASTEXITCODE)" }
+if ($LASTEXITCODE -ne 0) { throw "icacls on $vmDir failed (exit $LASTEXITCODE)" }
 # Until the line above, the folder inherited ProgramData's grant that lets every user create entries in it.
-$strayEntries = @(Get-ChildItem -LiteralPath $VmDir -Force)
-if ($strayEntries) { throw "$VmDir got entries before its ACL was set: $($strayEntries.FullName -join ', ')" }
+$strayEntries = @(Get-ChildItem -LiteralPath $vmDir -Force)
+if ($strayEntries) { throw "$vmDir got entries before its ACL was set: $($strayEntries.FullName -join ', ')" }
 
 $alphabet = [char[]]'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
 # Windows password complexity wants three character classes, here upper case, lower case and digits.
@@ -109,9 +112,9 @@ do {
     $passwordBytes = [Security.Cryptography.RandomNumberGenerator]::GetBytes(24)
     $password = -join ($passwordBytes | ForEach-Object { $alphabet[$_ % $alphabet.Length] })
 } until ($password -cmatch '[A-Z]' -and $password -cmatch '[a-z]' -and $password -match '[2-9]')
-Set-Content -LiteralPath (Join-Path $VmDir 'administrator.password') -NoNewline -Value $password
+Set-Content -LiteralPath (Join-Path $vmDir 'administrator.password') -NoNewline -Value $password
 
-$answerDir = Join-Path $VmDir 'answer'
+$answerDir = Join-Path $vmDir 'answer'
 New-Item -ItemType Directory -Path $answerDir | Out-Null
 (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'agent-vm-autounattend.template.xml') -Raw).
     Replace('__PASSWORD__', $password).Replace('__TIME_ZONE__', (Get-TimeZone).Id).
@@ -119,7 +122,7 @@ New-Item -ItemType Directory -Path $answerDir | Out-Null
     Set-Content -LiteralPath (Join-Path $answerDir 'autounattend.xml') -NoNewline
 
 # Setup reads autounattend.xml from the root of any removable media, so the answer file rides on a second DVD.
-$answerIso = Join-Path $VmDir 'answer.iso'
+$answerIso = Join-Path $vmDir 'answer.iso'
 Add-Type -TypeDefinition @"
 using System;
 using System.IO;
@@ -149,11 +152,11 @@ $fileSystemImage.Root.AddTree($answerDir, $false)
 [IsoStreamWriter]::Write($fileSystemImage.CreateResultImage().ImageStream, $answerIso)
 
 # 4 GB to start, the least Windows 11 setup takes, so the VM boots beside another one. Dynamic memory grows it.
-New-VM -Name $VmName -Generation 2 -MemoryStartupBytes 4GB -NewVHDPath (Join-Path $VmDir "$VmName.vhdx") `
-    -NewVHDSizeBytes 120GB -SwitchName 'Default Switch' -Path $VmDir | Out-Null
+New-VM -Name $VmName -Generation 2 -MemoryStartupBytes 4GB -NewVHDPath (Join-Path $vmDir "$VmName.vhdx") `
+    -NewVHDSizeBytes 120GB -SwitchName 'Default Switch' -Path $vmDir | Out-Null
 & (Join-Path $PSScriptRoot 'set-agent-vm-acls.ps1') -VmName $VmName
 # ShutDown instead of the default Save, which keeps a file the size of the VM's memory next to it.
-Set-VM -Name $VmName -ProcessorCount 12 -DynamicMemory -MemoryMinimumBytes 4GB -MemoryMaximumBytes 16GB `
+Set-VM -Name $VmName -ProcessorCount 12 -DynamicMemory -MemoryMinimumBytes 2GB -MemoryMaximumBytes 10GB `
     -AutomaticCheckpointsEnabled $false -AutomaticStopAction ShutDown
 Set-VMFirmware -VMName $VmName -SecureBootTemplate MicrosoftWindows
 # Windows 11 setup refuses a machine without TPM 2.0.
@@ -266,7 +269,7 @@ $repos = @(Get-Item -Path "$devRoot\*\.git", "$devRoot\*\*\.git" -Force |
 $gitUserName = & $git config --global user.name
 $gitUserEmail = & $git config --global user.email
 if (-not $gitUserName -or -not $gitUserEmail) { throw 'git config --global user.name and user.email must be set' }
-$setupPath = Join-Path $VmDir 'agent-vm.json'
+$setupPath = Join-Path $vmDir 'agent-vm.json'
 [pscustomobject]@{ devRoot = $devRoot; gitUserName = $gitUserName; gitUserEmail = $gitUserEmail; repos = $repos } |
     ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $setupPath -Encoding utf8NoBOM
 
