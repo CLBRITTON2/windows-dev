@@ -148,11 +148,12 @@ $fileSystemImage.VolumeName = 'ANSWER'
 $fileSystemImage.Root.AddTree($answerDir, $false)
 [IsoStreamWriter]::Write($fileSystemImage.CreateResultImage().ImageStream, $answerIso)
 
-New-VM -Name $VmName -Generation 2 -MemoryStartupBytes 8GB -NewVHDPath (Join-Path $VmDir "$VmName.vhdx") `
+# 4 GB to start, the least Windows 11 setup takes, so the VM boots beside another one. Dynamic memory grows it.
+New-VM -Name $VmName -Generation 2 -MemoryStartupBytes 4GB -NewVHDPath (Join-Path $VmDir "$VmName.vhdx") `
     -NewVHDSizeBytes 120GB -SwitchName 'Default Switch' -Path $VmDir | Out-Null
 & (Join-Path $PSScriptRoot 'set-agent-vm-acls.ps1') -VmName $VmName
 # ShutDown instead of the default Save, which keeps a file the size of the VM's memory next to it.
-Set-VM -Name $VmName -ProcessorCount 12 -DynamicMemory -MemoryMinimumBytes 8GB -MemoryMaximumBytes 16GB `
+Set-VM -Name $VmName -ProcessorCount 12 -DynamicMemory -MemoryMinimumBytes 4GB -MemoryMaximumBytes 16GB `
     -AutomaticCheckpointsEnabled $false -AutomaticStopAction ShutDown
 Set-VMFirmware -VMName $VmName -SecureBootTemplate MicrosoftWindows
 # Windows 11 setup refuses a machine without TPM 2.0.
@@ -213,7 +214,9 @@ $guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList
     # The first start writes the host keys and copies sshd_config_default to sshd_config.
     Start-Service sshd
     # sshd keeps the first value it reads for a keyword, so these go above the defaults.
-    $sshdConfig = @('PasswordAuthentication no', 'AllowUsers claude') + (Get-Content -LiteralPath "$sshDir\sshd_config")
+    # The ACLs' stateful ssh rule forgets a connection idle for 255 s, so keep it busier than that.
+    $sshdConfig = @('PasswordAuthentication no', 'AllowUsers claude', 'ClientAliveInterval 60') +
+        (Get-Content -LiteralPath "$sshDir\sshd_config")
     Set-Content -LiteralPath "$sshDir\sshd_config" -Encoding ascii -Value $sshdConfig
     Set-Content -LiteralPath "$sshDir\administrators_authorized_keys" -Encoding ascii -Value $authorizedKey
     # sshd ignores this file unless only Administrators and SYSTEM can write it.
@@ -221,6 +224,9 @@ $guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList
     if ($LASTEXITCODE -ne 0) { throw "icacls on administrators_authorized_keys failed (exit $LASTEXITCODE)" }
     # Windows puts a network it has not seen in the Public profile, so the rule must not be limited to Private.
     Set-NetFirewallRule -Name OpenSSH-Server-In-TCP -Profile Any -Enabled True
+    # The default login shell is cmd, which splits PowerShell pipelines and breaks git's quoted ssh paths.
+    New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Force `
+        -Value "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" | Out-Null
     Restart-Service sshd
 
     [pscustomobject]@{

@@ -66,7 +66,8 @@ if (-not (Test-Path "$binDir\claude.exe")) {
 
 if (-not (Test-Path $herdr)) {
     Write-Host "  installing herdr"
-    Invoke-RestMethod https://herdr.dev/install.ps1 | Invoke-Expression
+    # A child scope, since the installer turns on Set-StrictMode, which then breaks the plugin list read below.
+    & ([scriptblock]::Create((Invoke-RestMethod https://herdr.dev/install.ps1)))
 }
 
 $plugins = & $herdr plugin list --json | ConvertFrom-Json
