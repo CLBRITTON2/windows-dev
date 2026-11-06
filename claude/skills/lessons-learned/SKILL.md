@@ -2,7 +2,7 @@
 name: lessons-learned
 description: >
   Close out the session: distill what it settled about the projects touched into their context files
-  (the per-project CLAUDE.md under ~/dev/agents/context), and leave them uncommitted for the owner. No args.
+  (the per-project CLAUDE.md under ~/dev/agents/context), and leave them uncommitted for the user. No args.
 ---
 
 Type `~` paths literally and unquoted so bash expands them.
@@ -36,9 +36,9 @@ dash, no semicolon, wrap at 120 columns. Leave the Verified line alone.
 
 A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.md`, opened with the same
 `Verified against <owner/repo> <short sha> (<date>)` header the other files use, sha read from
-`.git/HEAD` and its ref. The symlink needs the owner's `setup-configs.ps1`, so name that as a follow-up.
+`.git/HEAD` and its ref. The symlink needs the user's `setup-configs.ps1`, so name that as a follow-up.
 
 ## Report
 
-The owner commits the agents repo, so never run git. Report at most three lines: the absolute path of every file
+The user commits the agents repo, so never run git. Report at most three lines: the absolute path of every file
 edited, or that nothing settled.

@@ -8,26 +8,31 @@
   Installs Windows 11 Enterprise unattended from its 90-day evaluation ISO, with a local administrator account
   claude that accepts ssh logons only with the key in -AuthorizedKeyPath. The VM sits on the Default Switch behind
   the extended port ACLs of set-agent-vm-acls.ps1, so on any network the laptop joins it reaches the internet but
-  not the host, the LAN, or the owner's ziti services, and only the host and its other Default Switch VMs can open a
+  not the host, the LAN, or the host's ziti services, and only the host and its other Default Switch VMs can open a
   connection to it, on ssh.
 
   Runs elevated, so the agent must not be able to change anything it reads: the VM's folder,
   %ProgramData%\<VmName>, must not exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus
-  Hyper-V Administrators), and -InstallIso must be in your profile outside ~\dev, where perusal mirrors the agent's
+  Hyper-V Administrators), and -InstallIso must be in the user profile outside ~\dev, where perusal mirrors the agent's
   edits.
 
   The guest Administrator password stays in %ProgramData%\<VmName>\administrator.password, for PowerShell Direct
-  from the host.
+  from the host. claude has the same password, never expiring, and logs on to the guest's desktop at boot, so
+  run-in-console.ps1 can run tests that need a desktop. The script restarts the guest last for that.
 
   Then it trusts the guest's ssh host key in ~\.ssh\known_hosts, and over ssh runs agent-vm-bootstrap.ps1 in the
-  guest, which installs the toolchain, logs gh in with the token this script asks for first, and clones every
+  guest, which installs git, gh and pwsh, logs gh in with the token this script asks for first, and clones every
   repository under ~\dev into the same path there. Without a Host <VmName> entry in ~\.ssh\config, it adds one for
   <VmName>.mshome.net with the private key beside -AuthorizedKeyPath.
+
+  -PersonalSetupPath is a script with a personal toolchain and dotfiles, such as agent-vm-personal-setup.ps1, that
+  the bootstrap runs last in the guest. Without it the VM gets only git, gh, pwsh, Claude Code and herdr.
 #>
 param(
     [Parameter(Mandatory)] [string] $InstallIso,
     [Parameter(Mandatory)] [string] $AuthorizedKeyPath,
-    [Parameter(Mandatory)] [string] $VmName
+    [Parameter(Mandatory)] [string] $VmName,
+    [string] $PersonalSetupPath
 )
 $ErrorActionPreference = 'Stop'
 # Full paths, since this runs elevated and a PATH folder the agent can write could otherwise supply the tool.
@@ -76,7 +81,7 @@ if ($gitHubToken.Length -eq 0) { throw 'The GitHub token is empty' }
 $isoPath = [IO.Path]::GetFullPath($InstallIso)
 if (-not $isoPath.StartsWith("$HOME\", [StringComparison]::OrdinalIgnoreCase) -or
     $isoPath.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
-    throw "InstallIso must be in your profile outside ~\dev, since the agent's edits reach ~\dev and could replace it. Move the ISO, for example to ~\Downloads: $isoPath"
+    throw "InstallIso must be in the user profile outside ~\dev, since the agent's edits reach ~\dev and could replace it. Move the ISO, for example to ~\Downloads: $isoPath"
 }
 # A path that leads to some other file must not hand that file to the guest as a disc. ISO 9660 puts CD001 at 32769.
 $isoStream = [IO.File]::OpenRead($isoPath)
@@ -88,6 +93,17 @@ try {
     $isoStream.Dispose()
 }
 if ([Text.Encoding]::ASCII.GetString($isoSignature) -ne 'CD001') { throw "InstallIso is not an ISO 9660 image: $isoPath" }
+
+# Checked before the 45 minute install, like the ssh settings above.
+$bootstrapPath = Join-Path $PSScriptRoot 'agent-vm-bootstrap.ps1'
+if ($PersonalSetupPath) {
+    if (-not (Test-Path -LiteralPath $PersonalSetupPath -PathType Leaf)) { throw "PersonalSetupPath is not a file: $PersonalSetupPath" }
+    $bootstrapFiles = @($bootstrapPath, $PersonalSetupPath)
+    $bootstrapArguments = @('-PersonalSetupPath', (Split-Path -Leaf $PersonalSetupPath))
+} else {
+    $bootstrapFiles = @($bootstrapPath)
+    $bootstrapArguments = @()
+}
 
 # One public key line only, so a wrong path cannot copy some other file's content into the guest.
 $authorizedKey = (Get-Content -LiteralPath $AuthorizedKeyPath -Raw).Trim()
@@ -196,9 +212,16 @@ while ($true) {
 }
 Get-VMDvdDrive -VMName $VmName | Set-VMDvdDrive -Path $null
 
-$guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $authorizedKey -ScriptBlock {
-    param([string] $authorizedKey)
+$guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $authorizedKey, $password -ScriptBlock {
+    param([string] $authorizedKey, [string] $password)
     $ErrorActionPreference = 'Stop'
+    # A desktop session for run-in-console.ps1, since an ssh key logon has no desktop and no DPAPI.
+    Set-LocalUser -Name claude -PasswordNeverExpires $true
+    $winlogon = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+    Set-ItemProperty -LiteralPath $winlogon -Name AutoAdminLogon -Value '1'
+    Set-ItemProperty -LiteralPath $winlogon -Name DefaultDomainName -Value $env:COMPUTERNAME
+    Set-ItemProperty -LiteralPath $winlogon -Name DefaultUserName -Value 'claude'
+    Set-ItemProperty -LiteralPath $winlogon -Name DefaultPassword -Value $password
     # The ACLs on the VM's adapter deny the Default Switch's DNS proxy on the host.
     $guestAdapter = Get-NetAdapter | Where-Object InterfaceDescription -like 'Microsoft Hyper-V Network Adapter*'
     Set-DnsClientServerAddress -InterfaceIndex $guestAdapter.ifIndex -ServerAddresses 1.1.1.1, 9.9.9.9
@@ -273,12 +296,14 @@ $setupPath = Join-Path $vmDir 'agent-vm.json'
 [pscustomobject]@{ devRoot = $devRoot; gitUserName = $gitUserName; gitUserEmail = $gitUserEmail; repos = $repos } |
     ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $setupPath -Encoding utf8NoBOM
 
-& "$openSshDir\scp.exe" -q (Join-Path $PSScriptRoot 'agent-vm-bootstrap.ps1') $setupPath "${VmName}:"
+& "$openSshDir\scp.exe" -q @bootstrapFiles $setupPath "${VmName}:"
 if ($LASTEXITCODE -ne 0) { throw "scp to $VmName failed (exit $LASTEXITCODE)" }
 [Net.NetworkCredential]::new('', $gitHubToken).Password |
     & "$openSshDir\ssh.exe" $VmName powershell -NoProfile -ExecutionPolicy RemoteSigned -File agent-vm-bootstrap.ps1 `
-        -SetupPath agent-vm.json
+        -SetupPath agent-vm.json @bootstrapArguments
 if ($LASTEXITCODE -ne 0) { throw "agent-vm-bootstrap.ps1 in $VmName failed (exit $LASTEXITCODE)" }
+# Autologon takes effect at the next boot, and installers such as Visual Studio's ask for one too.
+Restart-VM -Name $VmName -Force -Wait -For Heartbeat
 
 Write-Host "==> $VmName is ready. Attach with: herdr --remote $VmName"
 Write-Host "    Then run claude in a pane once to log in."

@@ -15,7 +15,7 @@ $editedDirs = Join-Path $env:LOCALAPPDATA 'windows-dev\edited-dirs'
 $agentDevDir = Join-Path $HOME 'dev'
 $mutexTimeoutMs = 10000
 
-# Claude Code also names files through the target of the ~\dev junction, the owner's dev folder.
+# Claude Code also names files through the target of the ~\dev junction.
 function Get-AgentDevPath([string]$path) {
     $roots = @($agentDevDir) + @((Get-Item -LiteralPath $agentDevDir).Target | Where-Object { $_ })
     foreach ($root in $roots) {

@@ -1,24 +1,29 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Install the laptop's dev toolchain, PSFzf, vcpkg and the MSYS2 compilers in the agent VM, log gh in, clone the
-  owner's repositories, install Claude Code and herdr, and link the agent's dotfiles. Runs inside the VM as claude,
-  over ssh, started by new-agent-vm.ps1.
+  Install git, gh and pwsh in the agent VM, log gh in, clone the repositories, install Claude Code and herdr, then
+  dot-source the personal setup script if one is given. Runs inside the VM as claude, over ssh, started by
+  new-agent-vm.ps1.
 
 .DESCRIPTION
   Written for Windows PowerShell 5.1, since pwsh is one of the packages it installs. Rerunning it is safe: it skips
   packages that are already installed and does not upgrade them. Claude Code and herdr come from their own
   installers, since the winget Claude Code never updates itself and shadows the native one on PATH.
 
+  -PersonalSetupPath names a script beside this one with a personal toolchain and dotfiles, such as
+  agent-vm-personal-setup.ps1. It runs last, in this script's scope, so it can use $setup, $winget, $herdr and
+  Install-WingetPackage.
+
   The evaluation ISO ships winget 1.6, which cannot read the current package index, and an ssh logon never gets the
   winget source package, so it installs the latest winget and the source package first.
 
-  -SetupPath is the JSON new-agent-vm.ps1 writes: the owner's dev root, git identity, and each repository's path
+  -SetupPath is the JSON new-agent-vm.ps1 writes: the dev root, git identity, and each repository's path
   under the dev root and https URL. A repository already cloned is left alone. The first line of stdin is the
   read-only token gh logs in with.
 #>
 param(
-    [Parameter(Mandatory)] [string] $SetupPath
+    [Parameter(Mandatory)] [string] $SetupPath,
+    [string] $PersonalSetupPath
 )
 $ErrorActionPreference = 'Stop'
 $gitHubToken = [Console]::In.ReadLine()
@@ -67,23 +72,8 @@ function Install-WingetPackage([string] $packageId, [string[]] $extraArguments) 
     }
 }
 
-# The toolchain of winget/packages.json that the profile and the repos' builds use, without the desktop apps.
-foreach ($packageId in @(
-    'Git.Git'
-    'GitHub.cli'
-    'BurntSushi.ripgrep.MSVC'
-    'Rustlang.Rustup'
-    'Microsoft.VisualStudio.2022.Community'
-    'Kitware.CMake'
-    'GoLang.Go'
-    'OpenJS.NodeJS.LTS'
-    'Microsoft.Coreutils'
-    'eza-community.eza'
-    'junegunn.fzf'
-    'MSYS2.MSYS2'
-)) {
-    Install-WingetPackage $packageId @()
-}
+Install-WingetPackage Git.Git @()
+Install-WingetPackage GitHub.cli @()
 # The default msix installer fails over ssh with -2147009255.
 Install-WingetPackage Microsoft.PowerShell @('--installer-type', 'wix', '--scope', 'machine')
 # new-agent-vm.ps1 sets Windows PowerShell as the login shell, since pwsh is not installed until here. This session
@@ -91,41 +81,9 @@ Install-WingetPackage Microsoft.PowerShell @('--installer-type', 'wix', '--scope
 New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Force `
     -Value "$env:ProgramFiles\PowerShell\7\pwsh.exe" | Out-Null
 
-# winget installs Visual Studio without MSBuild, which the profile's vswhere line needs. These are the laptop's workloads.
-$vsInstallerDir = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
-$vsInstallPath = & "$vsInstallerDir\vswhere.exe" -latest -property installationPath
-$vsSetup = Start-Process "$vsInstallerDir\setup.exe" -Wait -PassThru -ArgumentList 'modify', '--installPath',
-    "`"$vsInstallPath`"", '--add', 'Microsoft.VisualStudio.Workload.NativeDesktop', '--add',
-    'Microsoft.VisualStudio.Workload.ManagedDesktop', '--includeRecommended', '--quiet', '--norestart'
-# 3010 is "succeeded, reboot required".
-if ($vsSetup.ExitCode -ne 0 -and $vsSetup.ExitCode -ne 3010) {
-    throw "Visual Studio setup.exe modify failed (exit $($vsSetup.ExitCode))"
-}
-
 # winget installs update the registry PATH but not this session's copy.
 $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
     [Environment]::GetEnvironmentVariable('Path', 'User')
-
-Write-Host '==> PSFzf'
-& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -Command `
-    'if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -TrustRepository -ErrorAction Stop }'
-if ($LASTEXITCODE -ne 0) { throw "Install-PSResource PSFzf failed (exit $LASTEXITCODE)" }
-
-# The CMake presets expect vcpkg at this path.
-$vcpkgRoot = 'C:\vcpkg'
-if (-not (Test-Path -LiteralPath $vcpkgRoot)) {
-    Write-Host '==> vcpkg'
-    git clone --quiet https://github.com/microsoft/vcpkg $vcpkgRoot
-    if ($LASTEXITCODE -ne 0) { throw "git clone vcpkg failed (exit $LASTEXITCODE)" }
-    & "$vcpkgRoot\bootstrap-vcpkg.bat" -disableMetrics
-    if ($LASTEXITCODE -ne 0) { throw "bootstrap-vcpkg.bat failed (exit $LASTEXITCODE)" }
-}
-
-Write-Host '==> MSYS2 packages'
-# A login shell, so the first run initializes the pacman keyring.
-& 'C:\msys64\usr\bin\bash.exe' -lc ('pacman -S --needed --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb ' +
-    'mingw-w64-x86_64-ninja mingw-w64-x86_64-pkgconf mingw-w64-x86_64-openssl')
-if ($LASTEXITCODE -ne 0) { throw "pacman -S failed (exit $LASTEXITCODE)" }
 
 # Claude Code turns fullscreen off over ssh, and herdr panes inherit SSH_CONNECTION from the logon that started the
 # herdr server. Set here too, so any herdr server this script starts has it.
@@ -152,13 +110,6 @@ foreach ($repo in $setup.repos) {
     if ($LASTEXITCODE -ne 0) { throw "git clone $($repo.url) failed (exit $LASTEXITCODE)" }
 }
 
-$windowsDev = Join-Path $setup.devRoot 'windows-dev'
-$herdrConfig = Join-Path $env:APPDATA 'herdr\config.toml'
-if (-not (Test-Path -LiteralPath $herdrConfig)) {
-    New-Item -ItemType Directory -Force -Path (Split-Path $herdrConfig) | Out-Null
-    Copy-Item -LiteralPath (Join-Path $windowsDev 'herdr\config.toml') -Destination $herdrConfig
-}
-
 # The ~/dev paths in settings.json and the agents context resolve the same as on the laptop.
 if (-not (Test-Path -LiteralPath "$HOME\dev")) {
     Write-Host "==> junction $HOME\dev to $($setup.devRoot)"
@@ -173,13 +124,6 @@ if ($userPath -notlike "*$binDir*") {
 }
 $env:Path += ";$binDir"
 
-# The owner keeps CLAUDE.md links untracked in every repo, so git status would list them in each one.
-$gitIgnore = "$HOME\.config\git\ignore"
-if (-not (Test-Path -LiteralPath $gitIgnore) -or (Get-Content -LiteralPath $gitIgnore) -notcontains 'CLAUDE.md') {
-    New-Item -ItemType Directory -Force -Path (Split-Path $gitIgnore) | Out-Null
-    Add-Content -LiteralPath $gitIgnore -Value 'CLAUDE.md'
-}
-
 # Both installers turn on Set-StrictMode, so each runs in a child scope to keep it out of this script.
 if (-not (Test-Path -LiteralPath "$binDir\claude.exe")) {
     Write-Host '==> Claude Code'
@@ -192,35 +136,7 @@ if (-not (Test-Path -LiteralPath $herdr)) {
     & ([scriptblock]::Create((Invoke-RestMethod https://herdr.dev/install.ps1)))
 }
 
-$focusPluginId = 'windows-dev.focus-file'
-$plugins = & $herdr plugin list --json | ConvertFrom-Json
-if ($LASTEXITCODE -ne 0) { throw "herdr plugin list failed (exit $LASTEXITCODE)" }
-if ($plugins.result.plugins.plugin_id -notcontains $focusPluginId) {
-    & $herdr plugin link (Join-Path $windowsDev 'herdr\focus-file')
-    if ($LASTEXITCODE -ne 0) { throw "herdr plugin link $focusPluginId failed (exit $LASTEXITCODE)" }
+if ($PersonalSetupPath) {
+    Write-Host "==> $PersonalSetupPath"
+    . (Join-Path $PSScriptRoot $PersonalSetupPath)
 }
-
-Write-Host '==> dotfile links'
-. (Join-Path $windowsDev 'scripts\dotfile-link.ps1')
-$backupRoot = Join-Path $HOME ".dotfiles-backup\$(Get-Date -Format yyyyMMdd-HHmmss)"
-# The same targets setup-configs.ps1 makes for the owner, minus the ones only a human uses, plus Claude Code's.
-$agentLinks = [System.Collections.Generic.List[pscustomobject]]::new()
-$agentLinks.Add([pscustomobject]@{
-        Leaf   = 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'
-        Source = "$windowsDev\powershell\Microsoft.PowerShell_profile.ps1"
-    })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.wezterm.lua'; Source = "$windowsDev\wezterm\.wezterm.lua" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\CLAUDE.md'; Source = "$windowsDev\claude\context.md" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\settings.json'; Source = "$windowsDev\claude\settings.json" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\agents'; Source = "$windowsDev\claude\agents" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\output-styles'; Source = "$windowsDev\claude\output-styles" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\rules'; Source = "$windowsDev\claude\rules" })
-$agentLinks.Add([pscustomobject]@{ Leaf = '.claude\themes'; Source = "$windowsDev\claude\themes" })
-foreach ($skill in Get-ChildItem "$windowsDev\claude\skills" -Directory) {
-    $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
-}
-foreach ($agentLink in $agentLinks) { Link "$HOME\$($agentLink.Leaf)" $agentLink.Source $backupRoot }
-
-# Links each repository's CLAUDE.md from the agents repo.
-& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File (Join-Path $setup.devRoot 'agents\install.ps1')
-if ($LASTEXITCODE -ne 0) { throw "agents install.ps1 failed (exit $LASTEXITCODE)" }

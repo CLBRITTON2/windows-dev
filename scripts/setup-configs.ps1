@@ -1,7 +1,7 @@
 #Requires -Version 7
 <#
 .SYNOPSIS
-  Link every config into your home and the GlazeWM config for one layout, then reload GlazeWM if it is running.
+  Link every config into the home folder and the GlazeWM config for one layout, then reload GlazeWM if it is running.
 
 .DESCRIPTION
   Rerun it to switch layouts. Creating symlinks needs an elevated shell or Windows Developer Mode, which

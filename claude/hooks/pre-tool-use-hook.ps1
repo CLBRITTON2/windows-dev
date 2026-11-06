@@ -101,7 +101,7 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 
-	# The owner reviews repo changes as Edit and Write diffs, which a Bash write never shows.
+	# Repo changes are reviewed as Edit and Write diffs, which a Bash write never shows.
 	$slashed = $cmd -replace '\\', '/'
 	$repoRoot = '(?:(?:[a-z]:|/[a-z])?/users/(?:chris|claude)/dev/|~/dev/|\$\{?home\}?/dev/)'
 	$rootVars = @([regex]::Matches($slashed, "(?i)(?:\b(?<name>\w+)=[""']?|\bfor\s+(?<name>\w+)\s+in\s+[""']?)$repoRoot") |
@@ -123,7 +123,7 @@ if ($json.tool_name -eq "Bash") {
 	if ($scriptless -match "(?i)$inPlace" -or $slashed -match "(?i)$redirect" -or ($slashed -match "(?i)$writeCall" -and $slashed -match "(?i)$repoRoot")) {
 		@{
 			decision = "block"
-			reason   = "Change files under ~/dev only with the Edit or Write tool, so the owner sees the diff. Bash may write only into the scratchpad: to process a repo file there, copy it into the scratchpad in its own call first."
+			reason   = "Change files under ~/dev only with the Edit or Write tool, so the user sees the diff. Bash may write only into the scratchpad: to process a repo file there, copy it into the scratchpad in its own call first."
 		} | ConvertTo-Json -Compress
 		exit 0
 	}

@@ -4,8 +4,8 @@ Writes the focused herdr pane's working directory, then every work tree its Clau
 ~\dev\.herdr-focus.
 
 .DESCRIPTION
-herdr runs this as the agent account on startup and on every pane focus change. The owner's perusal follows the file
-to review the repos the focused agent works in, so the file is the only thing that crosses from herdr to the owner.
+herdr runs this as the agent account on startup and on every pane focus change. perusal follows the file to review
+the repos the focused agent works in, so the file is the only thing that crosses from herdr to perusal.
 perusal validates every path it reads from it, since the agent can write anything there.
 
 herdr starts hooks without waiting for earlier ones to finish, so the run that writes last can belong to an older

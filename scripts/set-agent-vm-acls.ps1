@@ -7,7 +7,7 @@
 .DESCRIPTION
   Denies, in both directions, every private, link-local, CGNAT and multicast range, IPv6, and each public address the
   host's ziti tunnels intercept, if it runs any. The VM sits on the Default Switch, where the host routes its
-  traffic, so an intercepted public address would reach the owner's ziti services. Rerun after starting a ziti tunnel
+  traffic, so an intercepted public address would reach the host's ziti services. Rerun after starting a ziti tunnel
   or adding a ziti service that intercepts a public address. The rules also deny the switch's DNS proxy on the host,
   so the guest must use public DNS servers.
 #>
