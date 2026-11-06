@@ -120,26 +120,11 @@ function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
 function udoz-repos { & "~\dev\windows-dev\scripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
 function pfc { perusal follow }
 
-# Claude Code runs as its own unprivileged account, see scripts/setup-agent-account.ps1. The agent shares this
-# profile, so the guard keeps its own `claude` resolving to the binary instead of recursing into runas.
+# The agent VM links this profile too, where herdr must stay the local binary.
 if ($env:USERNAME -ne 'claude') {
-    function claude {
-        # wezterm.exe is the console-subsystem CLI and flashes a window of its own before handing off to the
-        # GUI, so spawn wezterm-gui.exe. runas is a console app too, hence the hidden host. runas takes the program
-        # as one quoted string, so quotes inside it are escaped as \".
-        if ($args.Count -eq 0) {
-            Start-Process runas -WindowStyle Hidden -ArgumentList `
-                "/user:claude /savecred `"wezterm-gui.exe start --cwd \`"$PWD\`" -- pwsh -NoLogo -Command claude`""
-            return
-        }
-        # Subcommands such as `claude update` run the binary in the agent account and keep the console open
-        # so the output can be read, since runas cannot pipe it back.
-        $command = "claude $($args -join ' ')"
-        Start-Process runas -ArgumentList "/user:claude /savecred `"pwsh -NoLogo -NoExit -Command $command`""
-    }
     # herdr's server and its Claude panes run in claude-vm (scripts/new-agent-vm.ps1), reached through the claude-vm
     # alias in ~\.ssh\config. The local client attaches over ssh because mouse clicks do not survive `ssh -t` into the
-    # VM. The binary is the owner's own install, never the agent's copy, which the agent can replace.
+    # VM.
     function herdr {
         Start-Process wezterm-gui.exe -ArgumentList 'start', '--', "$env:LOCALAPPDATA\Programs\Herdr\bin\herdr.exe",
             '--remote', 'claude-vm'

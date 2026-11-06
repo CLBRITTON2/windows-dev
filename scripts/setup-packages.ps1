@@ -54,8 +54,7 @@ function Update-SessionPath {
         [Environment]::GetEnvironmentVariable('Path', 'User')
 }
 
-# The agent account cannot execute the Store pwsh under WindowsApps, and a present Store build satisfies the import
-# below, so swap it for the MSI build first.
+# bootstrap.ps1 runs pwsh by its MSI path, and a present Store build satisfies the import below, so swap it first.
 if (Get-AppxPackage Microsoft.PowerShell) {
     Write-Host "Removing Store pwsh" -ForegroundColor Cyan
     Get-AppxPackage Microsoft.PowerShell | Remove-AppxPackage

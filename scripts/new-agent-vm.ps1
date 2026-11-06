@@ -11,7 +11,7 @@
   not the host, the LAN, or the owner's ziti services, and only the host and its other Default Switch VMs can open a
   connection to it, on ssh.
 
-  Runs elevated, so the agent account on the host must not be able to change anything it reads: -VmDir must not
+  Runs elevated, so the agent must not be able to change anything it reads: -VmDir must not
   exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus Hyper-V Administrators), and
   -InstallIso must be in your profile outside ~\dev, where perusal mirrors the agent's edits.
 
@@ -73,7 +73,7 @@ if ($gitHubToken.Length -eq 0) { throw 'The GitHub token is empty' }
 $isoPath = [IO.Path]::GetFullPath($InstallIso)
 if (-not $isoPath.StartsWith("$HOME\", [StringComparison]::OrdinalIgnoreCase) -or
     $isoPath.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
-    throw "InstallIso must be in your profile outside ~\dev, where the agent account cannot replace it: $isoPath"
+    throw "InstallIso must be in your profile outside ~\dev, since the agent's edits reach ~\dev and could replace it. Move the ISO, for example to ~\Downloads: $isoPath"
 }
 # A path that leads to some other file must not hand that file to the guest as a disc. ISO 9660 puts CD001 at 32769.
 $isoStream = [IO.File]::OpenRead($isoPath)

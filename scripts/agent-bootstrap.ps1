@@ -6,8 +6,8 @@
 .DESCRIPTION
   Junctions <agent home>\dev onto the owner's dev root so the ~/dev paths in the shared settings.json resolve
   under both accounts, puts the Claude Code install dir on the account's persistent PATH (the installer only
-  sets it for the session it runs in), marks the owner's repos safe for git, installs Claude Code and herdr, and
-  links this repo's herdr focus-file plugin.
+  sets it for the session it runs in), installs Claude Code and herdr, and links this repo's herdr focus-file
+  plugin.
 
   Also links the account's dotfiles from this repo.
 #>
@@ -38,12 +38,6 @@ $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 if ($userPath -notlike "*$binDir*") {
     [Environment]::SetEnvironmentVariable('Path', "$userPath;$binDir", 'User')
     Write-Host "  PATH += $binDir"
-}
-
-# The repos are owned by the other account, so git treats them as unsafe without this.
-if ((git config --global --get-all safe.directory) -notcontains '*') {
-    git config --global --add safe.directory '*'
-    Write-Host "  git safe.directory = *"
 }
 
 # The owner keeps CLAUDE.md links untracked in every repo, so git status would list them in each one.
