@@ -31,7 +31,7 @@ Write-Host "PowerShell" -ForegroundColor Magenta
 Link "$([Environment]::GetFolderPath('MyDocuments'))\PowerShell\Microsoft.PowerShell_profile.ps1" `
      "$repo\powershell\Microsoft.PowerShell_profile.ps1" $backupRoot
 
-# Claude Code is not linked here. It runs only in the agent VM, where agent-bootstrap.ps1 links its ~/.claude.
+# Claude Code is not linked here. It runs only in the agent VM, where agent-vm-bootstrap.ps1 links its ~/.claude.
 
 Write-Host "VS Code" -ForegroundColor Magenta
 Link "$env:APPDATA\Code\User\settings.json"    "$repo\vscode\settings.json"    $backupRoot

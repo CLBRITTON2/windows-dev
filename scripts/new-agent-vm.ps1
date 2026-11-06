@@ -225,6 +225,7 @@ $guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList
     # Windows puts a network it has not seen in the Public profile, so the rule must not be limited to Private.
     Set-NetFirewallRule -Name OpenSSH-Server-In-TCP -Profile Any -Enabled True
     # The default login shell is cmd, which splits PowerShell pipelines and breaks git's quoted ssh paths.
+    # agent-vm-bootstrap.ps1 switches it to pwsh once it has installed it.
     New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Force `
         -Value "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" | Out-Null
     Restart-Service sshd

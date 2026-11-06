@@ -1,5 +1,5 @@
-#Requires -Version 7
-# Dot-sourced by setup-configs.ps1 and agent-bootstrap.ps1, which link into different homes.
+# Dot-sourced by setup-configs.ps1 and agent-vm-bootstrap.ps1, which link into different homes. Runs under Windows
+# PowerShell 5.1 too, since agent-vm-bootstrap.ps1 does.
 
 function Link([string]$target, [string]$source, [string]$backupRoot) {
     if (!(Test-Path $source)) {
@@ -13,10 +13,12 @@ function Link([string]$target, [string]$source, [string]$backupRoot) {
 
     if (Test-Path $target) {
         $existing = Get-Item $target -Force
-        if ($existing.LinkType) {
-            # Windows PowerShell 5.1 cannot remove a junction without -Recurse, and with it deletes the repo
-            # files the junction points at (PowerShell/PowerShell#621). Hence #Requires -Version 7.
-            Remove-Item $target -Force
+        # Remove-Item in Windows PowerShell 5.1 cannot remove a junction without -Recurse, and with it deletes the
+        # repo files the junction points at (PowerShell/PowerShell#621). The .NET calls remove only the link.
+        if ($existing.LinkType -and $existing -is [System.IO.DirectoryInfo]) {
+            [System.IO.Directory]::Delete($target)
+        } elseif ($existing.LinkType) {
+            [System.IO.File]::Delete($target)
         } else {
             # Mirror the full target path: several targets share the leaf settings.json.
             $backup = Join-Path $backupRoot ($target -replace '^([A-Za-z]):', '$1')
