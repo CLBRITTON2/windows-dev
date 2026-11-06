@@ -1,8 +1,9 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Install the laptop's dev toolchain, PSFzf, vcpkg and the MSYS2 compilers in the agent VM. Runs inside the VM as
-  claude, over ssh.
+  Install the laptop's dev toolchain, PSFzf, vcpkg and the MSYS2 compilers in the agent VM, log gh in, clone the
+  owner's repositories and set up the agent's home. Runs inside the VM as claude, over ssh, started by
+  new-agent-vm.ps1.
 
 .DESCRIPTION
   Written for Windows PowerShell 5.1, since pwsh is one of the packages it installs. Rerunning it is safe: it skips
@@ -13,11 +14,17 @@
   The evaluation ISO ships winget 1.6, which cannot read the current package index, and an ssh logon never gets the
   winget source package, so it installs the latest winget and the source package first.
 
-  From the host, in this repo:
-    scp scripts\agent-vm-bootstrap.ps1 claude-vm:
-    ssh claude-vm powershell -NoProfile -ExecutionPolicy RemoteSigned -File agent-vm-bootstrap.ps1
+  -SetupPath is the JSON new-agent-vm.ps1 writes: the owner's dev root, git identity, and each repository's path
+  under the dev root and https URL. A repository already cloned is left alone. The first line of stdin is the
+  read-only token gh logs in with.
 #>
+param(
+    [Parameter(Mandatory)] [string] $SetupPath
+)
 $ErrorActionPreference = 'Stop'
+$gitHubToken = [Console]::In.ReadLine()
+if (-not $gitHubToken) { throw 'stdin held no GitHub token' }
+$setup = Get-Content -LiteralPath $SetupPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $ProgressPreference = 'SilentlyContinue'
 $winget = Join-Path $env:LOCALAPPDATA 'Microsoft\WindowsApps\winget.exe'
 $downloadDir = Join-Path $env:TEMP 'agent-vm-bootstrap'
@@ -116,3 +123,45 @@ Write-Host '==> MSYS2 packages'
 & 'C:\msys64\usr\bin\bash.exe' -lc ('pacman -S --needed --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb ' +
     'mingw-w64-x86_64-ninja mingw-w64-x86_64-pkgconf mingw-w64-x86_64-openssl')
 if ($LASTEXITCODE -ne 0) { throw "pacman -S failed (exit $LASTEXITCODE)" }
+
+# Claude Code turns fullscreen off over ssh, and herdr panes inherit SSH_CONNECTION from the logon that started the
+# herdr server. Set here too, so any herdr server this script starts has it.
+[Environment]::SetEnvironmentVariable('CLAUDE_CODE_NO_FLICKER', '1', 'User')
+$env:CLAUDE_CODE_NO_FLICKER = '1'
+
+Write-Host '==> gh auth login'
+$gitHubToken | & gh auth login --hostname github.com --git-protocol https --with-token
+if ($LASTEXITCODE -ne 0) { throw "gh auth login failed (exit $LASTEXITCODE)" }
+& gh auth setup-git
+if ($LASTEXITCODE -ne 0) { throw "gh auth setup-git failed (exit $LASTEXITCODE)" }
+
+git config --global user.name $setup.gitUserName
+if ($LASTEXITCODE -ne 0) { throw "git config user.name failed (exit $LASTEXITCODE)" }
+git config --global user.email $setup.gitUserEmail
+if ($LASTEXITCODE -ne 0) { throw "git config user.email failed (exit $LASTEXITCODE)" }
+
+# The same paths as on the laptop, so perusal maps each repository to its copy here.
+foreach ($repo in $setup.repos) {
+    $workTree = Join-Path $setup.devRoot $repo.path
+    if (Test-Path -LiteralPath $workTree) { continue }
+    Write-Host "==> clone $($repo.path)"
+    git clone --quiet $repo.url $workTree
+    if ($LASTEXITCODE -ne 0) { throw "git clone $($repo.url) failed (exit $LASTEXITCODE)" }
+}
+
+$windowsDev = Join-Path $setup.devRoot 'windows-dev'
+$herdrConfig = Join-Path $env:APPDATA 'herdr\config.toml'
+if (-not (Test-Path -LiteralPath $herdrConfig)) {
+    New-Item -ItemType Directory -Force -Path (Split-Path $herdrConfig) | Out-Null
+    Copy-Item -LiteralPath (Join-Path $windowsDev 'herdr\config.toml') -Destination $herdrConfig
+}
+
+$pwsh = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
+# agent-bootstrap.ps1 puts the Claude Code install dir on the registry PATH only, so claude.exe resolves for the
+# processes this script starts.
+$env:Path += ";$HOME\.local\bin"
+& $pwsh -NoProfile -File (Join-Path $windowsDev 'scripts\agent-bootstrap.ps1') -OwnerDevRoot $setup.devRoot
+if ($LASTEXITCODE -ne 0) { throw "agent-bootstrap.ps1 failed (exit $LASTEXITCODE)" }
+# Links each repository's CLAUDE.md from the agents repo.
+& $pwsh -NoProfile -File (Join-Path $setup.devRoot 'agents\install.ps1')
+if ($LASTEXITCODE -ne 0) { throw "agents install.ps1 failed (exit $LASTEXITCODE)" }

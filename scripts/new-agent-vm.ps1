@@ -8,14 +8,19 @@
   Installs Windows 11 Enterprise unattended from its 90-day evaluation ISO, with a local administrator account
   claude that accepts ssh logons only with the key in -AuthorizedKeyPath. The VM sits on the Default Switch behind
   the extended port ACLs of set-agent-vm-acls.ps1, so on any network the laptop joins it reaches the internet but
-  not the host, the LAN, or the owner's ziti services, and only the host and its other Default Switch
-  VMs can open a connection to it, on ssh.
+  not the host, the LAN, or the owner's ziti services, and only the host and its other Default Switch VMs can open a
+  connection to it, on ssh.
 
   Runs elevated, so the agent account on the host must not be able to change anything it reads: -VmDir must not
   exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus Hyper-V Administrators), and
   -InstallIso must be in your profile outside ~\dev. Keep this script in $ownerExecPaths in setup-claude.ps1.
 
   The guest Administrator password stays in -VmDir\administrator.password, for PowerShell Direct from the host.
+
+  Then it trusts the guest's ssh host key in ~\.ssh\known_hosts, and over ssh runs agent-vm-bootstrap.ps1 in the
+  guest, which installs the toolchain, logs gh in with the token this script asks for first, and clones every
+  repository under ~\dev into the same path there. Without a Host <VmName> entry in ~\.ssh\config, it adds one for
+  <VmName>.mshome.net with the private key beside -AuthorizedKeyPath.
 #>
 param(
     [Parameter(Mandatory)] [string] $InstallIso,
@@ -24,6 +29,46 @@ param(
     [Parameter(Mandatory)] [string] $VmDir
 )
 $ErrorActionPreference = 'Stop'
+# Full paths, since this runs elevated and a PATH folder the agent can write could otherwise supply the tool.
+$openSshDir = "$env:SystemRoot\System32\OpenSSH"
+$git = "$env:ProgramFiles\Git\cmd\git.exe"
+$icacls = "$env:SystemRoot\System32\icacls.exe"
+
+# The guest's computer name, which the Default Switch publishes to the host as <name>.mshome.net, is at most 15
+# characters.
+if ($VmName -notmatch '^[A-Za-z][A-Za-z0-9-]{0,14}$') { throw "VmName must be a computer name of 1 to 15 letters, digits and hyphens: $VmName" }
+$vmHost = "$VmName.mshome.net".ToLowerInvariant()
+
+# Checked first, so a wrong Host entry does not fail the run after the 45 minute install. Without one, ssh -G gives
+# the name itself as the hostname.
+$sshSettings = @(& "$openSshDir\ssh.exe" -G $VmName)
+if ($LASTEXITCODE -ne 0) { throw "ssh -G $VmName failed (exit $LASTEXITCODE)" }
+if ($sshSettings -contains "hostname $($VmName.ToLowerInvariant())") {
+    $identityFile = $AuthorizedKeyPath -replace '\.pub$', ''
+    if ($identityFile -eq $AuthorizedKeyPath -or -not (Test-Path -LiteralPath $identityFile)) {
+        throw "AuthorizedKeyPath must be a .pub file with its private key beside it: $AuthorizedKeyPath"
+    }
+    $sshConfig = Join-Path $HOME '.ssh\config'
+    New-Item -ItemType Directory -Force -Path (Split-Path $sshConfig) | Out-Null
+    Add-Content -LiteralPath $sshConfig -Encoding ascii -Value '', "Host $VmName", "  HostName $vmHost", '  User claude',
+        "  IdentityFile $identityFile"
+    Write-Host "==> added Host $VmName to $sshConfig"
+    $sshSettings = @(& "$openSshDir\ssh.exe" -G $VmName)
+    if ($LASTEXITCODE -ne 0) { throw "ssh -G $VmName failed (exit $LASTEXITCODE)" }
+}
+if ($sshSettings -notcontains "hostname $vmHost" -or $sshSettings -notcontains 'user claude') {
+    throw "Host $VmName in ~\.ssh\config must have HostName $vmHost and User claude"
+}
+# ssh looks the host key up under the HostKeyAlias when one is set.
+$hostKeyAliasSettings = @($sshSettings -like 'hostkeyalias *')
+if ($hostKeyAliasSettings) {
+    $knownHostName = $hostKeyAliasSettings[0].Substring('hostkeyalias '.Length)
+} else {
+    $knownHostName = $vmHost
+}
+
+$gitHubToken = Read-Host -AsSecureString "Read-only GitHub token for the agent in $VmName"
+if ($gitHubToken.Length -eq 0) { throw 'The GitHub token is empty' }
 
 $isoPath = [IO.Path]::GetFullPath($InstallIso)
 if (-not $isoPath.StartsWith("$HOME\", [StringComparison]::OrdinalIgnoreCase) -or
@@ -51,7 +96,7 @@ if (Get-VM -Name $VmName -ErrorAction SilentlyContinue) { throw "VM $VmName alre
 # Any user can create a folder under ProgramData and would own it, and an owner can always rewrite its ACL.
 if (Test-Path -LiteralPath $VmDir) { throw "$VmDir already exists. Check who owns it, delete it, and rerun" }
 New-Item -ItemType Directory -Path $VmDir | Out-Null
-& icacls $VmDir /inheritance:r /grant:r '*S-1-5-32-544:(OI)(CI)(F)' '*S-1-5-18:(OI)(CI)(F)' `
+& $icacls $VmDir /inheritance:r /grant:r '*S-1-5-32-544:(OI)(CI)(F)' '*S-1-5-18:(OI)(CI)(F)' `
     '*S-1-5-83-0:(R,WD,AD)' '*S-1-5-83-0:(CI)(IO)(GR,WD,AD)'
 if ($LASTEXITCODE -ne 0) { throw "icacls on $VmDir failed (exit $LASTEXITCODE)" }
 # Until the line above, the folder inherited ProgramData's grant that lets every user create entries in it.
@@ -59,14 +104,18 @@ $strayEntries = @(Get-ChildItem -LiteralPath $VmDir -Force)
 if ($strayEntries) { throw "$VmDir got entries before its ACL was set: $($strayEntries.FullName -join ', ')" }
 
 $alphabet = [char[]]'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
-$passwordBytes = [Security.Cryptography.RandomNumberGenerator]::GetBytes(20)
-$password = 'Cv1!' + (-join ($passwordBytes | ForEach-Object { $alphabet[$_ % $alphabet.Length] }))
+# Windows password complexity wants three character classes, here upper case, lower case and digits.
+do {
+    $passwordBytes = [Security.Cryptography.RandomNumberGenerator]::GetBytes(24)
+    $password = -join ($passwordBytes | ForEach-Object { $alphabet[$_ % $alphabet.Length] })
+} until ($password -cmatch '[A-Z]' -and $password -cmatch '[a-z]' -and $password -match '[2-9]')
 Set-Content -LiteralPath (Join-Path $VmDir 'administrator.password') -NoNewline -Value $password
 
 $answerDir = Join-Path $VmDir 'answer'
 New-Item -ItemType Directory -Path $answerDir | Out-Null
 (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'agent-vm-autounattend.template.xml') -Raw).
-    Replace('__PASSWORD__', $password).Replace('__TIME_ZONE__', (Get-TimeZone).Id) |
+    Replace('__PASSWORD__', $password).Replace('__TIME_ZONE__', (Get-TimeZone).Id).
+    Replace('__COMPUTER_NAME__', $VmName.ToUpperInvariant()) |
     Set-Content -LiteralPath (Join-Path $answerDir 'autounattend.xml') -NoNewline
 
 # Setup reads autounattend.xml from the root of any removable media, so the answer file rides on a second DVD.
@@ -175,9 +224,51 @@ $guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList
     Restart-Service sshd
 
     [pscustomobject]@{
-        HostKey = & "$env:SystemRoot\System32\OpenSSH\ssh-keygen.exe" -lf "$sshDir\ssh_host_ed25519_key.pub"
+        HostKey = (Get-Content -LiteralPath "$sshDir\ssh_host_ed25519_key.pub" -Raw).Trim()
     }
 }
-# The answer file names the guest CLAUDE-VM, which the Default Switch publishes to the host under mshome.net.
-Write-Host "==> $VmName is installed. ssh to it as claude at claude-vm.mshome.net."
-Write-Host "    host key: $($guestSsh.HostKey)"
+
+# The key came over PowerShell Direct, so ssh never has to trust it on first use. A rebuilt guest has a new one, so
+# the old line goes first.
+$hostKeyType, $hostKeyData = ($guestSsh.HostKey -split ' ')[0, 1]
+$knownHosts = Join-Path $HOME '.ssh\known_hosts'
+if (Test-Path -LiteralPath $knownHosts) {
+    & "$openSshDir\ssh-keygen.exe" -R $knownHostName -f $knownHosts | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "ssh-keygen -R $knownHostName failed (exit $LASTEXITCODE)" }
+}
+Add-Content -LiteralPath $knownHosts -Encoding ascii -Value "$knownHostName $hostKeyType $hostKeyData"
+Write-Host "==> trusted the host key of $knownHostName in $knownHosts"
+
+# The repositories under ~\dev and where each is cloned from. Each URL is read from the .git\config file, since
+# running git in a repository the agent worked in would run what its config names, elevated. Linked work trees
+# (a .git file) and the embargoed advisory forks stay out.
+$devRoot = Join-Path $HOME 'dev'
+$repos = @(Get-Item -Path "$devRoot\*\.git", "$devRoot\*\*\.git" -Force |
+    Where-Object { $_.PSIsContainer -and $_.Parent.Name -notlike '*-ghsa-*' -and
+        -not (Test-Path -LiteralPath (Join-Path $_.Parent.Parent.FullName '.git')) } |
+    ForEach-Object {
+        $url = & $git config --file (Join-Path $_.FullName 'config') --get remote.origin.url
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "$($_.Parent.FullName) has no origin, so the VM does not get it"
+            return
+        }
+        if ($url -match '^git@github\.com:(.+?)(\.git)?$') { $url = "https://github.com/$($Matches[1]).git" }
+        if ($url -notlike 'https://*') { throw "$($_.Parent.FullName) has an origin the VM cannot clone over https: $url" }
+        [pscustomobject]@{ path = $_.Parent.FullName.Substring($devRoot.Length + 1); url = $url }
+    })
+$gitUserName = & $git config --global user.name
+$gitUserEmail = & $git config --global user.email
+if (-not $gitUserName -or -not $gitUserEmail) { throw 'git config --global user.name and user.email must be set' }
+$setupPath = Join-Path $VmDir 'agent-vm.json'
+[pscustomobject]@{ devRoot = $devRoot; gitUserName = $gitUserName; gitUserEmail = $gitUserEmail; repos = $repos } |
+    ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $setupPath -Encoding utf8NoBOM
+
+& "$openSshDir\scp.exe" -q (Join-Path $PSScriptRoot 'agent-vm-bootstrap.ps1') $setupPath "${VmName}:"
+if ($LASTEXITCODE -ne 0) { throw "scp to $VmName failed (exit $LASTEXITCODE)" }
+[Net.NetworkCredential]::new('', $gitHubToken).Password |
+    & "$openSshDir\ssh.exe" $VmName powershell -NoProfile -ExecutionPolicy RemoteSigned -File agent-vm-bootstrap.ps1 `
+        -SetupPath agent-vm.json
+if ($LASTEXITCODE -ne 0) { throw "agent-vm-bootstrap.ps1 in $VmName failed (exit $LASTEXITCODE)" }
+
+Write-Host "==> $VmName is ready. Attach with: herdr --remote $VmName"
+Write-Host "    Then run claude in a pane once to log in."

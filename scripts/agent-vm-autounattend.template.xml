@@ -41,7 +41,7 @@
   </settings>
   <settings pass="specialize">
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-      <ComputerName>CLAUDE-VM</ComputerName>
+      <ComputerName>__COMPUTER_NAME__</ComputerName>
       <TimeZone>__TIME_ZONE__</TimeZone>
     </component>
     <component name="Microsoft-Windows-TerminalServices-LocalSessionManager" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">

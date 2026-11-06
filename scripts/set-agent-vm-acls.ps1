@@ -6,9 +6,10 @@
 
 .DESCRIPTION
   Denies, in both directions, every private, link-local, CGNAT and multicast range, IPv6, and each public address the
-  host's ziti tunnel intercepts. The VM sits on the Default Switch, where the host routes its traffic, so an
-  intercepted public address would reach the owner's ziti services. Rerun after adding a ziti service that intercepts
-  a public address. The rules also deny the switch's DNS proxy on the host, so the guest must use public DNS servers.
+  host's ziti tunnels intercept, if it runs any. The VM sits on the Default Switch, where the host routes its
+  traffic, so an intercepted public address would reach the owner's ziti services. Rerun after starting a ziti tunnel
+  or adding a ziti service that intercepts a public address. The rules also deny the switch's DNS proxy on the host,
+  so the guest must use public DNS servers.
 
   Keep this script in $ownerExecPaths in setup-claude.ps1, so the agent account cannot change the rules it runs under.
 #>
@@ -19,8 +20,16 @@ $ErrorActionPreference = 'Stop'
 
 $blockedRanges = '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '169.254.0.0/16', '100.64.0.0/10', '224.0.0.0/4'
 
-# Get-NetRoute throws when ziti-tun0 is missing, so a stopped tunnel cannot leave its intercepts out.
-$interceptedPrefixes = @(Get-NetRoute -InterfaceAlias ziti-tun0 -AddressFamily IPv4 |
+# ziti-edge-tunnel, alone or under Ziti Desktop Edge, runs as the service ziti (SVCNAME in ziti-tunnel-sdk-c
+# windows-service.h). A stopped one would leave its intercepts out of the rules, and the VM would reach them once it
+# starts.
+$zitiService = Get-Service | Where-Object Name -eq 'ziti'
+if ($zitiService -and $zitiService.Status -ne 'Running') {
+    throw "The ziti tunnel service is $($zitiService.Status). Start it, so its intercepts get denied"
+}
+# A tunnel run outside the service routes its intercepts the same way. Each one numbers its adapter from ziti-tun0
+# (ZITI_TUN_NAME_BASE in ziti-tunnel-sdk-c tun.c).
+$interceptedPrefixes = @(Get-NetRoute -AddressFamily IPv4 | Where-Object InterfaceAlias -like 'ziti-tun*' |
     ForEach-Object DestinationPrefix | Sort-Object -Unique |
     Where-Object {
         $routePrefix = $_

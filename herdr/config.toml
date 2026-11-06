@@ -1,0 +1,25 @@
+onboarding = false
+
+[terminal]
+default_shell = 'C:\Program Files\PowerShell\7\pwsh.exe'
+new_cwd = "~/dev"
+
+[theme]
+name = "rose-pine"
+
+[theme.custom]
+panel_bg = "reset"
+sidebar_bg = "reset"
+
+[ui.sound]
+enabled = false
+
+[keys]
+focus_agent = "alt+1..9"
+toggle_sidebar = "alt+0"
+
+[ui.sidebar.agents.rows_by_agent]
+claude = [
+  ["state_icon", "terminal_title_stripped"],
+  ["state_text"],
+]
