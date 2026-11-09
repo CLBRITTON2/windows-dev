@@ -293,7 +293,7 @@ $gitUserName = & $git config --global user.name
 $gitUserEmail = & $git config --global user.email
 if (-not $gitUserName -or -not $gitUserEmail) { throw 'git config --global user.name and user.email must be set' }
 $setupPath = Join-Path $vmDir 'agent-vm.json'
-[pscustomobject]@{ devRoot = $devRoot; gitUserName = $gitUserName; gitUserEmail = $gitUserEmail; repos = $repos } |
+[pscustomobject]@{ gitUserName = $gitUserName; gitUserEmail = $gitUserEmail; repos = $repos } |
     ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $setupPath -Encoding utf8NoBOM
 
 & "$openSshDir\scp.exe" -q @bootstrapFiles $setupPath "${VmName}:"

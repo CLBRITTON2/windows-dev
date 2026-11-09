@@ -11,14 +11,16 @@
   installers, since the winget Claude Code never updates itself and shadows the native one on PATH.
 
   -PersonalSetupPath names a script beside this one with a personal toolchain and dotfiles, such as
-  agent-vm-personal-setup.ps1. It runs last, in this script's scope, so it can use $setup, $winget, $herdr and
-  Install-WingetPackage.
+  agent-vm-personal-setup.ps1. It runs last, in this script's scope, so it can use $setup, $devRoot, $winget, $herdr,
+  Write-Step and Install-WingetPackage.
+
+  Each step prints a timestamped ==> line, and the whole run is kept in ~\agent-vm-bootstrap.log in the guest.
 
   The evaluation ISO ships winget 1.6, which cannot read the current package index, and an ssh logon never gets the
   winget source package, so it installs the latest winget and the source package first.
 
-  -SetupPath is the JSON new-agent-vm.ps1 writes: the dev root, git identity, and each repository's path
-  under the dev root and https URL. A repository already cloned is left alone. The first line of stdin is the
+  -SetupPath is the JSON new-agent-vm.ps1 writes: the git identity, and each repository's path under ~\dev and
+  https URL. A repository already cloned is left alone. The first line of stdin is the
   read-only token gh logs in with.
 #>
 param(
@@ -26,6 +28,13 @@ param(
     [string] $PersonalSetupPath
 )
 $ErrorActionPreference = 'Stop'
+# The ssh session on the laptop is the only other copy of the output, and a dropped connection takes it along.
+Start-Transcript -LiteralPath "$HOME\agent-vm-bootstrap.log" -Append
+
+function Write-Step([string] $step) {
+    Write-Host "==> $(Get-Date -Format HH:mm:ss) $step"
+}
+
 $gitHubToken = [Console]::In.ReadLine()
 if (-not $gitHubToken) { throw 'stdin held no GitHub token' }
 $setup = Get-Content -LiteralPath $SetupPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -42,7 +51,7 @@ if (Test-Path -LiteralPath $winget) {
     $installedVersion = [version]'0.0'
 }
 if ($installedVersion -lt $latestVersion) {
-    Write-Host "==> updating winget $installedVersion to $latestVersion"
+    Write-Step "updating winget $installedVersion to $latestVersion"
     $bundleName = 'Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle'
     $dependenciesName = 'DesktopAppInstaller_Dependencies.zip'
     foreach ($assetName in $bundleName, $dependenciesName) {
@@ -57,13 +66,13 @@ if ($installedVersion -lt $latestVersion) {
 }
 
 # Without it every install fails with 0x8a15000f "Data required by the source is missing".
-Write-Host '==> installing the winget source package'
+Write-Step 'installing the winget source package'
 $sourcePackage = Join-Path $downloadDir 'source2.msix'
 Invoke-WebRequest https://cdn.winget.microsoft.com/cache/source2.msix -OutFile $sourcePackage -UseBasicParsing
 Add-AppxPackage -Path $sourcePackage
 
 function Install-WingetPackage([string] $packageId, [string[]] $extraArguments) {
-    Write-Host "==> $packageId"
+    Write-Step $packageId
     $wingetOutput = & $winget install --id $packageId --exact --source winget --silent --no-upgrade `
         --accept-source-agreements --accept-package-agreements --disable-interactivity @extraArguments
     # 0x8A150061 is "A package version is already installed", what --no-upgrade returns on a rerun.
@@ -94,7 +103,7 @@ $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
 [Environment]::SetEnvironmentVariable('CLAUDE_CODE_NO_FLICKER', '1', 'User')
 $env:CLAUDE_CODE_NO_FLICKER = '1'
 
-Write-Host '==> gh auth login'
+Write-Step 'gh auth login'
 $gitHubToken | & gh auth login --hostname github.com --git-protocol https --with-token
 if ($LASTEXITCODE -ne 0) { throw "gh auth login failed (exit $LASTEXITCODE)" }
 & gh auth setup-git
@@ -105,19 +114,14 @@ if ($LASTEXITCODE -ne 0) { throw "git config user.name failed (exit $LASTEXITCOD
 git config --global user.email $setup.gitUserEmail
 if ($LASTEXITCODE -ne 0) { throw "git config user.email failed (exit $LASTEXITCODE)" }
 
-# The same paths as on the laptop, so perusal maps each repository to its copy here.
+# The same paths under ~\dev as on the laptop, so perusal maps each repository to its copy here.
+$devRoot = Join-Path $HOME 'dev'
 foreach ($repo in $setup.repos) {
-    $workTree = Join-Path $setup.devRoot $repo.path
+    $workTree = Join-Path $devRoot $repo.path
     if (Test-Path -LiteralPath $workTree) { continue }
-    Write-Host "==> clone $($repo.path)"
+    Write-Step "clone $($repo.path)"
     git clone --quiet $repo.url $workTree
     if ($LASTEXITCODE -ne 0) { throw "git clone $($repo.url) failed (exit $LASTEXITCODE)" }
-}
-
-# The ~/dev paths in settings.json and the agents context resolve the same as on the laptop.
-if (-not (Test-Path -LiteralPath "$HOME\dev")) {
-    Write-Host "==> junction $HOME\dev to $($setup.devRoot)"
-    New-Item -ItemType Junction -Path "$HOME\dev" -Target $setup.devRoot | Out-Null
 }
 
 # The Claude Code installer sets PATH only for the session it runs in.
@@ -130,17 +134,17 @@ $env:Path += ";$binDir"
 
 # Both installers turn on Set-StrictMode, so each runs in a child scope to keep it out of this script.
 if (-not (Test-Path -LiteralPath "$binDir\claude.exe")) {
-    Write-Host '==> Claude Code'
+    Write-Step 'Claude Code (the installer prints nothing while it downloads 342 MB)'
     & ([scriptblock]::Create((Invoke-RestMethod https://claude.ai/install.ps1)))
 }
 # The installer's stable alias. The release folder it puts on PATH changes with every herdr version.
 $herdr = "$env:LOCALAPPDATA\Programs\Herdr\bin\herdr.exe"
 if (-not (Test-Path -LiteralPath $herdr)) {
-    Write-Host '==> herdr'
+    Write-Step 'herdr'
     & ([scriptblock]::Create((Invoke-RestMethod https://herdr.dev/install.ps1)))
 }
 
 if ($PersonalSetupPath) {
-    Write-Host "==> $PersonalSetupPath"
+    Write-Step $PersonalSetupPath
     . (Join-Path $PSScriptRoot $PersonalSetupPath)
 }
