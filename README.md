@@ -27,8 +27,11 @@ Open Windows PowerShell as administrator and run, picking your layout:
 & ([scriptblock]::Create((irm -UseBasicParsing https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Single
 ```
 
-[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, then runs the two setup
-scripts in order. Each one is safe to rerun on its own:
+[`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, adds the runtime checkout
+`~\.windows-dev` with [`scripts/add-runtime-checkout.ps1`](scripts/add-runtime-checkout.ps1), then runs the two setup
+scripts from there in order. The laptop links its configs from and runs its scripts from the runtime checkout only,
+which a git hook moves to `master` each time it moves, since perusal mirrors the agent's uncommitted edits into
+`~\dev`. Each setup script is safe to rerun on its own:
 
 - [`scripts/setup-packages.ps1`](scripts/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every app in
   [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the MSYS2 compilers, the VS Code extensions, the
@@ -67,11 +70,17 @@ Both need Developer Mode (turned on by `scripts/setup-packages.ps1`) or an eleva
 
 Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/` first.
 
+## Where configs live
+
+Every config lives in this repo. Edit them in `~\dev\windows-dev`, and they take effect on the laptop once committed.
+[`scripts/setup-configs.ps1`](scripts/setup-configs.ps1) links each one from the runtime checkout to the path its app
+reads.
+
 ## Claude Code
 
 Claude Code runs as the account `claude` in a Hyper-V VM built by
 [`scripts/new-agent-vm.ps1`](scripts/new-agent-vm.ps1). The VM reaches the internet but not the host, the LAN, or
-my ziti services, and its `gh` token is read-only.
+my ziti services, and its `gh` token is read-only. [`docs/agent-vm.md`](docs/agent-vm.md) sets one up from scratch.
 
 - [`claude/context.md`](claude/context.md) holds the working rules. `~/.claude/CLAUDE.md` links to it.
 - [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a

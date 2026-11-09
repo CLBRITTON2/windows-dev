@@ -1,7 +1,8 @@
 #Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-  Set up a fresh Windows machine: clone this repo, then run setup-packages.ps1 and setup-configs.ps1 in that order.
+  Set up a fresh Windows machine: clone this repo, add its runtime checkout ~\.windows-dev, then run
+  setup-packages.ps1 and setup-configs.ps1 from there in that order.
 
 .DESCRIPTION
   Runs under Windows PowerShell 5.1 because a fresh machine has no pwsh 7 yet. setup-packages.ps1 installs it,
@@ -34,9 +35,12 @@ if (-not (Test-Path $repo)) {
     if ($LASTEXITCODE -ne 0) { throw "git clone failed with exit code $LASTEXITCODE" }
 }
 
-& "$repo\scripts\setup-packages.ps1"
+& "$repo\scripts\add-runtime-checkout.ps1"
+$runtimeCheckout = "$HOME\.windows-dev"
 
-& $pwsh -NoProfile -File "$repo\scripts\setup-configs.ps1" -Layout $Layout
+& "$runtimeCheckout\scripts\setup-packages.ps1"
+
+& $pwsh -NoProfile -File "$runtimeCheckout\scripts\setup-configs.ps1" -Layout $Layout
 if ($LASTEXITCODE -ne 0) { throw "setup-configs.ps1 failed with exit code $LASTEXITCODE" }
 
 Write-Host ""

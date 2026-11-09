@@ -48,7 +48,8 @@ Set-PSReadLineOption -Colors @{
 # Winget shims are not on PATH by default on this machine.
 $env:PATH += ";$env:LOCALAPPDATA\Microsoft\WinGet\Packages\junegunn.fzf_Microsoft.Winget.Source_8wekyb3d8bbwe"
 $env:PATH += ";$env:LOCALAPPDATA\Microsoft\WinGet\Packages\eza-community.eza_Microsoft.Winget.Source_8wekyb3d8bbwe"
-# Prepended so mingw64 gcc/gdb shadow any other toolchain.
+# Prepended so mingw64 gcc/gdb shadow any other toolchain. setup-packages.ps1 lets only administrators write it, since
+# this runs in elevated shells too.
 $env:PATH = "C:\msys64\mingw64\bin;" + $env:PATH
 
 # ── fzf ──
@@ -121,7 +122,13 @@ function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
 function cdzet { Set-Location '~\dev\openziti\ziti-tunnel-sdk-c' }
 function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
-function udoz-repos { & "~\dev\windows-dev\scripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
+# The laptop runs scripts from the runtime checkout, since perusal mirrors the agent's edits into ~\dev.
+if ($env:USERNAME -eq 'claude') {
+    $windowsDevScripts = "$HOME\dev\windows-dev\scripts"
+} else {
+    $windowsDevScripts = "$HOME\.windows-dev\scripts"
+}
+function udoz-repos { & "$windowsDevScripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
 function pfc { perusal follow }
 
 # The agent VM links this profile too, where herdr must stay the local binary.

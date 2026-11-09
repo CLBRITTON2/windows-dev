@@ -11,7 +11,8 @@
   not the host, the LAN, or the host's ziti services, and only the host and its other Default Switch VMs can open a
   connection to it, on ssh.
 
-  Runs elevated, so the agent must not be able to change anything it reads: the VM's folder,
+  Runs elevated, so the agent must not be able to change anything it reads: it runs from the runtime checkout
+  ~\.windows-dev (add-runtime-checkout.ps1), the VM's folder,
   %ProgramData%\<VmName>, must not exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus
   Hyper-V Administrators), and -InstallIso must be in the user profile outside ~\dev, where perusal mirrors the agent's
   edits.
@@ -35,6 +36,10 @@ param(
     [string] $PersonalSetupPath
 )
 $ErrorActionPreference = 'Stop'
+# perusal mirrors the agent's uncommitted edits into ~\dev, and this runs the scripts beside it elevated.
+if ($PSScriptRoot.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
+    throw "Run new-agent-vm.ps1 from the runtime checkout ~\.windows-dev, not $PSScriptRoot"
+}
 # Full paths, since this runs elevated and a PATH folder the agent can write could otherwise supply the tool.
 $openSshDir = "$env:SystemRoot\System32\OpenSSH"
 $git = "$env:ProgramFiles\Git\cmd\git.exe"
@@ -44,7 +49,7 @@ $icacls = "$env:SystemRoot\System32\icacls.exe"
 # characters.
 if ($VmName -notmatch '^[A-Za-z][A-Za-z0-9-]{0,14}$') { throw "VmName must be a computer name of 1 to 15 letters, digits and hyphens: $VmName" }
 $vmHost = "$VmName.mshome.net".ToLowerInvariant()
-# Holds the VM, its disk, the guest password and the answer file.
+# Holds the VM, its disk, the guest password, and until setup finishes the answer file.
 $vmDir = Join-Path $env:ProgramData $VmName
 
 # Checked first, so a wrong Host entry does not fail the run after the 45 minute install. Without one, ssh -G gives
@@ -211,6 +216,8 @@ while ($true) {
     Start-Sleep -Seconds 30
 }
 Get-VMDvdDrive -VMName $VmName | Set-VMDvdDrive -Path $null
+# The answer file holds the guest password in plain text, and administrator.password keeps the only copy needed.
+Remove-Item -LiteralPath $answerDir, $answerIso -Recurse
 
 $guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $authorizedKey -ScriptBlock {
     param([string] $authorizedKey)
@@ -295,6 +302,7 @@ if ($LASTEXITCODE -ne 0) { throw "scp to $VmName failed (exit $LASTEXITCODE)" }
     & "$openSshDir\ssh.exe" $VmName powershell -NoProfile -ExecutionPolicy RemoteSigned -File agent-vm-bootstrap.ps1 `
         -SetupPath agent-vm.json @bootstrapArguments
 if ($LASTEXITCODE -ne 0) { throw "agent-vm-bootstrap.ps1 in $VmName failed (exit $LASTEXITCODE)" }
+Remove-Item -LiteralPath $setupPath
 # A desktop session for run-in-console.ps1, since an ssh key logon has no desktop and no DPAPI. Set this late, since
 # OOBE deletes AutoAdminLogon and DefaultUserName when it finishes, which can be after IMAGE_STATE_COMPLETE.
 Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $password -ScriptBlock {

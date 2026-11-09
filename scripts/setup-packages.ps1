@@ -89,6 +89,11 @@ Write-Host "Installing MSYS2 packages" -ForegroundColor Cyan
 # A login shell, so the first run initializes the pacman keyring.
 & 'C:\msys64\usr\bin\bash.exe' -lc "pacman -S --needed --noconfirm $($msysPackages -join ' ')"
 Assert-ExitCode 'pacman -S'
+# The profile puts mingw64\bin first on PATH in elevated shells too, and a folder at the root of C: inherits
+# Authenticated Users' Modify, so any process could plant an exe there.
+& "$env:SystemRoot\System32\icacls.exe" 'C:\msys64\mingw64' /inheritance:r /grant:r '*S-1-5-32-544:(OI)(CI)F' `
+    '*S-1-5-18:(OI)(CI)F' '*S-1-5-32-545:(OI)(CI)RX'
+Assert-ExitCode 'icacls C:\msys64\mingw64'
 
 Write-Host "Installing carronade, rallypoint, and intarsia releases" -ForegroundColor Cyan
 foreach ($tool in $releaseTools) {
@@ -96,12 +101,17 @@ foreach ($tool in $releaseTools) {
     $release = Invoke-RestMethod "https://api.github.com/repos/CLBRITTON2/$($tool.Repo)/releases/latest"
     $zip = Join-Path $env:TEMP "$($tool.Repo).zip"
     $unpacked = Join-Path $env:TEMP $tool.Repo
-    Invoke-WebRequest $release.assets[0].browser_download_url -OutFile $zip -UseBasicParsing
+    $asset = $release.assets[0]
+    Invoke-WebRequest $asset.browser_download_url -OutFile $zip -UseBasicParsing
+    # GitHub computes the digest at upload, so a download that differs from the uploaded file fails here.
+    if ($asset.digest -notmatch '^sha256:([0-9a-f]{64})$') { throw "$($asset.name) has no sha256 digest: $($asset.digest)" }
+    $zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
+    if ($zipHash -ne $Matches[1]) { throw "$($asset.name) has SHA256 $zipHash, GitHub lists $($Matches[1])" }
     Expand-Archive $zip $unpacked -Force
     New-Item -ItemType Directory -Force $tool.Dir | Out-Null
     foreach ($exe in $tool.Exes) {
         $found = @(Get-ChildItem $unpacked -Recurse -Filter $exe)
-        if ($found.Count -ne 1) { throw "$($release.assets[0].name) has $($found.Count) copies of $exe, expected 1" }
+        if ($found.Count -ne 1) { throw "$($asset.name) has $($found.Count) copies of $exe, expected 1" }
         Copy-Item $found[0].FullName $tool.Dir
     }
 }
