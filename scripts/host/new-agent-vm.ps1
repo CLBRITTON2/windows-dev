@@ -12,7 +12,7 @@
   connection to it, on ssh.
 
   Runs elevated, so the agent must not be able to change anything it reads: it runs from the runtime checkout
-  ~\.windows-dev (add-runtime-checkout.ps1), the VM's folder,
+  ~\.windows-dev (bootstrap.ps1 makes it), the VM's folder,
   %ProgramData%\<VmName>, must not exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus
   Hyper-V Administrators), and -InstallIso must be in the user profile outside ~\dev, where perusal mirrors the agent's
   edits.
@@ -100,7 +100,7 @@ try {
 if ([Text.Encoding]::ASCII.GetString($isoSignature) -ne 'CD001') { throw "InstallIso is not an ISO 9660 image: $isoPath" }
 
 # Checked before the 45 minute install, like the ssh settings above.
-$bootstrapPath = Join-Path $PSScriptRoot 'agent-vm-bootstrap.ps1'
+$bootstrapPath = Join-Path (Split-Path $PSScriptRoot -Parent) 'agent-vm\agent-vm-bootstrap.ps1'
 if ($PersonalSetupPath) {
     if (-not (Test-Path -LiteralPath $PersonalSetupPath -PathType Leaf)) { throw "PersonalSetupPath is not a file: $PersonalSetupPath" }
     $bootstrapFiles = @($bootstrapPath, $PersonalSetupPath)

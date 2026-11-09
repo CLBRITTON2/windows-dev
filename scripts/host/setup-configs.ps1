@@ -4,7 +4,7 @@
   Link every config into the home folder and the GlazeWM config for one layout, then reload GlazeWM if it is running.
 
 .DESCRIPTION
-  Runs from the runtime checkout ~\.windows-dev only, which add-runtime-checkout.ps1 makes, so every link points
+  Runs from the runtime checkout ~\.windows-dev only, which bootstrap.ps1 makes, so every link points
   there. Rerun it to switch layouts. Creating symlinks needs an elevated shell or Windows Developer Mode, which
   setup-packages.ps1 turns on. Anything already at a link target is moved to ~/.dotfiles-backup/<timestamp>/.
 #>
@@ -16,10 +16,10 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repo = Split-Path $PSScriptRoot -Parent
+$repo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 # perusal mirrors the agent's uncommitted edits into ~\dev, and a linked config runs whatever is there.
 if ($repo.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
-    throw "Run setup-configs.ps1 from the runtime checkout ~\.windows-dev (scripts\add-runtime-checkout.ps1), not $repo"
+    throw "Run setup-configs.ps1 from the runtime checkout ~\.windows-dev (bootstrap.ps1 makes it), not $repo"
 }
 # Backups go outside the linked directories: Claude Code scans its config dirs and would pick up a stale
 # sibling copy.

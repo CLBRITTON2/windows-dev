@@ -19,8 +19,8 @@ a code file is touched.
 - Keep changes minimal and related to the request. Do not revert unrelated changes.
 - If unsure, inspect the codebase instead of inventing patterns.
 - Test data, repro artifacts, and downloads go in the session scratchpad, nowhere else in the agent's home.
-  `scripts/clean-agent.ps1` in windows-dev deletes the scratch folders of sessions idle for 7 days, so anything worth
-  keeping goes into the agents repo context file first.
+  `scripts/agent-vm/clean-agent.ps1` in windows-dev deletes the scratch folders of sessions idle for 7 days, so
+  anything worth keeping goes into the agents repo context file first.
 - Diagnosing a failure or explaining how code behaves at runtime: quote the log line, source line, or command output
   before naming a cause or a flow. A claim with none behind it is labeled a hypothesis.
 - When project instructions include test or lint commands, run them before finishing if the task changed

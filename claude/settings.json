@@ -48,20 +48,11 @@
       "Bash(node ./scripts/*)",
       "Bash(npm run *)",
       "Bash(yarn run *)",
-      "Bash(rm -rf ./build)",
-      "Bash(rm -rf ./dist)",
-      "Bash(rm -rf ./node_modules)",
-      "Bash(pkill -f node)",
-      "Bash(pkill -f dev-server)",
       "Bash(xargs grep :*)",
       "Bash(ziti:*)",
       "Bash(go build:*)",
-      "Read(//c/temp/**)",
       "Read(~/dev/openziti/**)",
       "Read(~/dev/windows-dev/**)",
-      "Edit(//c/temp/**)",
-      "Read(/tmp/**)",
-      "Edit(/tmp/**)",
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
@@ -165,18 +156,6 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo reminder for chat replies only, not prose written into files or commits: 1-3 sentences or bullets, lead with the verdict, no preamble, no wrap-up summary, no hedges or filler adjectives, no em dash, no semicolon in prose, never end with vague delegation. Recommend one default and state the exact next action.",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "matcher": "^(startup|resume|clear|compact|fork)$",
@@ -203,11 +182,6 @@
   "feedbackSurveyRate": 0,
   "feedbackDrafts": "off",
   "effortLevel": "high",
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "effortLevel": "high"
-    }
-  },
   "autoCompactWindow": 200000,
   "promptSuggestionEnabled": false,
   "autoUpdatesChannel": "latest",

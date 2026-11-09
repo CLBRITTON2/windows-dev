@@ -133,7 +133,7 @@ function pfc { perusal follow }
 
 # The agent VM links this profile too, where herdr must stay the local binary.
 if ($env:USERNAME -ne 'claude') {
-    # herdr's server and its Claude panes run in claude-vm (scripts/new-agent-vm.ps1), reached through the claude-vm
+    # herdr's server and its Claude panes run in claude-vm (scripts/host/new-agent-vm.ps1), reached through the claude-vm
     # alias in ~\.ssh\config. The local client attaches over ssh because mouse clicks do not survive `ssh -t` into the
     # VM.
     function herdr {

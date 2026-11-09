@@ -136,8 +136,20 @@ function Test-WinKeyParity([string]$repoRoot) {
     return $failures
 }
 
+# perusal mirrors the agent's uncommitted edits into ~\dev, so every laptop script refuses to run from there.
+function Test-RuntimeCheckoutGuard([string[]]$paths) {
+    $failures = @()
+    foreach ($path in $paths) {
+        if (-not (Select-String -LiteralPath $path -Pattern '\.StartsWith\("\$HOME\\dev\\"' -Quiet)) {
+            $failures += "${path}: scripts/host scripts must throw when run from under ~\dev, see setup-configs.ps1"
+        }
+    }
+    return $failures
+}
+
 $failures = @()
 $failures += Test-JsonSyntax (Get-TrackedFile $RepoRoot '*.json')
+$failures += Test-RuntimeCheckoutGuard (Get-TrackedFile $RepoRoot 'scripts/host/*.ps1')
 $failures += Test-PowerShellSyntax (Get-TrackedFile $RepoRoot '*.ps1')
 $failures += Test-WinKeyParity $RepoRoot
 

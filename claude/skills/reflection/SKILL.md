@@ -35,9 +35,9 @@ in the same sessions.
 ## Fresh VM tools
 
 `~/dev/agents/context/windows-dev/vm-tools.md` is the ledger of tools that sessions in the agent VM needed and neither
-`~/dev/windows-dev/scripts/agent-vm-bootstrap.ps1` nor the personal setup `agent-vm-personal-setup.ps1` beside it
-installs. Create it when missing, with the header the other files there use. Each entry: the tool, what needed it,
-and the session id prefixes and dates it was seen in.
+`~/dev/windows-dev/scripts/agent-vm/agent-vm-bootstrap.ps1` nor the personal setup `agent-vm-personal-setup.ps1`
+beside it installs. Create it when missing, with the header the other files there use. Each entry: the tool, what
+needed it, and the session id prefixes and dates it was seen in.
 
 - Record a tool from the "Missing commands" lines, and from any executable used in two or more sessions that
   `Get-Command` resolves to something neither script installs (installed by hand in this VM, so a rebuild loses it).

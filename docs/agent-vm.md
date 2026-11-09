@@ -14,7 +14,7 @@ Example run, in PowerShell 7 as administrator:
 ```powershell
 ssh-keygen -t ed25519 -f "$HOME\.ssh\claude-vm"
 git clone https://github.com/CLBRITTON2/windows-dev.git "$HOME\windows-dev"
-& "$HOME\windows-dev\scripts\new-agent-vm.ps1" -InstallIso "$HOME\Downloads\windows-eval.iso" -AuthorizedKeyPath "$HOME\.ssh\claude-vm.pub" -VmName claude-vm
+& "$HOME\windows-dev\scripts\host\new-agent-vm.ps1" -InstallIso "$HOME\Downloads\windows-eval.iso" -AuthorizedKeyPath "$HOME\.ssh\claude-vm.pub" -VmName claude-vm
 ssh claude-vm
 claude
 ```
