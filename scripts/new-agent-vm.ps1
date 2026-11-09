@@ -60,7 +60,7 @@ if ($sshSettings -contains "hostname $($VmName.ToLowerInvariant())") {
     New-Item -ItemType Directory -Force -Path (Split-Path $sshConfig) | Out-Null
     Add-Content -LiteralPath $sshConfig -Encoding ascii -Value '', "Host $VmName", "  HostName $vmHost", '  User claude',
         "  IdentityFile $identityFile"
-    Write-Host "==> added Host $VmName to $sshConfig"
+    Write-Host "added Host $VmName to $sshConfig"
     $sshSettings = @(& "$openSshDir\ssh.exe" -G $VmName)
     if ($LASTEXITCODE -ne 0) { throw "ssh -G $VmName failed (exit $LASTEXITCODE)" }
 }
@@ -207,21 +207,14 @@ while ($true) {
     } catch {
         $lastError = $_.Exception.Message
     }
-    Write-Host "==> waiting for $VmName ($lastError)"
+    Write-Host "waiting for $VmName ($lastError)"
     Start-Sleep -Seconds 30
 }
 Get-VMDvdDrive -VMName $VmName | Set-VMDvdDrive -Path $null
 
-$guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $authorizedKey, $password -ScriptBlock {
-    param([string] $authorizedKey, [string] $password)
+$guestSsh = Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $authorizedKey -ScriptBlock {
+    param([string] $authorizedKey)
     $ErrorActionPreference = 'Stop'
-    # A desktop session for run-in-console.ps1, since an ssh key logon has no desktop and no DPAPI.
-    Set-LocalUser -Name claude -PasswordNeverExpires $true
-    $winlogon = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
-    Set-ItemProperty -LiteralPath $winlogon -Name AutoAdminLogon -Value '1'
-    Set-ItemProperty -LiteralPath $winlogon -Name DefaultDomainName -Value $env:COMPUTERNAME
-    Set-ItemProperty -LiteralPath $winlogon -Name DefaultUserName -Value 'claude'
-    Set-ItemProperty -LiteralPath $winlogon -Name DefaultPassword -Value $password
     # The ACLs on the VM's adapter deny the Default Switch's DNS proxy on the host.
     $guestAdapter = Get-NetAdapter | Where-Object InterfaceDescription -like 'Microsoft Hyper-V Network Adapter*'
     Set-DnsClientServerAddress -InterfaceIndex $guestAdapter.ifIndex -ServerAddresses 1.1.1.1, 9.9.9.9
@@ -270,7 +263,7 @@ if (Test-Path -LiteralPath $knownHosts) {
     if ($LASTEXITCODE -ne 0) { throw "ssh-keygen -R $knownHostName failed (exit $LASTEXITCODE)" }
 }
 Add-Content -LiteralPath $knownHosts -Encoding ascii -Value "$knownHostName $hostKeyType $hostKeyData"
-Write-Host "==> trusted the host key of $knownHostName in $knownHosts"
+Write-Host "trusted the host key of $knownHostName in $knownHosts"
 
 # The repositories under ~\dev and where each is cloned from. Each URL is read from the .git\config file, since
 # running git in a repository the agent worked in would run what its config names, elevated. Linked work trees
@@ -302,8 +295,42 @@ if ($LASTEXITCODE -ne 0) { throw "scp to $VmName failed (exit $LASTEXITCODE)" }
     & "$openSshDir\ssh.exe" $VmName powershell -NoProfile -ExecutionPolicy RemoteSigned -File agent-vm-bootstrap.ps1 `
         -SetupPath agent-vm.json @bootstrapArguments
 if ($LASTEXITCODE -ne 0) { throw "agent-vm-bootstrap.ps1 in $VmName failed (exit $LASTEXITCODE)" }
+# A desktop session for run-in-console.ps1, since an ssh key logon has no desktop and no DPAPI. Set this late, since
+# OOBE deletes AutoAdminLogon and DefaultUserName when it finishes, which can be after IMAGE_STATE_COMPLETE.
+Invoke-Command -VMName $VmName -Credential $credential -ArgumentList $password -ScriptBlock {
+    param([string] $password)
+    $ErrorActionPreference = 'Stop'
+    Set-LocalUser -Name claude -PasswordNeverExpires $true
+    $winlogon = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+    Set-ItemProperty -LiteralPath $winlogon -Name AutoAdminLogon -Value '1'
+    Set-ItemProperty -LiteralPath $winlogon -Name DefaultDomainName -Value $env:COMPUTERNAME
+    Set-ItemProperty -LiteralPath $winlogon -Name DefaultUserName -Value 'claude'
+    Set-ItemProperty -LiteralPath $winlogon -Name DefaultPassword -Value $password
+}
 # Autologon takes effect at the next boot, and installers such as Visual Studio's ask for one too.
-Restart-VM -Name $VmName -Force -Wait -For Heartbeat
+# Restart-VM is a hard reset, which drops the guest's writes of the last minute (the bootstrap's dotfile links).
+Stop-VM -Name $VmName -Force
+Start-VM -Name $VmName
+Wait-VM -Name $VmName -For Heartbeat
+# run-in-console.ps1 needs claude on the console, and Windows can drop autologon silently or restart once more first.
+$logonDeadline = (Get-Date).AddMinutes(5)
+$lastLogonCheck = 'none'
+while ($true) {
+    if ((Get-Date) -gt $logonDeadline) {
+        throw "claude did not log on to the console of $VmName within 5 minutes. Last check: $lastLogonCheck"
+    }
+    try {
+        $claudeSessions = Invoke-Command -VMName $VmName -Credential $credential -ErrorAction Stop -ScriptBlock {
+            (quser claude 2>&1 | ForEach-Object ToString) -join ' '
+        }
+        if ($claudeSessions -match '\bconsole\b') { break }
+        $lastLogonCheck = $claudeSessions
+    } catch {
+        $lastLogonCheck = $_.Exception.Message
+    }
+    Write-Host "waiting for claude's console logon ($lastLogonCheck)"
+    Start-Sleep -Seconds 15
+}
 
-Write-Host "==> $VmName is ready. Attach with: herdr --remote $VmName"
+Write-Host "$VmName is ready. Attach with: herdr --remote $VmName"
 Write-Host "    Then run claude in a pane once to log in."

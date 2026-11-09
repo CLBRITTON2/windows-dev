@@ -14,7 +14,7 @@
   agent-vm-personal-setup.ps1. It runs last, in this script's scope, so it can use $setup, $devRoot, $winget, $herdr,
   Write-Step and Install-WingetPackage.
 
-  Each step prints a timestamped ==> line, and the whole run is kept in ~\agent-vm-bootstrap.log in the guest.
+  Each step prints a line starting with the time, and the whole run is kept in ~\agent-vm-bootstrap.log in the guest.
 
   The evaluation ISO ships winget 1.6, which cannot read the current package index, and an ssh logon never gets the
   winget source package, so it installs the latest winget and the source package first.
@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 Start-Transcript -LiteralPath "$HOME\agent-vm-bootstrap.log" -Append
 
 function Write-Step([string] $step) {
-    Write-Host "==> $(Get-Date -Format HH:mm:ss) $step"
+    Write-Host "$(Get-Date -Format HH:mm:ss) $step"
 }
 
 $gitHubToken = [Console]::In.ReadLine()

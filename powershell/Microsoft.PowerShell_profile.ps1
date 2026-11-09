@@ -130,8 +130,13 @@ if ($env:USERNAME -ne 'claude') {
     # alias in ~\.ssh\config. The local client attaches over ssh because mouse clicks do not survive `ssh -t` into the
     # VM.
     function herdr {
-        Start-Process wezterm-gui.exe -ArgumentList 'start', '--', "$env:LOCALAPPDATA\Programs\Herdr\bin\herdr.exe",
-            '--remote', 'claude-vm'
+        if ($args.Count -eq 0) {
+            $herdrArguments = @('--remote', 'claude-vm')
+        } else {
+            $herdrArguments = $args
+        }
+        Start-Process wezterm-gui.exe -ArgumentList (
+            @('start', '--', "$env:LOCALAPPDATA\Programs\Herdr\bin\herdr.exe") + $herdrArguments)
     }
 }
 

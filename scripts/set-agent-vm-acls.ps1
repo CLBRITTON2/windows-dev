@@ -39,7 +39,7 @@ $interceptedPrefixes = @(Get-NetRoute -AddressFamily IPv4 | Where-Object Interfa
         # The tunnel's limited broadcast route is not an intercept.
         $routePrefix -ne '255.255.255.255/32' -and -not $coveringRanges
     })
-Write-Host "==> ziti intercepts denied besides the blocked ranges: $($interceptedPrefixes -join ', ')"
+Write-Host "ziti intercepts denied besides the blocked ranges: $($interceptedPrefixes -join ', ')"
 
 # The new rules take the weight bank the old ones do not use and the old ones go after, so the VM is never without
 # its denies. Higher weight applies first.
