@@ -1,0 +1,59 @@
+id: no-loose-type-go
+language: go
+message: Strict typing everywhere. Avoid any and interface{}.
+severity: error
+rule:
+  any:
+    - kind: type_identifier
+      regex: ^any$
+    - kind: interface_type
+      regex: ^interface\s*\{\s*\}$
+---
+id: no-generic-name-go
+language: go
+message: Name a variable for what it holds, never a generic word, an ad hoc abbreviation or a single letter.
+severity: error
+rule:
+  kind: identifier
+  regex: ^([a-zA-Z]|found|status|props|added|data|result|tmp|temp|val|obj|vm|evt)$
+  any:
+    - inside:
+        kind: expression_list
+        inside:
+          field: left
+          any:
+            - kind: short_var_declaration
+              not:
+                inside:
+                  kind: for_clause
+            - kind: range_clause
+    - inside:
+        kind: var_spec
+        field: name
+---
+id: no-swallowed-error-go
+language: go
+message: Raise errors explicitly. Never silently ignore them.
+severity: error
+rule:
+  pattern: if err != nil {}
+---
+id: no-log-interpolation-go
+language: go
+message: Logging uses structured fields, not dynamic values interpolated into the message string.
+severity: error
+rule:
+  kind: call_expression
+  any:
+    - has:
+        field: function
+        kind: selector_expression
+        all:
+          - has:
+              field: field
+              regex: ^(Trace|Debug|Info|Warn|Warning|Error|Fatal|Panic)f$
+          - not:
+              has:
+                field: operand
+                regex: ^(fmt|errors|t|b|tb)$
+    - pattern: slog.$LEVEL(fmt.Sprintf($$$), $$$)

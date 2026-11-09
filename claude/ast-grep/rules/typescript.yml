@@ -1,0 +1,58 @@
+# sgconfig.yml parses .ts and the JavaScript extensions as tsx too, so these rules cover all of them.
+id: no-ternary-ts
+language: tsx
+message: Plain if/else that assigns in each branch, never a ternary.
+severity: error
+rule:
+  kind: ternary_expression
+---
+id: no-loose-type-ts
+language: tsx
+message: Strict typing everywhere. Avoid any and unknown.
+severity: error
+rule:
+  kind: predefined_type
+  regex: ^(any|unknown)$
+---
+id: no-default-parameter-ts
+language: tsx
+message: No default parameter values. Make every parameter explicit.
+severity: error
+rule:
+  any:
+    - kind: required_parameter
+    - kind: optional_parameter
+  has:
+    field: value
+    regex: .
+---
+id: no-generic-name-ts
+language: tsx
+message: Name a variable for what it holds, never a generic word, an ad hoc abbreviation or a single letter.
+severity: error
+rule:
+  kind: identifier
+  regex: ^([a-zA-Z]|found|status|props|added|data|result|tmp|temp|val|obj|vm|evt)$
+  any:
+    - inside:
+        kind: variable_declarator
+        field: name
+        not:
+          inside:
+            kind: lexical_declaration
+            inside:
+              kind: for_statement
+              field: initializer
+    - inside:
+        kind: for_in_statement
+        field: left
+---
+id: no-swallowed-error-ts
+language: tsx
+message: Raise errors explicitly. Never silently ignore them.
+severity: error
+rule:
+  kind: catch_clause
+  has:
+    field: body
+    regex: ^\{\s*\}$

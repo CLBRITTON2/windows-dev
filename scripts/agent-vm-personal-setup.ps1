@@ -22,6 +22,7 @@ foreach ($packageId in @(
     'junegunn.fzf'
     'MSYS2.MSYS2'
     'Microsoft.NuGet'
+    'ast-grep.ast-grep'
 )) {
     Install-WingetPackage $packageId @()
 }

@@ -1,0 +1,7 @@
+# sgconfig.yml parses .c and .h as cpp too, so this covers C.
+id: no-ternary-cpp
+language: cpp
+message: Plain if/else that assigns in each branch, never a ternary.
+severity: error
+rule:
+  kind: conditional_expression

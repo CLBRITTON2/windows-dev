@@ -1,0 +1,102 @@
+id: no-ternary-cs
+language: csharp
+message: Plain if/else that assigns in each branch, never a ternary.
+severity: error
+rule:
+  kind: conditional_expression
+---
+id: no-loose-type-cs
+language: csharp
+message: Strict typing everywhere. Write the type instead of var or dynamic.
+severity: error
+rule:
+  any:
+    - kind: implicit_type
+    - kind: identifier
+      regex: ^dynamic$
+      inside:
+        kind: variable_declaration
+        field: type
+---
+id: no-default-parameter-cs
+language: csharp
+message: No default parameter values. Make every parameter explicit.
+severity: error
+rule:
+  kind: parameter
+  has:
+    pattern: '='
+---
+id: no-generic-name-cs
+language: csharp
+message: Name a variable for what it holds, never a generic word, an ad hoc abbreviation or a single letter.
+severity: error
+rule:
+  kind: identifier
+  regex: ^([a-zA-Z]|found|status|props|added|data|result|tmp|temp|val|obj|vm|evt)$
+  any:
+    - inside:
+        kind: variable_declarator
+        field: name
+        not:
+          inside:
+            kind: variable_declaration
+            inside:
+              kind: for_statement
+              field: initializer
+    - inside:
+        kind: foreach_statement
+        field: left
+---
+id: no-swallowed-error-cs
+language: csharp
+message: Raise errors explicitly. Never silently ignore them.
+severity: error
+rule:
+  kind: catch_clause
+  has:
+    field: body
+    regex: ^\{\s*\}$
+---
+id: no-catch-all-cs
+language: csharp
+message: Use specific error types. Avoid catch-all handlers that hide the cause.
+severity: error
+rule:
+  kind: catch_clause
+  any:
+    - not:
+        has:
+          kind: catch_declaration
+    - has:
+        kind: catch_declaration
+        has:
+          field: type
+          regex: ^(System\.)?Exception$
+  not:
+    has:
+      field: body
+      has:
+        kind: throw_statement
+        stopBy: end
+---
+id: no-log-interpolation-cs
+language: csharp
+message: Logging uses structured fields, not dynamic values interpolated into the message string.
+severity: error
+rule:
+  kind: invocation_expression
+  has:
+    field: function
+    kind: member_access_expression
+    has:
+      field: name
+      regex: ^(Log)?(Trace|Debug|Info|Information|Warn|Warning|Error|Fatal|Critical)$
+  all:
+    - has:
+        field: arguments
+        has:
+          kind: argument
+          nthChild: 1
+          has:
+            kind: interpolated_string_expression

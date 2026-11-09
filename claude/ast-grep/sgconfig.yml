@@ -1,0 +1,6 @@
+ruleDirs:
+  - rules
+# One parser per family, so each rule is written once for it.
+languageGlobs:
+  tsx: ['*.ts', '*.mts', '*.cts', '*.js', '*.jsx', '*.mjs', '*.cjs']
+  cpp: ['*.c', '*.h']

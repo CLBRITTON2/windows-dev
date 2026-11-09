@@ -151,6 +151,16 @@
             "timeout": 15
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/hooks/lint-edited-lines.ps1",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -161,17 +171,6 @@
             "type": "command",
             "command": "echo reminder for chat replies only, not prose written into files or commits: 1-3 sentences or bullets, lead with the verdict, no preamble, no wrap-up summary, no hedges or filler adjectives, no em dash, no semicolon in prose, never end with vague delegation. Recommend one default and state the exact next action.",
             "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "pwsh -NoProfile -File ~/dev/windows-dev/claude/hooks/stop-rules-gate.ps1",
-            "timeout": 120
           }
         ]
       }
