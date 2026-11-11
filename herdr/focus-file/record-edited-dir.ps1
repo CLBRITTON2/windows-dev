@@ -79,10 +79,6 @@ $editedDir = Get-AgentDevPath (Split-Path -Parent ([System.IO.Path]::GetFullPath
 if (-not $editedDir) {
     exit 0
 }
-# The agent commits its own context file edits in the same turn, so following them would show a clean repo.
-if ($editedDir.StartsWith((Join-Path $agentDevDir 'agents') + '\', [StringComparison]::OrdinalIgnoreCase)) {
-    exit 0
-}
 $workTree = Find-WorkTree $editedDir
 if (-not $workTree) {
     exit 0
