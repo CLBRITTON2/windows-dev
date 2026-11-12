@@ -122,7 +122,7 @@ function ..  { Set-Location .. }
 function ... { Set-Location ..\.. }
 function cdzet { Set-Location '~\dev\openziti\ziti-tunnel-sdk-c' }
 function cdew  { Set-Location '~\dev\openziti\desktop-edge-win' }
-# The laptop runs scripts from the runtime checkout, since perusal mirrors the agent's edits into ~\dev.
+# The laptop runs scripts from the runtime checkout, since perusal writes the agent's commits into ~\dev.
 if ($env:USERNAME -eq 'claude') {
     $windowsDevScripts = "$HOME\dev\windows-dev\scripts"
 } else {

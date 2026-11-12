@@ -15,7 +15,7 @@ param(
     [Parameter(Mandatory)] [string] $VmName
 )
 $ErrorActionPreference = 'Stop'
-# perusal mirrors the agent's uncommitted edits into ~\dev, and this runs elevated.
+# perusal writes the agent's commits into ~\dev unreviewed, and this runs elevated.
 if ($PSScriptRoot.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
     throw "Run set-agent-vm-acls.ps1 from the runtime checkout ~\.windows-dev, not $PSScriptRoot"
 }

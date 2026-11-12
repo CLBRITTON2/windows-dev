@@ -13,7 +13,7 @@ param()
 $ErrorActionPreference = 'Stop'
 
 $repo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-# perusal mirrors the agent's uncommitted edits into ~\dev, and this runs elevated.
+# perusal writes the agent's commits into ~\dev unreviewed, and this runs elevated.
 if ($repo.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
     throw "Run setup-packages.ps1 from the runtime checkout ~\.windows-dev (bootstrap.ps1 makes it), not $repo"
 }

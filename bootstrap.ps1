@@ -37,7 +37,7 @@ if (-not (Test-Path $repo)) {
 
 $runtimeCheckout = "$HOME\.windows-dev"
 $hookMarker = '# Written by bootstrap.ps1.'
-# perusal mirrors the agent's uncommitted edits into ~\dev, so nothing there runs elevated and no config links there.
+# perusal writes the agent's commits into ~\dev unreviewed, so nothing there runs elevated and no config links there.
 # The runtime checkout holds committed code only: a reference-transaction hook checks it out at master each time master
 # moves (commit, pull, reset, rebase). perusal writes work trees, never .git\hooks.
 $hooksPathSetting = & $git -C $repo config --get core.hooksPath

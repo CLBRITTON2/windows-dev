@@ -136,7 +136,7 @@ function Test-WinKeyParity([string]$repoRoot) {
     return $failures
 }
 
-# perusal mirrors the agent's uncommitted edits into ~\dev, so every laptop script refuses to run from there.
+# perusal writes the agent's commits into ~\dev unreviewed, so every laptop script refuses to run from there.
 function Test-RuntimeCheckoutGuard([string[]]$paths) {
     $failures = @()
     foreach ($path in $paths) {

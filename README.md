@@ -105,5 +105,5 @@ Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/
 
 Every config lives in this repo. Edit them in `~\dev\windows-dev`, and they take effect once committed:
 [`setup-configs.ps1`](scripts/host/setup-configs.ps1) links them from `~\.windows-dev`, a checkout that a git hook
-keeps on `master`. Nothing on the laptop runs from `~\dev`, since perusal mirrors the agent's uncommitted edits there.
+keeps on `master`. Nothing on the laptop runs from `~\dev`, since perusal writes the agent's commits there unreviewed.
 [`scripts/host`](scripts/host) runs on the laptop, [`scripts/agent-vm`](scripts/agent-vm) inside the VM.

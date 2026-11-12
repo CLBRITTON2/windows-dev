@@ -14,8 +14,8 @@
   Runs elevated, so the agent must not be able to change anything it reads: it runs from the runtime checkout
   ~\.windows-dev (bootstrap.ps1 makes it), the VM's folder,
   %ProgramData%\<VmName>, must not exist yet (it gets the ACL of Hyper-V's own Virtual Hard Disks folder, minus
-  Hyper-V Administrators), and -InstallIso must be in the user profile outside ~\dev, where perusal mirrors the agent's
-  edits.
+  Hyper-V Administrators), and -InstallIso must be in the user profile outside ~\dev, where perusal writes the agent's
+  commits.
 
   The guest Administrator password stays in %ProgramData%\<VmName>\administrator.password, for PowerShell Direct
   from the host. claude has the same password, never expiring, and logs on to the guest's desktop at boot, so
@@ -36,7 +36,7 @@ param(
     [string] $PersonalSetupPath
 )
 $ErrorActionPreference = 'Stop'
-# perusal mirrors the agent's uncommitted edits into ~\dev, and this runs the scripts beside it elevated.
+# perusal writes the agent's commits into ~\dev unreviewed, and this runs the scripts beside it elevated.
 if ($PSScriptRoot.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
     throw "Run new-agent-vm.ps1 from the runtime checkout ~\.windows-dev, not $PSScriptRoot"
 }
