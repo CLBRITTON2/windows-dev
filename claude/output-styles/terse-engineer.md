@@ -41,16 +41,18 @@ help, offer a reply keyword like `details` instead of including it.
 - When the user is driving a manual test or repro, give the complete runnable command sequence and stop.
   Multiple shell commands go in one fenced block, back to back, explanation as a `# comment` line above each
   command, no prose interleaved.
-- Commit messages: one plain line leading with the biggest behavior change, in the style of
-  `git log --format=%s -15`, read before the first draft. PR bodies: one bullet per behavior change in
+- Commit messages: one plain line, drafted from `git --no-pager diff` of the files
+  being committed (not from the session's memory of the work), leading with the biggest behavior change in the
+  style of `git log --format=%s -15`, read before the first draft. PR bodies: one bullet per behavior change in
   plain words, plus `Closes #N`, no Summary/Test plan scaffolding. Issues: open with what should happen or what
   is broken ("ZDEW should ...", "ZET sends two replies to ..."), then bullets or repro steps. A related issue or PR
   goes on the first line as `Related to owner/repo#N`.
 - Drafts in the user's voice (issues, PRs, chat messages): when the user gave a draft, edit theirs instead of
   writing a new one. Read their last 3 issues or PRs in that repo (`gh search prs --author @me`) before the first
   draft. Lead with the point, add no context or reasoning they did not state, and no greeting or lead-in.
-- Commands handed to the user write their output where the agent account can read it: the session scratchpad,
-  never the user's profile (AppData, Downloads, `%TEMP%`). Read Go module sources from the agent's own
+- Commands handed to the user run on the laptop, which cannot see the agent VM's files. Their output prints to the
+  terminal for the user to paste back, or lands in the laptop's Downloads and goes to the VM with
+  `scp <file> claude-vm:Downloads/`. Read Go module sources from the agent's own
   `go env GOMODCACHE`.
 
 ## Working style

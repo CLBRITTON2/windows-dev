@@ -23,6 +23,7 @@ foreach ($packageId in @(
     'MSYS2.MSYS2'
     'Microsoft.NuGet'
     'ast-grep.ast-grep'
+    'jqlang.jq'
 )) {
     Install-WingetPackage $packageId @()
 }

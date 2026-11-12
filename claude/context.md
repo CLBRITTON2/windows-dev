@@ -37,6 +37,11 @@ a code file is touched.
   the commit" or "still uncommitted". I commit between turns without saying so.
 - Reading is fine: run `git --no-pager diff`, `git log`, `git show`, or `git status` to inspect when you
   need to.
+- In the agent VM, each repo under `~\dev` is a perusal mirror of the same repo under the laptop's `~\dev`, not a
+  separate clone. The laptop's branch drives the VM's (a branch switched in the VM is undone on the next poll), and
+  the VM's uncommitted edits are copied to the laptop. So git commands handed to me target the laptop repo, written
+  `$HOME\dev\<repo>`, never the VM path and never `ssh claude-vm git ...`. To move work to another branch, I switch
+  the laptop and perusal carries the edits.
 
 ## Shell
 
