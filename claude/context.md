@@ -28,20 +28,20 @@ a code file is touched.
 
 ## Git
 
-- I run all git mutations myself. Never run a mutating git command (add, commit, branch, push, pull, fetch,
-  checkout, reset, rebase, restore, clean, merge, tag) and never ask permission to run one. Hand over git
-  commands or a commit message only when I ask for one.
+- In the agent VM, commit your work: `add`, `commit`, `fetch` and `switch` (with `--create` for a new branch) are
+  yours to run. Commit when a change is ready for my review. Only commits reach my laptop, uncommitted edits do not.
+- Never run push, pull, checkout, reset, restore, clean, rebase, merge, tag or a branch delete or rename, and never
+  ask permission to run one. Hand over git commands for my laptop or a commit message only when I ask for one.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually
   uncommitted. Never guess whether I already committed an earlier change.
 - Run `git status` in the same turn before saying anything about what is committed or pending, including "next is
   the commit" or "still uncommitted". I commit between turns without saying so.
 - Reading is fine: run `git --no-pager diff`, `git log`, `git show`, or `git status` to inspect when you
   need to.
-- In the agent VM, each repo under `~\dev` is a perusal mirror of the same repo under the laptop's `~\dev`, not a
-  separate clone. The laptop's branch drives the VM's (a branch switched in the VM is undone on the next poll), and
-  the VM's uncommitted edits are copied to the laptop. So git commands handed to me target the laptop repo, written
-  `$HOME\dev\<repo>`, never the VM path and never `ssh claude-vm git ...`. To move work to another branch, I switch
-  the laptop and perusal carries the edits.
+- In the agent VM, each repo under `~\dev` is a clone of the same repo under the laptop's `~\dev`. perusal on the
+  laptop takes each new commit in the VM into the laptop's work tree as unstaged changes, where I review and commit
+  it. So git commands handed to me target the laptop repo, written `$HOME\dev\<repo>`, never the VM path and never
+  `ssh claude-vm git ...`.
 
 ## Shell
 
@@ -74,7 +74,7 @@ a code file is touched.
   assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
   asked (terms go in its `## Vocabulary` section). Current state only, no changelog.
 - Durable findings about a project go in its context file in the agents repo, never in auto-memory or ad hoc
-  files. Leave it uncommitted: I commit the agents repo myself.
+  files. Commit it in the agent VM like any other repo, so it reaches my laptop.
 
 ## Security
 
