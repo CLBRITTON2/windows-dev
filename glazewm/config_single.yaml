@@ -120,6 +120,9 @@ keybindings:
     bindings: ['lwin+n', 'rwin+n']
   - commands: ['shell-exec devenv']
     bindings: ['lwin+v', 'rwin+v']
+  # Same as the profile's herdr function: rallypoint restores herdr only as the direct child of a one-pane wezterm.
+  - commands: ['shell-exec C:/Program Files/WezTerm/wezterm-gui.exe start -- %LOCALAPPDATA%/Programs/Herdr/bin/herdr.exe --remote claude-vm']
+    bindings: ['lwin+a', 'rwin+a']
 
   # WINDOW MANAGEMENT
   - commands: ['close']
