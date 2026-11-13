@@ -56,8 +56,10 @@ if ($oldRules | Where-Object Weight -ge 500) {
 # Above the denies, so DHCP reaches 255.255.255.255 (inside 240.0.0.0/4) and the host's private address.
 Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Outbound -Protocol UDP -LocalPort 68 -RemotePort 67 -Weight ($bankBase + 400)
 Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Inbound -Protocol UDP -LocalPort 68 -RemotePort 67 -Weight ($bankBase + 399)
-# Stateful, so the VM's packets to the host pass only as replies on an ssh connection the host opened.
-Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Inbound -Protocol TCP -LocalPort 22 -Stateful $true -Weight ($bankBase + 450)
+# Stateful, so the VM's packets to the host pass only as replies on an ssh connection the host opened. The idle
+# timeout is the most IdleSessionTimeout takes (about 18 hours), so herdr's ssh connection outlasts a night of laptop
+# sleep.
+Add-VMNetworkAdapterExtendedAcl -VMName $VmName -Action Allow -Direction Inbound -Protocol TCP -LocalPort 22 -Stateful $true -IdleSessionTimeout 65535 -Weight ($bankBase + 450)
 
 $deniedPrefixes = @($blockedRanges) + $interceptedPrefixes + '::/0'
 for ($prefixIndex = 0; $prefixIndex -lt $deniedPrefixes.Count; $prefixIndex++) {
