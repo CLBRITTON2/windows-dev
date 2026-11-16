@@ -28,10 +28,19 @@ the start of every session.
 
 ## Git
 
-- In the agent VM, commit your work: `add`, `commit`, `fetch` and `switch` (with `--create` for a new branch) are
-  yours to run. Commit when a change is ready for my review. Only commits reach my laptop, uncommitted edits do not.
-- Never run push, pull, checkout, reset, restore, clean, rebase, merge, tag or a branch delete or rename, and never
-  ask permission to run one. Hand over git commands for my laptop or a commit message only when I ask for one.
+- In the agent VM, commit your work: `add`, `commit`, `fetch`, `switch` and `worktree add` are yours to run. Commit
+  when a change is ready for my review. Only commits reach my laptop, uncommitted edits do not.
+- Each task that changes a repo gets its own worktree, never the clone's own checkout. Run
+  `git -C ~/dev/<repo> fetch origin`, then
+  `git -C ~/dev/<repo> worktree add -b <branch> ~/dev/worktrees/<repo>/<folder> <sha>`, where `<repo>` is the clone's
+  path under `~\dev`, `<folder>` is `<branch>` with `/` replaced by `-`, and `<sha>` is the fetched tip of origin's
+  default branch. Edit and commit only inside it. In the same reply, hand me the same two commands for my laptop
+  with `$HOME\dev` paths and the same sha, so perusal has my copy of the worktree to take your commits into.
+- `scripts\prune-worktrees.ps1` in windows-dev, run on my laptop, removes the worktrees whose PR merged, on both
+  machines. Never remove a worktree yourself.
+- Never run push, pull, checkout, reset, restore, clean, rebase, merge, tag, a branch delete or rename, or a worktree
+  remove, prune or move, and never ask permission to run one. Hand over other git commands for my laptop or a commit
+  message only when I ask for one.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually
   uncommitted. Never guess whether I already committed an earlier change.
 - Run `git status` in the same turn before saying anything about what is committed or pending, including "next is

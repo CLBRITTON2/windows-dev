@@ -26,9 +26,10 @@ if ($json.tool_name -eq "Bash") {
 
     # Second layer under the settings.json deny list, which misses forms like 'git -c x=y commit'.
     # Bare 'git branch' and the listing forms of 'git tag' stay allowed, so those match only when they mutate.
-    # add, commit, fetch and switch stay allowed: perusal takes the agent's commits into the laptop's work tree.
+    # add, commit, fetch, switch and worktree add stay allowed: perusal takes the agent's commits into the laptop's work tree.
     if ($dataUnquoted -match "\bgit\s+$gitOptions(push|pull|checkout|rebase|reset|restore|clean|merge|tag(?!$tagListing))(?![\w-])" -or
-        $dataUnquoted -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)') {
+        $dataUnquoted -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)' -or
+        $dataUnquoted -match "\bgit\s+$gitOptions" + 'worktree\s+(remove|prune|move|repair)\b') {
         @{
             decision = "block"
             reason   = "Do not mutate the git repo. Hand the command to the user to run instead."
@@ -59,7 +60,7 @@ if ($json.tool_name -eq "Bash") {
 		$subcommand = $git.Groups['subcommand'].Value
 		$rest = $git.Groups['rest'].Value
 		$operands = @(($rest -replace '\s\d*>.*', '').Trim() -split '\s+' | Where-Object { $_ -and $_ -notlike '-*' })
-		# config, remote, branch, reflog, worktree and stash also write, so only their reading forms pass.
+		# config, remote, branch, reflog, worktree and stash also write, so only their reading forms and worktree add pass.
 		$allowedWithPath = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file|fsck|add|commit|fetch|switch)$' -or
 			($subcommand -ceq 'tag' -and $rest -match "^$tagListing") -or
 			($subcommand -ceq 'config' -and $rest -notmatch '\s(--unset\S*|--add|--replace-all|--rename-section|--remove-section|--edit|-e)\b' -and
@@ -71,12 +72,12 @@ if ($json.tool_name -eq "Bash") {
 			($subcommand -ceq 'hash-object' -and $rest -notmatch '\s-w\b') -or
 			($subcommand -ceq 'symbolic-ref' -and $rest -notmatch '\s(-d|--delete)\b' -and $operands.Count -le 1) -or
 			($subcommand -ceq 'reflog' -and $rest -notmatch '^\s+(expire|delete)\b') -or
-			($subcommand -ceq 'worktree' -and $rest -match '^\s+list\b') -or
+			($subcommand -ceq 'worktree' -and $rest -match '^\s+(list|add)\b') -or
 			($subcommand -ceq 'stash' -and $rest -match '^\s+(list|show)\b')
 		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $allowedWithPath) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only add, commit, fetch, switch, the read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only add, commit, fetch, switch, worktree add, the read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}
