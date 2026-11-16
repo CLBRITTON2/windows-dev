@@ -130,6 +130,9 @@ if ($env:USERNAME -eq 'claude') {
 }
 function udoz-repos { & "$windowsDevScripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
 function pfc { perusal follow }
+function pwt {
+    & "$windowsDevScripts\prune-worktrees.ps1" -DevRoot "$HOME\dev" -AgentHost claude-vm -AgentDevRoot C:/Users/claude/dev
+}
 
 # The agent VM links this profile too, where herdr must stay the local binary.
 if ($env:USERNAME -ne 'claude') {

@@ -30,7 +30,9 @@ the start of every session.
 
 - In the agent VM, commit your work: `add`, `commit`, `fetch`, `switch` and `worktree add` are yours to run. Commit
   when a change is ready for my review. Only commits reach my laptop, uncommitted edits do not.
-- Each task that changes a repo gets its own worktree, never the clone's own checkout. Run
+- windows-dev takes no worktrees: edit and commit in the `~/dev/windows-dev` clone itself, and hand me no git
+  commands for it.
+- In every other repo, each task that changes it gets its own worktree, never the clone's own checkout. Run
   `git -C ~/dev/<repo> fetch origin`, then
   `git -C ~/dev/<repo> worktree add -b <branch> ~/dev/worktrees/<repo>/<folder> <sha>`, where `<repo>` is the clone's
   path under `~\dev`, `<folder>` is `<branch>` with `/` replaced by `-`, and `<sha>` is the fetched tip of origin's
