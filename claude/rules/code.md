@@ -1,13 +1,3 @@
----
-paths:
-  - "**/*.{go,rs,c,h,cc,cpp,hpp,cs,java,kt,swift,zig}"
-  - "**/*.{js,jsx,mjs,cjs,ts,tsx,vue,svelte}"
-  - "**/*.{py,rb,lua,php,pl}"
-  - "**/*.{ps1,psm1,psd1,sh,bash,zsh,cmd,bat,ahk}"
-  - "**/{CMakeLists.txt,*.cmake,Makefile,Dockerfile}"
-  - "**/*.{toml,yml,yaml}"
----
-
 # Code rules
 
 ## Code style

@@ -1,8 +1,8 @@
 # Working rules
 
 Context loaded at the start of every Claude Code session: `~/.claude/CLAUDE.md` is a symlink to this file.
-This repo is the source of truth. Code, comment, and error handling rules live in `rules/code.md`, which loads when
-a code file is touched.
+This repo is the source of truth. Code, comment, and error handling rules live in `rules/code.md`, which also loads at
+the start of every session.
 
 ## Writing
 
@@ -69,7 +69,8 @@ a code file is touched.
 
 ## Knowledge upkeep
 
-- Project `CLAUDE.md` files may be symlinks. Edit the symlink target, never through the link.
+- Sessions start in `~/dev/agents`, the home repo. Its `CLAUDE.md` points each repo at its context file under
+  `~/dev/agents/context/<path>/`, and the repos themselves hold no `CLAUDE.md` of mine.
 - When a session settles what a term means, finds a version-specific behavior, or corrects a wrong
   assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
   asked (terms go in its `## Vocabulary` section). Current state only, no changelog.

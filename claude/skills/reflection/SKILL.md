@@ -51,4 +51,4 @@ needed it, and the session id prefixes and dates it was seen in.
 At most ten findings, worst first: the pattern in one line, the evidence (session id prefix plus the quoted prompt or
 error), and the fix as the exact file plus the change in one line. Tool promotions count as findings. Then stop: apply
 a fix only after the user picks it, one at a time. The ledger is the one file this skill edits without asking. Context
-files under `~/dev/agents` stay uncommitted, edited at the symlink target.
+files under `~/dev/agents` stay uncommitted.

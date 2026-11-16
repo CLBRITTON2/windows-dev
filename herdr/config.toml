@@ -2,7 +2,7 @@ onboarding = false
 
 [terminal]
 default_shell = 'C:\Program Files\PowerShell\7\pwsh.exe'
-new_cwd = "~/dev"
+new_cwd = "~/dev/agents"
 
 [theme]
 name = "rose-pine"

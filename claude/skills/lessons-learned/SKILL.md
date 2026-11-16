@@ -24,10 +24,8 @@ write nothing and stop after saying so in one line.
 
 ## Write
 
-The context file is `~/dev/<path>/CLAUDE.md`, a symlink into `~/dev/agents/context/<path>/CLAUDE.md`. Read and
-edit the target under `~/dev/agents/context` directly, never the symlink: Edit writes a temp file and renames it
-over the path, which replaces the link with a plain file, and Edit requires the target itself to have been read
-first. A subdirectory file owns its scope, the root file owns the rest, and each fact lives in exactly one file. A
+The context file for the checkout `~/dev/<path>` is `~/dev/agents/context/<path>/CLAUDE.md`. Read it before
+editing. A subdirectory file owns its scope, the root file owns the rest, and each fact lives in exactly one file. A
 root file may list detail files (sibling `*.md` in the same context dir, read on demand, each with its own
 read-when trigger) under `## Detail files`: a fact that belongs to one of those topics goes there, not into the
 root. Keep the file's voice, section order, and
@@ -36,7 +34,7 @@ dash, no semicolon, wrap at 120 columns. Leave the Verified line alone.
 
 A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.md`, opened with the same
 `Verified against <owner/repo> <short sha> (<date>)` header the other files use, sha read from
-`.git/HEAD` and its ref. The symlink needs the user's `setup-configs.ps1`, so name that as a follow-up.
+`.git/HEAD` and its ref, and a pointer line in `~/dev/agents/CLAUDE.md` under `## Other repos`.
 
 ## Report
 

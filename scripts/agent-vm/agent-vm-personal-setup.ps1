@@ -128,7 +128,3 @@ foreach ($skill in Get-ChildItem "$windowsDev\claude\skills" -Directory) {
     $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
 }
 foreach ($agentLink in $agentLinks) { Link "$HOME\$($agentLink.Leaf)" $agentLink.Source $backupRoot }
-
-# Links each repository's CLAUDE.md from the agents repo.
-& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File (Join-Path $devRoot 'agents\install.ps1')
-if ($LASTEXITCODE -ne 0) { throw "agents install.ps1 failed (exit $LASTEXITCODE)" }

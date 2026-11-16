@@ -1,11 +1,12 @@
 <#
 .SYNOPSIS
-Records the work tree of the file a Claude Code edit touched, keyed by the session, then refreshes ~\dev\.herdr-focus.
+Records the work tree of the file a Claude Code edit touched, or of each git -C commit a Bash call ran, keyed by the
+session, then refreshes ~\dev\.herdr-focus.
 
 .DESCRIPTION
-Claude Code runs this as a PostToolUse hook on Edit, Write and NotebookEdit. A session started in one repo can edit
-others, so the session's file lists every work tree it edited, most recent first, and write-focus-file.ps1 writes them
-after the pane's cwd. Edits outside a work tree under ~\dev, and sessions outside herdr, are not recorded, since
+Claude Code runs this as a PostToolUse hook on Edit, Write, NotebookEdit and Bash. A session started in one repo can
+edit others, so the session's file lists every work tree it edited, most recent first, and write-focus-file.ps1 writes
+them after the pane's cwd. Edits outside a work tree under ~\dev, and sessions outside herdr, are not recorded, since
 perusal follows only repos under ~\dev.
 #>
 
@@ -48,11 +49,11 @@ function Write-Atomically([string]$path, [string]$content) {
     [System.IO.File]::Move($staging, $path, $true)
 }
 
-function Read-Recorded([string]$sessionFile, [string]$workTree) {
+function Read-Recorded([string]$sessionFile, [string[]]$workTrees) {
     if (-not (Test-Path -LiteralPath $sessionFile -PathType Leaf)) {
         return @()
     }
-    return @([System.IO.File]::ReadAllLines($sessionFile) | Where-Object { $_ -and $_ -ine $workTree })
+    return @([System.IO.File]::ReadAllLines($sessionFile) | Where-Object { $_ -and $workTrees -notcontains $_ })
 }
 
 if ($env:HERDR_ENV -ne '1') {
@@ -66,21 +67,24 @@ $sessionId = [guid]::Empty
 if (-not [guid]::TryParse($payload.session_id, [ref]$sessionId)) {
     throw "PostToolUse payload session_id '$($payload.session_id)' is not a GUID, so it cannot name a file in $editedDirs"
 }
-if ($payload.tool_input.notebook_path) {
-    $editedFile = $payload.tool_input.notebook_path
+if ($payload.tool_name -eq 'Bash') {
+    # Sessions start in the agents home repo and commit elsewhere with git -C, and perusal takes commits only from
+    # the work trees this list names, so a repo committed through Bash alone would otherwise stay in the VM.
+    $commitTargets = [regex]::Matches([string]$payload.tool_input.command,
+        'git\s+-C\s+(?:"([^"]+)"|''([^'']+)''|(\S+))\s+commit\b') |
+        ForEach-Object { ($_.Groups[1..3] | Where-Object Success | Select-Object -First 1).Value }
+    $touchedDirs = @($commitTargets | ForEach-Object { $_ -replace '^~(?=[\\/])', $HOME })
+} elseif ($payload.tool_input.notebook_path) {
+    $touchedDirs = @(Split-Path -Parent $payload.tool_input.notebook_path)
+} elseif ($payload.tool_input.file_path) {
+    $touchedDirs = @(Split-Path -Parent $payload.tool_input.file_path)
 } else {
-    $editedFile = $payload.tool_input.file_path
-}
-if (-not $editedFile) {
     throw "PostToolUse payload for $($payload.tool_name) has no tool_input.file_path or notebook_path: $($payload.tool_input | ConvertTo-Json -Compress)"
 }
 
-$editedDir = Get-AgentDevPath (Split-Path -Parent ([System.IO.Path]::GetFullPath($editedFile)))
-if (-not $editedDir) {
-    exit 0
-}
-$workTree = Find-WorkTree $editedDir
-if (-not $workTree) {
+$workTrees = @($touchedDirs | ForEach-Object { Get-AgentDevPath ([System.IO.Path]::GetFullPath($_)) } |
+    Where-Object { $_ } | ForEach-Object { Find-WorkTree $_ } | Where-Object { $_ } | Select-Object -Unique)
+if (-not $workTrees) {
     exit 0
 }
 
@@ -93,7 +97,7 @@ try {
         throw "another record-edited-dir.ps1 held mutex Local\windows-dev.edited-dirs for over $mutexTimeoutMs ms"
     }
     try {
-        Write-Atomically $sessionFile ((@($workTree) + (Read-Recorded $sessionFile $workTree)) -join "`n")
+        Write-Atomically $sessionFile (($workTrees + (Read-Recorded $sessionFile $workTrees)) -join "`n")
     } finally {
         $mutex.ReleaseMutex()
     }
