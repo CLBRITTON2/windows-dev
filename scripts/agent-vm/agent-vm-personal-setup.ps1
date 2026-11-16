@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  The personal part of the agent VM setup: the laptop's dev toolchain, Visual Studio workloads, what the desktop-edge-win UI
+  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, Visual Studio workloads, what the desktop-edge-win UI
   tests need, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and focus-file plugin, and the agent's dotfile links.
 
 .DESCRIPTION
@@ -43,6 +43,11 @@ if ($vsSetup.ExitCode -ne 0 -and $vsSetup.ExitCode -ne 3010) {
 # winget installs update the registry PATH but not this session's copy.
 $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
     [Environment]::GetEnvironmentVariable('Path', 'User')
+
+# Claude Code's Go LSP runs gopls from PATH. The Go installer puts %USERPROFILE%\go\bin there.
+Write-Step 'gopls'
+& go install golang.org/x/tools/gopls@latest
+if ($LASTEXITCODE -ne 0) { throw "go install gopls failed (exit $LASTEXITCODE)" }
 
 Write-Step 'desktop-edge-win UI test prerequisites'
 # The NuGet.Config Visual Studio leaves lists only its offline packages, so nuget restore cannot find the rest.
