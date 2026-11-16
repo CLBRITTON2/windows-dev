@@ -42,7 +42,8 @@ function Get-FocusedPaneDirectories {
     }
     # perusal opens on the first line, and panes start in the agents home repo, whose edits are only context upkeep.
     # It stays listed, since perusal takes commits only from the listed work trees.
-    $unique = @($directories | Select-Object -Unique)
+    # A work tree prune-worktrees.ps1 removed stays in the session's list, and perusal would offer to recreate it.
+    $unique = @($directories | Select-Object -Unique | Where-Object { Test-Path -LiteralPath $_ -PathType Container })
     return @($unique | Where-Object { $_ -ine $agentsDir }) + @($unique | Where-Object { $_ -ieq $agentsDir })
 }
 
