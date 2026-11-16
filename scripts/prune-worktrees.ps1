@@ -1,11 +1,13 @@
 #Requires -Version 7
 <#
 .SYNOPSIS
-Removes each worktree under <DevRoot>\worktrees whose branch merged through a PR, on the laptop and in the agent VM.
+Removes each worktree under <DevRoot>\worktrees whose branch reached origin's default branch, on the laptop and in the
+agent VM.
 
 .DESCRIPTION
-Runs on the laptop. A worktree is pruned when a merged PR's head commit is its branch tip, neither copy has
-uncommitted changes, and perusal has taken the agent copy's last commit: the agent's HEAD is perusal's taken ref for
+Runs on the laptop. A worktree is pruned when its branch tip is a merged PR's head commit, or when the branch has
+commits since it was created and each one is in origin's default branch or was cherry-picked onto it (git cherry
+shows no + line), neither copy has uncommitted changes, and perusal has taken the agent copy's last commit: the agent's HEAD is perusal's taken ref for
 the branch, or is already in the laptop branch. Pruning removes the agent's worktree and branch first, then the
 laptop's worktree, branch and perusal's taken ref. Every other worktree stays and is listed with the reason.
 
@@ -102,11 +104,33 @@ $verdicts = foreach ($workTree in Find-WorkTreeDir $worktreesRoot) {
     if ($LASTEXITCODE -ne 0) {
         throw "gh pr list --repo $slug --head $branch failed with exit code ${LASTEXITCODE}: $($mergedHeads -join "`n")"
     }
-    if (@($mergedHeads) -notcontains $head) {
-        $verdict.State = 'ACTIVE'
-        $verdict.Reason = "no merged PR in $slug has head $($head.Substring(0, 8))"
-        $verdict
-        continue
+    if (@($mergedHeads) -contains $head) {
+        $landedReason = "merged PR head $($head.Substring(0, 8))"
+    } else {
+        $defaultBranch = & gh repo view $slug --json defaultBranchRef --jq '.defaultBranchRef.name' 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "gh repo view $slug failed with exit code ${LASTEXITCODE}: $($defaultBranch -join "`n")"
+        }
+        Invoke-Git $workTree @('fetch', 'origin', $defaultBranch) | Out-Null
+        # The oldest reflog entry is where worktree add created the branch. A branch still there has no work of its own,
+        # so being in the default branch says nothing about it.
+        $createdAt = @((Invoke-Git $workTree @('reflog', 'show', '--format=%H', "refs/heads/$branch")) -split "`n")[-1]
+        $unlandedCommits = @((Invoke-Git $workTree @('cherry', "origin/$defaultBranch", $head)) -split "`n" |
+            Where-Object { $_.StartsWith('+') })
+        if ($head -eq $createdAt) {
+            $verdict.State = 'ACTIVE'
+            $verdict.Reason = "no commits since the branch was created at $($createdAt.Substring(0, 8))"
+            $verdict
+            continue
+        }
+        if ($unlandedCommits.Count -gt 0) {
+            $verdict.State = 'ACTIVE'
+            $verdict.Reason = "no merged PR in $slug has head $($head.Substring(0, 8)), and " +
+                "$($unlandedCommits.Count) commits are not in origin/$defaultBranch"
+            $verdict
+            continue
+        }
+        $landedReason = "every commit since $($createdAt.Substring(0, 8)) is in origin/$defaultBranch"
     }
 
     $commonGitDir = Invoke-Git $workTree @('rev-parse', '--path-format=absolute', '--git-common-dir')
@@ -155,7 +179,7 @@ exit `$LASTEXITCODE
     Invoke-Git $cloneDir @('branch', '-D', $branch) | Out-Null
     Invoke-Git $cloneDir @('update-ref', '-d', "refs/perusal/taken/heads/$branch") | Out-Null
     $verdict.State = 'PRUNED'
-    $verdict.Reason = "merged PR head $($head.Substring(0, 8))"
+    $verdict.Reason = $landedReason
     $verdict
 }
 
