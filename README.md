@@ -18,7 +18,7 @@ My Windows setup: a tiling window manager, terminal and editor configs, and a sa
 In Windows PowerShell as administrator, picking your layout:
 
 ```powershell
-& ([scriptblock]::Create((irm -UseBasicParsing https://raw.githubusercontent.com/CLBRITTON2/windows-dev/master/bootstrap.ps1))) -Layout Single
+& ([scriptblock]::Create((irm -UseBasicParsing https://raw.githubusercontent.com/CLBRITTON2/windows-dev/main/bootstrap.ps1))) -Layout Single
 ```
 
 Then by hand:
@@ -99,5 +99,5 @@ Anything already at a link target gets moved to `~/.dotfiles-backup/<timestamp>/
 
 Every config lives in this repo. Edit them in `~\dev\windows-dev`, and they take effect once committed:
 [`setup-configs.ps1`](scripts/host/setup-configs.ps1) links them from `~\.windows-dev`, a checkout that a git hook
-keeps on `master`. Nothing on the laptop runs from `~\dev`, since perusal writes the agent's commits there unreviewed.
+keeps on `main`. Nothing on the laptop runs from `~\dev`, since perusal writes the agent's commits there unreviewed.
 [`scripts/host`](scripts/host) runs on the laptop, [`scripts/agent-vm`](scripts/agent-vm) inside the VM.

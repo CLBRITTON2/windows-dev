@@ -38,13 +38,13 @@ if (-not (Test-Path $repo)) {
 $runtimeCheckout = "$HOME\.windows-dev"
 $hookMarker = '# Written by bootstrap.ps1.'
 # perusal writes the agent's commits into ~\dev unreviewed, so nothing there runs elevated and no config links there.
-# The runtime checkout holds committed code only: a reference-transaction hook checks it out at master each time master
+# The runtime checkout holds committed code only: a reference-transaction hook checks it out at main each time main
 # moves (commit, pull, reset, rebase). perusal writes work trees, never .git\hooks.
 $hooksPathSetting = & $git -C $repo config --get core.hooksPath
 if ($hooksPathSetting) { throw "core.hooksPath is $hooksPathSetting, so git would not run the hook in .git\hooks" }
 
 if (-not (Test-Path $runtimeCheckout)) {
-    & $git -C $repo worktree add --detach $runtimeCheckout master
+    & $git -C $repo worktree add --detach $runtimeCheckout main
     if ($LASTEXITCODE -ne 0) { throw "git worktree add $runtimeCheckout failed with exit code $LASTEXITCODE" }
 }
 
@@ -60,12 +60,12 @@ $hook = @(
     '#!/bin/sh'
     $hookMarker
     'test "$1" = committed || exit 0'
-    "grep ' refs/heads/master$' >/dev/null || exit 0"
+    "grep ' refs/heads/main$' >/dev/null || exit 0"
     'unset GIT_DIR GIT_INDEX_FILE GIT_WORK_TREE GIT_PREFIX'
-    "exec git -C '$($runtimeCheckout.Replace('\', '/'))' checkout --quiet --detach master"
+    "exec git -C '$($runtimeCheckout.Replace('\', '/'))' checkout --quiet --detach main"
 ) -join "`n"
 [IO.File]::WriteAllText($hookPath, "$hook`n", [Text.UTF8Encoding]::new($false))
-Write-Host "$runtimeCheckout follows master through $hookPath" -ForegroundColor Cyan
+Write-Host "$runtimeCheckout follows main through $hookPath" -ForegroundColor Cyan
 
 & "$runtimeCheckout\scripts\host\setup-packages.ps1"
 
