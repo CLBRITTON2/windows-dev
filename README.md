@@ -2,22 +2,16 @@
 
 My Windows setup: a tiling window manager, terminal and editor configs, and a sandboxed Claude Code.
 
-| What | Tool |
+| Role | Tool |
 | --- | --- |
 | Window manager | [GlazeWM](https://github.com/glzr-io/glazewm) |
-| Status bar | [intarsia](https://github.com/CLBRITTON2/intarsia), configured in [`intarsia/`](intarsia/) |
-| Terminal | Windows Terminal, [WezTerm](https://wezfurlong.org/wezterm/) for WSL, Claude Code and herdr |
-| App launcher | [carronade](https://github.com/CLBRITTON2/carronade), configured in [`carronade/`](carronade/) |
-| Session restore | [rallypoint](https://github.com/CLBRITTON2/rallypoint), started by the GlazeWM layouts |
-| Agent multiplexer | [herdr](https://herdr.dev), with the [`herdr/focus-file`](herdr/focus-file/) plugin |
-| Diff reviewer | perusal, configured in [`perusal/`](perusal/), started by `pfc` in the profile |
-| Hide the taskbar | [thide](https://github.com/amnweb/thide) |
-| Visual Studio 2022 | VsVim 2022 (VS keeps ctrl+c, ctrl+f, ctrl+v, VsVim gets everything else) |
-
-### WSL configs
-
-WSL uses my [lazyvim config](https://github.com/CLBRITTON2/lazyvim-config) and the `.zshrc` from
-[dots](https://github.com/CLBRITTON2/dots).
+| Status bar | [intarsia](https://github.com/CLBRITTON2/intarsia) |
+| App launcher | [carronade](https://github.com/CLBRITTON2/carronade) |
+| Session restore | [rallypoint](https://github.com/CLBRITTON2/rallypoint) |
+| Taskbar hider | [thide](https://github.com/amnweb/thide) |
+| Terminal for WSL, Claude Code and herdr | [WezTerm](https://wezfurlong.org/wezterm/) |
+| Agent multiplexer | [herdr](https://herdr.dev) |
+| Git client that can follow Claude | [perusal](https://github.com/CLBRITTON2/perusal) |
 
 ## New machine
 
@@ -33,7 +27,7 @@ Then by hand:
   [thide](https://github.com/amnweb/thide/releases) (not on winget).
 - Install the VsVim 2022 extension from Visual Studio's Extensions menu.
 - Reboot, then install a WSL distro with `wsl --install Ubuntu`.
-- Copy perusal to `~\dev\perusal` (it has no remote) and run `go -C ~\dev\perusal install ./cmd/perusal`.
+- Install perusal with `go install github.com/CLBRITTON2/perusal/cmd/perusal@latest`.
 - Set up the agent VM, below.
 
 [`bootstrap.ps1`](bootstrap.ps1) installs git, clones this repo to `~\dev\windows-dev`, adds the runtime checkout
