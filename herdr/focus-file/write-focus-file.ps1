@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 Writes the focused herdr pane's working directory, then every work tree its Claude session edited, one per line, to
-~\dev\.herdr-focus.
+~\dev\.herdr-focus, with the agents home repo moved last.
 
 .DESCRIPTION
 herdr runs this as the agent account on startup and on every pane focus change. perusal follows the file to review
@@ -17,6 +17,7 @@ $ErrorActionPreference = 'Stop'
 
 $focusFile = Join-Path $HOME 'dev\.herdr-focus'
 $editedDirs = Join-Path $env:LOCALAPPDATA 'windows-dev\edited-dirs'
+$agentsDir = Join-Path $HOME 'dev\agents'
 $mutexTimeoutMs = 10000
 
 function Get-FocusedPaneDirectories {
@@ -35,9 +36,14 @@ function Get-FocusedPaneDirectories {
     }
     # record-edited-dir.ps1 writes these, named by the Claude session id herdr reports for the pane.
     if ($pane.agent_session.value -and (Test-Path -LiteralPath (Join-Path $editedDirs $pane.agent_session.value) -PathType Leaf)) {
-        return @($pane.cwd) + [System.IO.File]::ReadAllLines((Join-Path $editedDirs $pane.agent_session.value))
+        $directories = @($pane.cwd) + [System.IO.File]::ReadAllLines((Join-Path $editedDirs $pane.agent_session.value))
+    } else {
+        $directories = @($pane.cwd)
     }
-    return @($pane.cwd)
+    # perusal opens on the first line, and panes start in the agents home repo, whose edits are only context upkeep.
+    # It stays listed, since perusal takes commits only from the listed work trees.
+    $unique = @($directories | Select-Object -Unique)
+    return @($unique | Where-Object { $_ -ine $agentsDir }) + @($unique | Where-Object { $_ -ieq $agentsDir })
 }
 
 # Replace instead of overwrite, so a reader never sees a half-written list.
