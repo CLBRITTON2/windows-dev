@@ -1,0 +1,2 @@
+# bash and zsh in WSL read these, and break on CRLF.
+wsl/** text eol=lf

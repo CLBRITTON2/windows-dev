@@ -1,0 +1,21 @@
+export EDITOR=nvim
+export PATH="/opt/nvim-linux-x86_64/bin:/usr/local/go/bin:$PATH:$HOME/go/bin:$HOME/.local/bin"
+
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory
+set -o vi
+
+PROMPT="┌[%T]-[%n]-[%~]
+└─> "
+
+alias c='clear'
+alias ls='eza -a --icons=always'
+alias ll='eza -al --icons=always'
+alias lt='eza -a --tree --level=1 --icons=always'
+alias v='$EDITOR'
+alias ..='cd ..'
+alias ...='cd ../..'
+# ~/winhome links to the Windows home, made by setup.sh.
+alias cdzet='cd ~/winhome/dev/openziti/ziti-tunnel-sdk-c'

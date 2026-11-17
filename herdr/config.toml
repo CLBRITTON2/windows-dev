@@ -1,7 +1,7 @@
 onboarding = false
 
 [terminal]
-default_shell = 'C:\Program Files\PowerShell\7\pwsh.exe'
+default_shell = 'pwsh.exe'
 new_cwd = "~/dev/agents"
 
 [theme]

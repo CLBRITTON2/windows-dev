@@ -19,7 +19,7 @@ $ErrorActionPreference = 'Stop'
 
 $repoUrl = 'https://github.com/CLBRITTON2/windows-dev'
 $repo = "$HOME\dev\windows-dev"
-$pwsh = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
+$pwsh = "$env:LOCALAPPDATA\Microsoft\WindowsApps\pwsh.exe"
 # Called by full path: this session's PATH predates the git install.
 $git = "$env:ProgramFiles\Git\cmd\git.exe"
 

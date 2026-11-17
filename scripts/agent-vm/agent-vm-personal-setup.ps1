@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   agent-vm-bootstrap.ps1 dot-sources it last, so it runs under Windows PowerShell 5.1 in the bootstrap's scope, with
-  $devRoot, $winget, Write-Step and Install-WingetPackage from there, and the repositories, Claude Code and herdr already in place.
+  $devRoot, $winget, $pwsh, Write-Step and Install-WingetPackage from there, and the repositories, Claude Code and herdr already in place.
   Rerunning it is safe, like the bootstrap.
 #>
 
@@ -67,11 +67,11 @@ $uiTestsInstall = Join-Path $env:TEMP 'desktop-edge-win-ci-install.ps1'
 $uiTestsInstallScript = git -C (Join-Path $devRoot 'openziti\desktop-edge-win') show origin/try-appium:UITests/ci-install.ps1
 if ($LASTEXITCODE -ne 0) { throw "git show of desktop-edge-win's ci-install.ps1 failed (exit $LASTEXITCODE)" }
 Set-Content -LiteralPath $uiTestsInstall -Value $uiTestsInstallScript
-& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -File $uiTestsInstall
+& $pwsh -NoProfile -File $uiTestsInstall
 if ($LASTEXITCODE -ne 0) { throw "desktop-edge-win ci-install.ps1 failed (exit $LASTEXITCODE)" }
 
 Write-Step 'PSFzf'
-& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile -Command `
+& $pwsh -NoProfile -Command `
     'if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -TrustRepository -ErrorAction Stop }'
 if ($LASTEXITCODE -ne 0) { throw "Install-PSResource PSFzf failed (exit $LASTEXITCODE)" }
 

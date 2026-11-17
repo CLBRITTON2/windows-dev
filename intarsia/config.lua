@@ -164,7 +164,7 @@ return {
         -- and each count takes three.
         ziti = {
             type = "custom",
-            command = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-Command",
+            command = { "pwsh.exe", "-NoProfile", "-NonInteractive", "-Command",
                         [[& "$HOME\.windows-dev\intarsia\ziti-github.ps1"]] },
             run = "interval",
             timeout = 45,
@@ -201,7 +201,7 @@ return {
             icon = "",
             interval = 3600,
             tooltip = "Link the single monitor GlazeWM config and gather every workspace onto monitor 0",
-            on_click = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
+            on_click = { "pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
                          [[& "$HOME\.windows-dev\glazewm\switch-layout.ps1" -Layout Single]] },
         },
         layout_dual = {
@@ -215,7 +215,7 @@ return {
             icon = "",
             interval = 3600,
             tooltip = "Link the dual monitor GlazeWM config and move each workspace to its bound monitor",
-            on_click = { "C:\\Program Files\\PowerShell\\7\\pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
+            on_click = { "pwsh.exe", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command",
                          [[& "$HOME\.windows-dev\glazewm\switch-layout.ps1" -Layout Dual]] },
         },
         -- A window module shows the focused window's title. Add "title" to a list to show it.

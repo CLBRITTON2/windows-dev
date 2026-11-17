@@ -20,7 +20,7 @@ if (-not $desktopShell) { throw "$env:USERNAME is not logged on to a desktop, so
 
 $taskName = "run-in-console-$PID"
 $command = "& '$ScriptPath' *> '$LogPath'; exit `$LASTEXITCODE"
-$action = New-ScheduledTaskAction -Execute "$env:ProgramFiles\PowerShell\7\pwsh.exe" -Argument "-NoProfile -Command `"$command`""
+$action = New-ScheduledTaskAction -Execute "$env:LOCALAPPDATA\Microsoft\WindowsApps\pwsh.exe" -Argument "-NoProfile -Command `"$command`""
 $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest
 # A VM sees the host's battery, and without these the task stays Queued while the laptop is unplugged.
 $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Hours 4) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries

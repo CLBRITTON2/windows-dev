@@ -26,7 +26,10 @@ Then by hand:
 - Install [Ziti Desktop Edge](https://github.com/openziti/desktop-edge-win/releases) and
   [thide](https://github.com/amnweb/thide/releases) (not on winget).
 - Install the VsVim 2022 extension from Visual Studio's Extensions menu.
-- Reboot, then install a WSL distro with `wsl --install Ubuntu`.
+- Reboot, then install a WSL distro with `wsl --install Ubuntu`. In it, run
+  `bash /mnt/c/Users/<you>/.windows-dev/wsl/setup.sh` ([`wsl/setup.sh`](wsl/setup.sh)): the packages zsh and nvim
+  need, [`wsl/zshrc`](wsl/zshrc) linked to `~/.zshrc`, and the nvim config cloned from
+  [lazyvim-config](https://github.com/CLBRITTON2/lazyvim-config).
 - Install perusal with `go install github.com/CLBRITTON2/perusal/cmd/perusal@latest`.
 - Set up the agent VM, below.
 

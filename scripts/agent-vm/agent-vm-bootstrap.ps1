@@ -11,8 +11,8 @@
   installers, since the winget Claude Code never updates itself and shadows the native one on PATH.
 
   -PersonalSetupPath names a script beside this one with a personal toolchain and dotfiles, such as
-  agent-vm-personal-setup.ps1. It runs last, in this script's scope, so it can use $setup, $devRoot, $winget, $herdr,
-  Write-Step and Install-WingetPackage.
+  agent-vm-personal-setup.ps1. It runs last, in this script's scope, so it can use $setup, $devRoot, $winget, $pwsh,
+  $herdr, Write-Step and Install-WingetPackage.
 
   Each step prints a line starting with the time, and the whole run is kept in ~\agent-vm-bootstrap.log in the guest.
 
@@ -83,12 +83,12 @@ function Install-WingetPackage([string] $packageId, [string[]] $extraArguments) 
 
 Install-WingetPackage Git.Git @()
 Install-WingetPackage GitHub.cli @()
-# The default msix installer fails over ssh with -2147009255.
-Install-WingetPackage Microsoft.PowerShell @('--installer-type', 'wix', '--scope', 'machine')
+Install-WingetPackage Microsoft.PowerShell @()
+# The msix's alias. Its install folder changes with every pwsh version.
+$pwsh = "$env:LOCALAPPDATA\Microsoft\WindowsApps\pwsh.exe"
 # new-agent-vm.ps1 sets Windows PowerShell as the login shell, since pwsh is not installed until here. This session
 # keeps it, and every later ssh logon gets pwsh.
-New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Force `
-    -Value "$env:ProgramFiles\PowerShell\7\pwsh.exe" | Out-Null
+New-ItemProperty -Path HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -PropertyType String -Force -Value $pwsh | Out-Null
 
 # Nothing in the VM searches, and the indexer took most of a core while perusal polled.
 Stop-Service WSearch -Force

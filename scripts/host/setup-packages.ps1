@@ -17,7 +17,7 @@ $repo = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 if ($repo.StartsWith("$HOME\dev\", [StringComparison]::OrdinalIgnoreCase)) {
     throw "Run setup-packages.ps1 from the runtime checkout ~\.windows-dev (bootstrap.ps1 makes it), not $repo"
 }
-$pwsh = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
+$pwsh = "$env:LOCALAPPDATA\Microsoft\WindowsApps\pwsh.exe"
 $vcpkgRoot = 'C:\vcpkg'
 $vscodeExtensions = @(
     'anthropic.claude-code'
@@ -56,17 +56,6 @@ function Update-SessionPath {
     # winget installs update the registry PATH but not this session's copy.
     $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
         [Environment]::GetEnvironmentVariable('Path', 'User')
-}
-
-# bootstrap.ps1 runs pwsh by its MSI path, and a present Store build satisfies the import below, so swap it first.
-if (Get-AppxPackage Microsoft.PowerShell) {
-    Write-Host "Removing Store pwsh" -ForegroundColor Cyan
-    Get-AppxPackage Microsoft.PowerShell | Remove-AppxPackage
-}
-if (-not (Test-Path $pwsh)) {
-    Write-Host "Installing pwsh (MSI)" -ForegroundColor Cyan
-    winget install --id Microsoft.PowerShell --exact --source winget --installer-type wix --accept-package-agreements --accept-source-agreements
-    Assert-ExitCode 'winget install Microsoft.PowerShell'
 }
 
 Write-Host "Installing apps" -ForegroundColor Cyan
