@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Records the work tree of the file a Claude Code edit touched, or of each git -C commit a Bash call ran, keyed by the
+Records the work tree of the file a Claude Code edit touched, or of each git -C commit, cherry-pick or rebase a Bash call ran, keyed by the
 session, then refreshes ~\dev\.herdr-focus.
 
 .DESCRIPTION
@@ -70,10 +70,10 @@ if (-not [guid]::TryParse($payload.session_id, [ref]$sessionId)) {
 if ($payload.tool_name -eq 'Bash') {
     # Sessions start in the agents home repo and commit elsewhere with git -C, and perusal takes commits only from
     # the work trees this list names, so a repo committed through Bash alone would otherwise stay in the VM.
-    $commitTargets = [regex]::Matches([string]$payload.tool_input.command,
-        'git\s+-C\s+(?:"([^"]+)"|''([^'']+)''|(\S+))\s+commit\b') |
+    $commitWritingTargets = [regex]::Matches([string]$payload.tool_input.command,
+        'git\s+-C\s+(?:"([^"]+)"|''([^'']+)''|(\S+))\s+(?:commit|cherry-pick|rebase)\b') |
         ForEach-Object { ($_.Groups[1..3] | Where-Object Success | Select-Object -First 1).Value }
-    $touchedDirs = @($commitTargets | ForEach-Object { $_ -replace '^~(?=[\\/])', $HOME })
+    $touchedDirs = @($commitWritingTargets | ForEach-Object { $_ -replace '^~(?=[\\/])', $HOME })
 } elseif ($payload.tool_input.notebook_path) {
     $touchedDirs = @(Split-Path -Parent $payload.tool_input.notebook_path)
 } elseif ($payload.tool_input.file_path) {

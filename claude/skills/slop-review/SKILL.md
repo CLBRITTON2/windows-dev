@@ -68,8 +68,10 @@ One change site per message, then stop. A finding that touches two files is two 
   a plain `=== SCROLL BACK TO HERE ===` line.
 - For a large or unfamiliar change, explain the mechanism first: why the code exists, what it does, why it goes.
   The user cannot judge a removal they do not understand.
-- Show the real diff: patch a copy in the scratchpad and show `git --no-pager diff --no-index <file> <copy>` in a
-  diff block, every line, no `...` elisions. Add a view against the base only when the first one hides the point.
+- Show the real diff: patch a copy in the scratchpad and run `git --no-pager diff --no-index <file> <copy>`. Each hunk
+  goes under its own repo-relative `file:line` heading (the hunk's first new line) in a `diff` block holding only the
+  hunk's lines: drop the `diff --git`, `index`, `---`, `+++` and `@@` lines, keep every other line, no `...`
+  elisions. Add a view against the base only when the first one hides the point.
 - Proposed code is exactly what goes in the file. Notes go in prose, never inside the snippet.
 - One or two plain lines for trade-offs, side edits, and whether a touched comment is new or exists on the base.
 - End every message and every page with the fenced footer, the question folded into the SUMMARY line, no finding IDs

@@ -27,7 +27,7 @@ if ($json.tool_name -eq "Bash") {
     # Second layer under the settings.json deny list, which misses forms like 'git -c x=y commit'.
     # Bare 'git branch' and the listing forms of 'git tag' stay allowed, so those match only when they mutate.
     # add, commit, fetch, switch and worktree add stay allowed: perusal takes the agent's commits into the laptop's work tree.
-    if ($dataUnquoted -match "\bgit\s+$gitOptions(push|pull|checkout|rebase|reset|restore|clean|merge|tag(?!$tagListing))(?![\w-])" -or
+    if ($dataUnquoted -match "\bgit\s+$gitOptions(push|pull|checkout|reset|restore|clean|merge|tag(?!$tagListing))(?![\w-])" -or
         $dataUnquoted -match "\bgit\s+$gitOptions" + 'branch\s+(-[dDmMcC]\b|--(delete|move|copy|force|set-upstream|unset-upstream)\b)' -or
         $dataUnquoted -match "\bgit\s+$gitOptions" + 'worktree\s+(remove|prune|move|repair)\b') {
         @{
@@ -35,6 +35,18 @@ if ($json.tool_name -eq "Bash") {
             reason   = "Do not mutate the git repo. Hand the command to the user to run instead."
         } | ConvertTo-Json -Compress
         exit 0
+    }
+
+    # A worktree's branch is the agent's own, while a clone's checkout and its branches are the user's.
+    foreach ($historyRewrite in [regex]::Matches($dataUnquoted, "\bgit\s+(?<options>$gitOptions)(?:rebase|cherry-pick)(?![\w-])")) {
+        $gitPath = [regex]::Match($historyRewrite.Groups['options'].Value, '(?:^|\s)-C\s+(?<path>\S+)').Groups['path'].Value -replace '\\', '/'
+        if ($gitPath -notmatch '(?i)^(?:(?:[a-z]:|/[a-z])?/users/(?:chris|claude)/dev/worktrees/|~/dev/worktrees/)[^/]' -or $gitPath -match '\.\.') {
+            @{
+                decision = "block"
+                reason   = "rebase and cherry-pick run only as 'git -C <unquoted absolute path under ~/dev/worktrees> ...', never in a clone's own checkout."
+            } | ConvertTo-Json -Compress
+            exit 0
+        }
     }
 
     # A cd carries into every later Bash call, so each command's meaning would depend on call history.
@@ -61,7 +73,7 @@ if ($json.tool_name -eq "Bash") {
 		$rest = $git.Groups['rest'].Value
 		$operands = @(($rest -replace '\s\d*>.*', '').Trim() -split '\s+' | Where-Object { $_ -and $_ -notlike '-*' })
 		# config, remote, branch, reflog, worktree and stash also write, so only their reading forms and worktree add pass.
-		$allowedWithPath = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file|fsck|add|commit|fetch|switch)$' -or
+		$allowedWithPath = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file|fsck|add|commit|fetch|switch|rebase|cherry-pick)$' -or
 			($subcommand -ceq 'tag' -and $rest -match "^$tagListing") -or
 			($subcommand -ceq 'config' -and $rest -notmatch '\s(--unset\S*|--add|--replace-all|--rename-section|--remove-section|--edit|-e)\b' -and
 				($rest -match '^\s+(get|list)\b|\s(--get\S*|--list|-l)\b' -or $operands.Count -eq 1)) -or
@@ -77,7 +89,7 @@ if ($json.tool_name -eq "Bash") {
 		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $allowedWithPath) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only add, commit, fetch, switch, worktree add, the read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only add, commit, fetch, switch, worktree add, rebase and cherry-pick under ~/dev/worktrees, the read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}

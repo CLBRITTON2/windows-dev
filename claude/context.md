@@ -40,7 +40,9 @@ the start of every session.
   with `$HOME\dev` paths and the same sha, so perusal has my copy of the worktree to take your commits into.
 - `scripts\prune-worktrees.ps1` in windows-dev, run on my laptop, removes the worktrees whose PR merged, on both
   machines. Never remove a worktree yourself.
-- Never run push, pull, checkout, reset, restore, clean, rebase, merge, tag, a branch delete or rename, or a worktree
+- `rebase` and `cherry-pick` are yours inside a worktree under `~/dev/worktrees`, run as
+  `git -C ~/dev/worktrees/<repo>/<folder> ...`, never in a clone's own checkout.
+- Never run push, pull, checkout, reset, restore, clean, merge, tag, a branch delete or rename, or a worktree
   remove, prune or move, and never ask permission to run one. Hand over other git commands for my laptop or a commit
   message only when I ask for one.
 - Run `git status` and `git log` right before handing me git commands, and build them from what is actually

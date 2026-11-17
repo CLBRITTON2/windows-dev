@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, Visual Studio workloads, what the desktop-edge-win UI
+  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
   tests need, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and focus-file plugin, and the agent's dotfile links.
 
 .DESCRIPTION
@@ -48,6 +48,12 @@ $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
 Write-Step 'gopls'
 & go install golang.org/x/tools/gopls@latest
 if ($LASTEXITCODE -ne 0) { throw "go install gopls failed (exit $LASTEXITCODE)" }
+
+# The csharp-lsp plugin runs csharp-ls from ~\.dotnet\tools. 0.21.0 and later target net10.0, which the .NET 9 SDK
+# cannot install.
+Write-Step 'csharp-ls'
+& dotnet tool update --global csharp-ls --version 0.20.0
+if ($LASTEXITCODE -ne 0) { throw "dotnet tool update csharp-ls failed (exit $LASTEXITCODE)" }
 
 Write-Step 'desktop-edge-win UI test prerequisites'
 # The NuGet.Config Visual Studio leaves lists only its offline packages, so nuget restore cannot find the rest.
