@@ -32,7 +32,10 @@ A review outlives compaction and sessions only through its ledger at
 
 ## 2. Find
 
-Spawn the `diff-reviewer` agent for candidates, then read the full diff yourself for what it does not weigh:
+Spawn four `diff-reviewer` agents in parallel, each fresh and given only the diff: one general review, and one per
+lens (correctness bugs, dead or duplicated code and churn, missing tests). Merge their findings, then spawn one agent that tries to disprove
+each against the source, and keep what survives. Present nothing before that pass returns. Read the full diff
+yourself for what the reviewers do not weigh:
 
 - SCOPE: a fix spread to paths that never failed. Each touched site needs the failing test or run that proves it.
 - CHURN: lines changed against the base with no correctness or hygiene value. Restoring the base's text is the fix.
