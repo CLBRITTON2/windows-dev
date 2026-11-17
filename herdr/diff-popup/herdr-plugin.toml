@@ -1,0 +1,17 @@
+id = "windows-dev.diff-popup"
+name = "Diff popup"
+version = "0.2.0"
+min_herdr_version = "0.9.5"
+platforms = ["windows"]
+
+# Opened by the slop-review skill: herdr plugin pane open --plugin windows-dev.diff-popup --entrypoint diff
+# --env DIFF_OLD_PATH=... --env DIFF_NEW_PATH=... --env DIFF_NOTE_PATH=... --env DIFF_LABEL=...
+# herdr passes command as is, so pwsh expands the variables.
+[[panes]]
+id = "diff"
+title = "Diff"
+placement = "popup"
+width = "100%"
+height = "100%"
+command = ["pwsh", "-NoProfile", "-NonInteractive", "-Command",
+    "perusal show -old $env:DIFF_OLD_PATH -new $env:DIFF_NEW_PATH -label $env:DIFF_LABEL -note $env:DIFF_NOTE_PATH"]

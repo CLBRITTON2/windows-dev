@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
-  tests need, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and focus-file plugin, and the agent's dotfile links.
+  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, perusal, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
+  tests need, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and its focus-file and diff-popup plugins, and the agent's dotfile links.
 
 .DESCRIPTION
   agent-vm-bootstrap.ps1 dot-sources it last, so it runs under Windows PowerShell 5.1 in the bootstrap's scope, with
@@ -48,6 +48,11 @@ $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' +
 Write-Step 'gopls'
 & go install golang.org/x/tools/gopls@latest
 if ($LASTEXITCODE -ne 0) { throw "go install gopls failed (exit $LASTEXITCODE)" }
+
+# The diff-popup herdr plugin runs perusal show.
+Write-Step 'perusal'
+& go install github.com/CLBRITTON2/perusal/cmd/perusal@latest
+if ($LASTEXITCODE -ne 0) { throw "go install perusal failed (exit $LASTEXITCODE)" }
 
 # The csharp-lsp plugin runs csharp-ls from ~\.dotnet\tools. 0.21.0 and later target net10.0, which the .NET 9 SDK
 # cannot install.
@@ -104,12 +109,14 @@ if (-not (Test-Path -LiteralPath $herdrConfig)) {
     Copy-Item -LiteralPath (Join-Path $windowsDev 'herdr\config.toml') -Destination $herdrConfig
 }
 
-$focusPluginId = 'windows-dev.focus-file'
 $plugins = & $herdr plugin list --json | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw "herdr plugin list failed (exit $LASTEXITCODE)" }
-if ($plugins.result.plugins.plugin_id -notcontains $focusPluginId) {
-    & $herdr plugin link (Join-Path $windowsDev 'herdr\focus-file')
-    if ($LASTEXITCODE -ne 0) { throw "herdr plugin link $focusPluginId failed (exit $LASTEXITCODE)" }
+foreach ($pluginDir in @('focus-file', 'diff-popup')) {
+    $pluginId = "windows-dev.$pluginDir"
+    if ($plugins.result.plugins.plugin_id -notcontains $pluginId) {
+        & $herdr plugin link (Join-Path $windowsDev "herdr\$pluginDir")
+        if ($LASTEXITCODE -ne 0) { throw "herdr plugin link $pluginId failed (exit $LASTEXITCODE)" }
+    }
 }
 
 # The CLAUDE.md links are untracked in every repo, so git status would list them in each one.
