@@ -23,8 +23,7 @@ In Windows PowerShell as administrator, picking your layout:
 
 Then by hand:
 
-- Install [Ziti Desktop Edge](https://github.com/openziti/desktop-edge-win/releases) and
-  [thide](https://github.com/amnweb/thide/releases) (not on winget).
+- Install [Ziti Desktop Edge](https://github.com/openziti/desktop-edge-win/releases).
 - Install the VsVim 2022 extension from Visual Studio's Extensions menu.
 - Reboot, then install a WSL distro with `wsl --install Ubuntu`. In it, run
   `bash /mnt/c/Users/<you>/.windows-dev/wsl/setup.sh` ([`wsl/setup.sh`](wsl/setup.sh)): the packages zsh and nvim
@@ -38,8 +37,9 @@ Then by hand:
 
 - [`scripts/host/setup-packages.ps1`](scripts/host/setup-packages.ps1) (elevated, Windows PowerShell or pwsh): every
   app in [`winget/packages.json`](winget/packages.json), PSFzf, vcpkg, the MSYS2 compilers, the VS Code extensions,
-  the latest carronade, rallypoint, and intarsia releases, Developer Mode, and the registry access
-  `glazewm/winkey-fix.ahk` needs to hand Win+L to GlazeWM.
+  the latest carronade, rallypoint, intarsia and [thide](https://github.com/amnweb/thide) releases, Developer Mode,
+  the registry access `glazewm/winkey-fix.ahk` needs to hand Win+L to GlazeWM, and a Startup shortcut that starts
+  GlazeWM at logon.
 - [`scripts/host/setup-configs.ps1`](scripts/host/setup-configs.ps1) `-Layout` (pwsh): links every config and the
   GlazeWM layout.
 

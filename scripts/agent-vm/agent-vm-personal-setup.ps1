@@ -83,7 +83,7 @@ if ($LASTEXITCODE -ne 0) { throw "desktop-edge-win ci-install.ps1 failed (exit $
 
 Write-Step 'PSFzf'
 & $pwsh -NoProfile -Command `
-    'if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -TrustRepository -ErrorAction Stop }'
+    'if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -Repository PSGallery -TrustRepository -ErrorAction Stop }'
 if ($LASTEXITCODE -ne 0) { throw "Install-PSResource PSFzf failed (exit $LASTEXITCODE)" }
 
 # The CMake presets expect vcpkg at this path.

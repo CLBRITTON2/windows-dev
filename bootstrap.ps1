@@ -1,4 +1,3 @@
-#Requires -RunAsAdministrator
 <#
 .SYNOPSIS
   Set up a fresh Windows machine: clone this repo, add its runtime checkout ~\.windows-dev, then run
@@ -16,6 +15,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Not #Requires -RunAsAdministrator, which PowerShell skips when README's one-liner runs this as a scriptblock.
+$principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    throw 'Run bootstrap.ps1 in Windows PowerShell as administrator'
+}
 
 $repoUrl = 'https://github.com/CLBRITTON2/windows-dev'
 $repo = "$HOME\dev\windows-dev"
@@ -75,4 +79,4 @@ if ($LASTEXITCODE -ne 0) { throw "setup-packages.ps1 failed with exit code $LAST
 if ($LASTEXITCODE -ne 0) { throw "setup-configs.ps1 failed with exit code $LASTEXITCODE" }
 
 Write-Host ""
-Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, thide, VsVim, new-agent-vm.ps1." -ForegroundColor Yellow
+Write-Host "Left to do by hand, see README.md: Ziti Desktop Edge, VsVim, new-agent-vm.ps1." -ForegroundColor Yellow

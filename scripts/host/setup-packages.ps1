@@ -2,7 +2,8 @@
 <#
 .SYNOPSIS
   Install every app in winget/packages.json plus PSFzf, vcpkg, the MSYS2 compilers, the VS Code extensions, and the
-  latest carronade, rallypoint, and intarsia releases, and set the machine settings the configs rely on.
+  latest carronade, rallypoint, intarsia and thide releases, and set the machine settings the configs rely on, with a
+  Startup shortcut for GlazeWM.
 
 .DESCRIPTION
   Runs under Windows PowerShell 5.1 because a fresh machine has no pwsh 7 yet. Safe to rerun: installed apps are
@@ -66,7 +67,7 @@ Update-SessionPath
 
 Write-Host "Installing PSFzf" -ForegroundColor Cyan
 # The profile imports it. PSResourceGet ships with pwsh 7.4+, and installing from pwsh puts it in the pwsh module path.
-& $pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -TrustRepository -ErrorAction Stop }"
+& $pwsh -NoProfile -Command "if (-not (Get-Module -ListAvailable PSFzf)) { Install-PSResource PSFzf -Repository PSGallery -TrustRepository -ErrorAction Stop }"
 Assert-ExitCode 'Install-PSResource PSFzf'
 
 # The CMake presets expect vcpkg at this path. It is a git checkout, not a winget package.
@@ -109,6 +110,23 @@ foreach ($tool in $releaseTools) {
     }
 }
 
+# Not on winget. GlazeWM's startup_commands start it from the MSI's install path.
+if (-not (Test-Path 'C:\Program Files\thide\bin\thide.exe')) {
+    Write-Host "Installing thide" -ForegroundColor Cyan
+    $thideRelease = Invoke-RestMethod 'https://api.github.com/repos/amnweb/thide/releases/latest'
+    $thideAssets = @($thideRelease.assets | Where-Object name -like '*-x64.msi')
+    if ($thideAssets.Count -ne 1) { throw "thide $($thideRelease.tag_name) has $($thideAssets.Count) x64 MSIs, expected 1" }
+    $thideMsi = Join-Path $env:TEMP $thideAssets[0].name
+    Invoke-WebRequest $thideAssets[0].browser_download_url -OutFile $thideMsi -UseBasicParsing
+    if ($thideAssets[0].digest -notmatch '^sha256:([0-9a-f]{64})$') {
+        throw "$($thideAssets[0].name) has no sha256 digest: $($thideAssets[0].digest)"
+    }
+    $thideMsiHash = (Get-FileHash -LiteralPath $thideMsi -Algorithm SHA256).Hash
+    if ($thideMsiHash -ne $Matches[1]) { throw "$($thideAssets[0].name) has SHA256 $thideMsiHash, GitHub lists $($Matches[1])" }
+    $thideInstall = Start-Process msiexec.exe -Wait -PassThru -ArgumentList '/i', "`"$thideMsi`"", '/qn', '/norestart'
+    if ($thideInstall.ExitCode -ne 0) { throw "msiexec /i $thideMsi failed with exit code $($thideInstall.ExitCode)" }
+}
+
 Write-Host "Installing VS Code extensions" -ForegroundColor Cyan
 foreach ($extension in $vscodeExtensions) {
     code --install-extension $extension
@@ -129,3 +147,10 @@ $lockPolicyAcl = Get-Acl $lockPolicy
 $lockPolicyAcl.AddAccessRule([Security.AccessControl.RegistryAccessRule]::new(
         "$env:USERDOMAIN\$env:USERNAME", 'SetValue, CreateSubKey', 'Allow'))
 Set-Acl $lockPolicy $lockPolicyAcl
+# GlazeWM's installer adds no logon entry, and GlazeWM's startup_commands start intarsia, thide and the rest.
+$glazeShortcutPath = "$([Environment]::GetFolderPath('Startup'))\GlazeWM.lnk"
+if (-not (Test-Path -LiteralPath $glazeShortcutPath)) {
+    $glazeShortcut = (New-Object -ComObject WScript.Shell).CreateShortcut($glazeShortcutPath)
+    $glazeShortcut.TargetPath = "$env:ProgramFiles\glzr.io\GlazeWM\glazewm.exe"
+    $glazeShortcut.Save()
+}
