@@ -4,8 +4,9 @@ local act = wezterm.action
 return {
   -- Launch WSL as the default shell
   default_prog = {"wsl", "--cd", "~"},
-  font = wezterm.font("JetBrainsMono NF"),
+  font = wezterm.font("Nerdwand Mono"),
   font_size = 16,
+  line_height = 1.35,
   window_decorations = "RESIZE",
   enable_tab_bar = false,
   color_scheme = "rose-pine",

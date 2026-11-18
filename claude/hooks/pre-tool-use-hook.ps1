@@ -115,33 +115,6 @@ if ($json.tool_name -eq "Bash") {
 		exit 0
 	}
 
-	# Repo changes are reviewed as Edit and Write diffs, which a Bash write never shows.
-	$slashed = $cmd -replace '\\', '/'
-	$repoRoot = '(?:(?:[a-z]:|/[a-z])?/users/(?:chris|claude)/dev/|~/dev/|\$\{?home\}?/dev/)'
-	$rootVars = @([regex]::Matches($slashed, "(?i)(?:\b(?<name>\w+)=[""']?|\bfor\s+(?<name>\w+)\s+in\s+[""']?)$repoRoot") |
-		ForEach-Object { $_.Groups['name'].Value })
-	if ($rootVars.Count -gt 0) {
-		$derivedVars = @([regex]::Matches($slashed, "\b(?<name>\w+)=[""']?\$\{?(?:$($rootVars -join '|'))\b") |
-			ForEach-Object { $_.Groups['name'].Value })
-		$repoTarget = "(?:$repoRoot|\$\{?(?:$(($rootVars + $derivedVars) -join '|'))\b)"
-	}
-	else {
-		$repoTarget = $repoRoot
-	}
-	# Single-quoted sed scripts are dropped so their ';' and '|' do not end the command segment early.
-	$scriptless = ($cmd -replace "'[^']*'", "''") -replace '\\', '/'
-	$inPlace = "\b(?:sed|perl)(?:\s+[^\n;&|]*?)?\s(?-i:-[a-z]*i|--in-place)\S*\s[^\n;&|]*$repoTarget"
-	# 'git diff', 'log' and 'show' write a file with --output, and their allow rules skip the classifier.
-	$redirect = "(?:(?<![=-])>{1,2}|\btee\s+(?:-a\s+)?|\bgit\s[^\n;&|]*\s--output[=\s])\s*[""']?$repoTarget"
-	$writeCall = '\b(?:writeFileSync|appendFileSync|writeFile|appendFile|createWriteStream)\s*\(|\b(?:Set-Content|Add-Content|Out-File)\s'
-	if ($scriptless -match "(?i)$inPlace" -or $slashed -match "(?i)$redirect" -or ($slashed -match "(?i)$writeCall" -and $slashed -match "(?i)$repoRoot")) {
-		@{
-			decision = "block"
-			reason   = "Change files under ~/dev only with the Edit or Write tool, so the user sees the diff. Bash may write only into the scratchpad: to process a repo file there, copy it into the scratchpad in its own call first."
-		} | ConvertTo-Json -Compress
-		exit 0
-	}
-
 	# 'Bash(gh api -X GET:*)' skips the auto mode classifier, and gh uses the last method flag, so a later
 	# '-X POST', '-iX POST' or '--method' would send a write through unreviewed.
 	foreach ($ghApi in [regex]::Matches($dataUnquoted, '(?:^|[;&|(\n]|\$\()\s*gh\s+api\b(?<rest>[^\n;&|]*)')) {

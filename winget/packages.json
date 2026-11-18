@@ -9,6 +9,7 @@
 				{ "PackageIdentifier" : "Git.Git" },
 				{ "PackageIdentifier" : "GitHub.cli" },
 				{ "PackageIdentifier" : "Microsoft.PowerShell" },
+				{ "PackageIdentifier" : "Microsoft.VCRedist.2015+.x64" },
 				{ "PackageIdentifier" : "wez.wezterm" },
 				{ "PackageIdentifier" : "Microsoft.WindowsTerminal" },
 				{ "PackageIdentifier" : "glzr-io.glazewm" },
