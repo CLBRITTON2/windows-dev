@@ -67,7 +67,9 @@ $hook = @(
 [IO.File]::WriteAllText($hookPath, "$hook`n", [Text.UTF8Encoding]::new($false))
 Write-Host "$runtimeCheckout follows main through $hookPath" -ForegroundColor Cyan
 
-& "$runtimeCheckout\scripts\host\setup-packages.ps1"
+# A fresh Windows client's execution policy is Restricted, which refuses any script file.
+& "$PSHOME\powershell.exe" -NoProfile -ExecutionPolicy RemoteSigned -File "$runtimeCheckout\scripts\host\setup-packages.ps1"
+if ($LASTEXITCODE -ne 0) { throw "setup-packages.ps1 failed with exit code $LASTEXITCODE" }
 
 & $pwsh -NoProfile -File "$runtimeCheckout\scripts\host\setup-configs.ps1" -Layout $Layout
 if ($LASTEXITCODE -ne 0) { throw "setup-configs.ps1 failed with exit code $LASTEXITCODE" }

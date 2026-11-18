@@ -72,10 +72,11 @@ One change site per message, then stop. A finding that touches two files is two 
 - For a large or unfamiliar change, explain the mechanism first: why the code exists, what it does, why it goes.
   The user cannot judge a removal they do not understand.
 - Show the real diff in herdr's diff popup: copy the file to `<scratchpad>/slop/<repo-relative path>` and make the
-  proposed change on the copy. Write the footer lines, a blank line, then the explanation and side notes to
-  `<scratchpad>/slop/note.txt`. Then run `MSYS_NO_PATHCONV=1 herdr plugin pane open --plugin windows-dev.diff-popup
-  --entrypoint diff --env DIFF_OLD_PATH=<repo file> --env DIFF_NEW_PATH=<copy> --env DIFF_NOTE_PATH=<note>
-  --env DIFF_LABEL=<repo-relative path>`. The reply holds only the footer, never the diff. Add a view against the
+  proposed change on the copy. Write the footer lines, a blank line, then at most two short lines of explanation to
+  `<scratchpad>/slop/note.txt` (perusal shows them only on `i`). Then run, in the background,
+  `pwsh -NoProfile -File C:/Users/claude/dev/windows-dev/herdr/diff-popup/open-diff-popup.ps1 -OldPath <repo file>
+  -NewPath <copy> -NotePath <note> -Label <repo-relative path> -FocusPollIntervalMs 1000`. It waits until this
+  Claude pane has focus, since herdr opens a popup on whichever pane is active. The reply holds only the footer, never the diff. Add a view against the
   base only when the first one hides the point. After approval, make the same change on the repo file.
 - Proposed code is exactly what goes in the file. Notes go in prose, never inside the snippet.
 - One or two plain lines for trade-offs, side edits, and whether a touched comment is new or exists on the base.

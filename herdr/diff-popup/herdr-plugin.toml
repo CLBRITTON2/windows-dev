@@ -4,8 +4,7 @@ version = "0.2.0"
 min_herdr_version = "0.9.5"
 platforms = ["windows"]
 
-# Opened by the slop-review skill: herdr plugin pane open --plugin windows-dev.diff-popup --entrypoint diff
-# --env DIFF_OLD_PATH=... --env DIFF_NEW_PATH=... --env DIFF_NOTE_PATH=... --env DIFF_LABEL=...
+# Opened by the slop-review skill through open-diff-popup.ps1, which waits for the calling pane to have focus.
 # herdr passes command as is, so pwsh expands the variables.
 [[panes]]
 id = "diff"
