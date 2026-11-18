@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   The personal part of the agent VM setup: the laptop's dev toolchain, gopls, perusal, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
-  tests need, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and its focus-file and diff-popup plugins, and the agent's dotfile links.
+  tests need, terminus and its MCP registration, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and its focus-file and diff-popup plugins, and the agent's dotfile links.
 
 .DESCRIPTION
   agent-vm-bootstrap.ps1 dot-sources it last, so it runs under Windows PowerShell 5.1 in the bootstrap's scope, with
@@ -53,6 +53,23 @@ if ($LASTEXITCODE -ne 0) { throw "go install gopls failed (exit $LASTEXITCODE)" 
 Write-Step 'perusal'
 & go install github.com/CLBRITTON2/perusal/cmd/perusal@latest
 if ($LASTEXITCODE -ne 0) { throw "go install perusal failed (exit $LASTEXITCODE)" }
+
+# The fork's go.mod still declares github.com/michaelquigley/terminus, so go install of the fork's path fails. Build
+# the fork's claude-reviewer-schema commit (Claude Code rejects upstream's 2020-12 findings schema) from an archive.
+Write-Step 'terminus'
+$terminusCommit = '86a3f47'
+$terminusSource = Join-Path $env:TEMP "terminus-$terminusCommit"
+$terminusZip = "$terminusSource.zip"
+git -C (Join-Path $devRoot 'CLBRITTON2\terminus') archive --format=zip -o $terminusZip $terminusCommit
+if ($LASTEXITCODE -ne 0) { throw "git archive of terminus $terminusCommit failed (exit $LASTEXITCODE)" }
+Expand-Archive -LiteralPath $terminusZip -DestinationPath $terminusSource -Force
+& go -C $terminusSource install ./cmd/terminus
+if ($LASTEXITCODE -ne 0) { throw "go install terminus $terminusCommit failed (exit $LASTEXITCODE)" }
+& claude mcp get terminus *> $null
+if ($LASTEXITCODE -ne 0) {
+    & claude mcp add --scope user terminus -- "$HOME\go\bin\terminus.exe" serve
+    if ($LASTEXITCODE -ne 0) { throw "claude mcp add terminus failed (exit $LASTEXITCODE)" }
+}
 
 # The csharp-lsp plugin runs csharp-ls from ~\.dotnet\tools. 0.21.0 and later target net10.0, which the .NET 9 SDK
 # cannot install.
@@ -142,6 +159,7 @@ $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\agents'; Source = "$windowsDe
 $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\output-styles'; Source = "$windowsDev\claude\output-styles" })
 $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\rules'; Source = "$windowsDev\claude\rules" })
 $agentLinks.Add([pscustomobject]@{ Leaf = '.claude\themes'; Source = "$windowsDev\claude\themes" })
+$agentLinks.Add([pscustomobject]@{ Leaf = '.config\terminus\config.yaml'; Source = "$windowsDev\terminus\config.yaml" })
 foreach ($skill in Get-ChildItem "$windowsDev\claude\skills" -Directory) {
     $agentLinks.Add([pscustomobject]@{ Leaf = ".claude\skills\$($skill.Name)"; Source = $skill.FullName })
 }

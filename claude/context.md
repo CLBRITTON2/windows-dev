@@ -2,7 +2,7 @@
 
 Context loaded at the start of every Claude Code session: `~/.claude/CLAUDE.md` is a symlink to this file.
 This repo is the source of truth. Code, comment, and error handling rules live in `rules/code.md`, which also loads at
-the start of every session.
+the start of every session, and in the terminus canon it points to.
 
 ## Writing
 
@@ -25,6 +25,10 @@ the start of every session.
   before naming a cause or a flow. A claim with none behind it is labeled a hypothesis.
 - When project instructions include test or lint commands, run them before finishing if the task changed
   code.
+- Before committing a code change, review the uncommitted changes with the terminus MCP tools: `start_review` with
+  `repo_path` set to the worktree, then `collect_review`. Fix each blocking finding, or tell me why it is wrong, and
+  review again until the verdict is `clean`. A repo with no `projects/<repo>/rubric.yaml` in
+  `~/dev/agents/terminus-canon` gets one before its first review, listing the shared rules the others list.
 
 ## Git
 

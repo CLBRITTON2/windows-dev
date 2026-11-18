@@ -1,0 +1,4 @@
+canon_path: ~/dev/agents/terminus-canon
+reviewer:
+  name: claude
+  impl: claude

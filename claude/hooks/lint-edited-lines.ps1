@@ -5,7 +5,7 @@ Sends the rule breaks in the lines an Edit or Write call just wrote back to Clau
 .DESCRIPTION
 Claude Code runs this as a PostToolUse hook on Edit and Write. It lints the edited file with ast-grep and the rules in
 claude/ast-grep, or for PowerShell with checks on the parser's syntax tree, since ast-grep has no PowerShell grammar.
-Only findings on lines the call wrote are reported, so older code in the file is not held to claude/rules/code.md.
+Only findings on lines the call wrote are reported, so older code in the file is not held to the code rules.
 Findings come back as a block reason, which Claude sees right after the tool result.
 #>
 
@@ -162,5 +162,5 @@ if ($newFindings.Count -eq 0) {
 $findingLines = ($newFindings | ForEach-Object { "- ${filePath}:$($_.Line): ``$($_.Text)`` breaks: $($_.Rule)" }) -join "`n"
 @{
     decision = 'block'
-    reason   = "Lint of the lines this edit wrote, against ~/.claude/rules/code.md. Fix each one, or say in your reply why a finding is wrong:`n$findingLines"
+    reason   = "Lint of the lines this edit wrote, against ~/.claude/rules/code.md and the terminus canon. Fix each one, or say in your reply why a finding is wrong:`n$findingLines"
 } | ConvertTo-Json -Compress
