@@ -37,8 +37,8 @@ The rules terminus reviews against (naming, comments, tests, simplicity) live on
 - Leave existing comments alone unless your change makes one wrong, then fix or delete it. Existing means present
   on the base branch: a comment this branch added is yours to fix. English only.
 - Never decorate with banners and `==== section ====` bars.
-- Documentation lives in the docstring of the function or class it describes. Separate docs files only when
-  a concept cannot be expressed in code. Never duplicate documentation across files.
+- Documentation, when the code needs it, lives in the docstring of the function or class it describes. Separate docs
+  files only when a concept cannot be expressed in code. Never duplicate documentation across files.
 
 ## Error handling
 

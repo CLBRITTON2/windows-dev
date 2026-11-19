@@ -14,6 +14,8 @@ the start of every session, and in the terminus canon it points to.
 ## Workflow
 
 - Read existing code and relevant `CLAUDE.md` files before editing.
+- Read a file you will change with the Read tool, even when Bash reads are allowed: Edit and Write refuse a file
+  only `cat`, `sed` or `head` read.
 - In-repo edits in my projects: proceed. Reversible actions (build, run tests, write a file): proceed.
 - Hard to reverse or outward facing (hits a remote, deletes, touches CI/CD or production): ask first.
 - Keep changes minimal and related to the request. Do not revert unrelated changes.

@@ -13,8 +13,8 @@ description: >
 > Experimental: this skill was vibe-coded, and its checklist has not been checked against reviews by Rust
 > developers. Take its findings as you will.
 
-Review the crate, report findings, and record them in the repo's review ledger. Never edit code and never run a git
-mutation. The ledger and the report are the deliverables.
+Review the crate, report findings, and record them in the repo's review ledger. Never edit code. Commit the ledger
+in the agents repo. The ledger and the report are the deliverables.
 
 ## Ledger
 

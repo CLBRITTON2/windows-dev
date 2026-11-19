@@ -5,8 +5,7 @@ description: Turn this session's findings into a short, verified bug report read
 
 # distill-bug
 
-Outbound twin of humanize-issue: turns this session's investigation into a report the reader can act on without
-re-deriving anything.
+Turns this session's investigation into a report the reader can act on without re-deriving anything.
 
 ## Process
 

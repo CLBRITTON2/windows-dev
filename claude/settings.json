@@ -107,7 +107,6 @@
       "Read(**/.env.*)",
       "Edit(**/.env)",
       "Edit(**/.env.*)",
-      "Bash(find *)",
       "Read(./secrets/**)",
       "Read(~/.encrypted/**)",
       "Read(~/.aws/**)",

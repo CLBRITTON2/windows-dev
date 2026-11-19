@@ -53,16 +53,7 @@ if ($json.tool_name -eq "Bash") {
     if ($cmd -match '(^|;|\n|&&|\|\|)\s*cd\s') {
         @{
             decision = "block"
-            reason   = "Do not cd. Pass absolute paths to every command, and read another repo with 'git -C <path>' and a read-only subcommand."
-        } | ConvertTo-Json -Compress
-        exit 0
-    }
-
-    # settings.json denies 'Bash(find *)' with no reason, which reads as if the whole command was refused.
-    if ($dataUnquoted -match '(?:^|[;&|(\n]|\$\(|\bxargs\s+(?:-\S+\s+)*)\s*find(?=\s|$)') {
-        @{
-            decision = "block"
-            reason   = "find is denied. Use the Glob tool or 'rg --files -g <glob> <dir>'. Nothing else in this command was refused, rerun the rest without find."
+            reason   = "Do not cd. Pass absolute paths to every command, or the tool's own directory flag: 'git -C <path>', 'go -C <dir>', 'cmake --build <dir>', 'npm --prefix <dir>'."
         } | ConvertTo-Json -Compress
         exit 0
     }
@@ -73,7 +64,7 @@ if ($json.tool_name -eq "Bash") {
 		$rest = $git.Groups['rest'].Value
 		$operands = @(($rest -replace '\s\d*>.*', '').Trim() -split '\s+' | Where-Object { $_ -and $_ -notlike '-*' })
 		# config, remote, branch, reflog, worktree and stash also write, so only their reading forms and worktree add pass.
-		$allowedWithPath = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file|fsck|add|commit|fetch|switch|rebase|cherry-pick)$' -or
+		$allowedWithPath = $subcommand -cmatch '^(status|log|diff|show|blame|rev-parse|rev-list|merge-base|ls-files|ls-tree|ls-remote|check-ignore|check-attr|grep|describe|shortlog|for-each-ref|cat-file|fsck|add|rm|commit|fetch|switch|rebase|cherry-pick)$' -or
 			($subcommand -ceq 'tag' -and $rest -match "^$tagListing") -or
 			($subcommand -ceq 'config' -and $rest -notmatch '\s(--unset\S*|--add|--replace-all|--rename-section|--remove-section|--edit|-e)\b' -and
 				($rest -match '^\s+(get|list)\b|\s(--get\S*|--list|-l)\b' -or $operands.Count -eq 1)) -or
@@ -89,7 +80,7 @@ if ($json.tool_name -eq "Bash") {
 		if ($git.Groups['options'].Value -cmatch '(^|\s)(-C\s|--git-dir|--work-tree)' -and -not $allowedWithPath) {
 			@{
 				decision = "block"
-				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only add, commit, fetch, switch, worktree add, rebase and cherry-pick under ~/dev/worktrees, the read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
+				reason   = "'git -C <path>' and 'git --git-dir=<path>' allow only add, rm, commit, fetch, switch, worktree add, rebase and cherry-pick under ~/dev/worktrees, the read-only subcommands (status, log, diff, show, blame, rev-parse, rev-list, merge-base, ls-files, ls-tree, ls-remote, check-ignore, check-attr, grep, describe, shortlog, for-each-ref, cat-file, fsck) and the reading forms of tag, config, remote, branch, reflog, worktree list, stash list/show, hash-object without -w, symbolic-ref and archive to a path outside ~/dev."
 			} | ConvertTo-Json -Compress
 			exit 0
 		}

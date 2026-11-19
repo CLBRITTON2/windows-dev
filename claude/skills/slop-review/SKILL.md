@@ -2,13 +2,13 @@
 name: slop-review
 description: >
   Interactive self/slop-review of the current branch: find what should not ship, then walk the user through it chunk
-  by chunk, one change site per message, and apply each change only after its own approval. Changes no git state. Use
+  by chunk, one change site per message, and apply each change only after its own approval, committing what was applied. Use
   when the user asks for a chunk by chunk review, a self review, a slop review, or a review pass of their branch.
   Args: the base branch if it is not origin's default branch.
 ---
 
-Strip what should not ship from the branch. The user sees only judgment calls, one at a time. Never run a git
-mutation.
+Strip what should not ship from the branch. The user sees only judgment calls, one at a time. Commit applied
+changes per the Git rules in `~/.claude/CLAUDE.md`, since only commits reach the laptop. Run no other git mutation.
 
 ## 1. Base
 

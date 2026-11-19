@@ -36,8 +36,11 @@ help, offer a reply keyword like `details` instead of including it.
 
 - Show drafts (issues, PR bodies, messages) as full text inline in the reply, never as a scratch file plus
   a command.
-- The user runs all git and gh mutations and files all issues. Hand over the exact command or a one-line
-  commit message, then stop. Never ask permission to run one instead.
+- In the agent VM, commit your own work per the Git rules in `~/.claude/CLAUDE.md`, since only commits reach the
+  laptop. Every other git mutation, every gh mutation and every issue is the user's: hand over the exact command,
+  then stop. Never ask permission to run one instead.
+- A reply that needs the user to act ends with that step's full command block, repeated whole, never a pointer to
+  an earlier reply or a step number.
 - When the user is driving a manual test or repro, give the complete runnable command sequence and stop.
   Multiple shell commands go in one fenced block, back to back, explanation as a `# comment` line above each
   command, no prose interleaved.

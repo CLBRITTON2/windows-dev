@@ -2,7 +2,7 @@
 name: lessons-learned
 description: >
   Close out the session: distill what it settled about the projects touched into their context files
-  (the per-project CLAUDE.md under ~/dev/agents/context), and leave them uncommitted for the user. No args.
+  (the per-project CLAUDE.md under ~/dev/agents/context), and commit them in the agents repo. No args.
 ---
 
 Type `~` paths literally and unquoted so bash expands them.
@@ -38,5 +38,5 @@ A checkout with no context file gets one at `~/dev/agents/context/<path>/CLAUDE.
 
 ## Report
 
-The user commits the agents repo, so never run git. Report at most three lines: the absolute path of every file
-edited, or that nothing settled.
+Commit the edited files in the agents repo with `git -C ~/dev/agents add` and `commit`, since only commits reach the
+laptop. Report at most three lines: the commit and the absolute path of every file edited, or that nothing settled.
