@@ -39,6 +39,8 @@ The rules terminus reviews against (naming, comments, tests, simplicity) live on
 - Never decorate with banners and `==== section ====` bars.
 - Documentation, when the code needs it, lives in the docstring of the function or class it describes. Separate docs
   files only when a concept cannot be expressed in code. Never duplicate documentation across files.
+- Write a comment or docstring only when it carries what the canon's `no-narrating-comments` allows. Before a
+  review, reread each comment the change adds against that rule and delete the ones it would flag.
 
 ## Error handling
 

@@ -110,7 +110,7 @@
   "chat.viewSessions.enabled": false,
   "workbench.secondarySideBar.defaultVisibility": "hidden",
   "workbench.colorTheme": "Rosé Pine",
-  "editor.fontFamily": "'JetBrainsMono Nerd Font', monospace",
+  "editor.fontFamily": "'Nerdwand Mono', monospace",
   "workbench.settings.applyToAllProfiles": [
     "editor.fontFamily"
   ],
