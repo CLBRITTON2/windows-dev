@@ -13,8 +13,8 @@ help, offer a reply keyword like `details` instead of including it.
   new information. When in doubt, stop typing.
 - Never end with vague delegation ("your call", "want me to...?"). When options exist, recommend one
   default and state the exact next action.
-- If blocked, ask exactly one concrete question. A complaint about a UI word that can name more than one element
-  ("highlight": selection, prompt background, diff line) gets that question before any fix.
+- A complaint about a UI word that can name more than one element ("highlight": selection, prompt background, diff
+  line) gets a question asking which one before any fix.
 - Lead with the outcome or verdict, then evidence. Report faithfully: failing tests get the output, skipped
   steps get named, done means verified done.
 - Use the vocabulary already in the code and conversation. Never coin jargon or cute names for things.
@@ -39,11 +39,8 @@ help, offer a reply keyword like `details` instead of including it.
 - In the agent VM, commit your own work per the Git rules in `~/.claude/CLAUDE.md`, since only commits reach the
   laptop. Every other git mutation, every gh mutation and every issue is the user's: hand over the exact command,
   then stop. Never ask permission to run one instead.
-- A reply that needs the user to act ends with that step's full command block, repeated whole, never a pointer to
-  an earlier reply or a step number.
-- When the user is driving a manual test or repro, give the complete runnable command sequence and stop.
-  Multiple shell commands go in one fenced block, back to back, explanation as a `# comment` line above each
-  command, no prose interleaved.
+- When the user is driving a manual test or repro, the complete runnable command sequence goes in `Do This Now`,
+  then stop.
 - Commit messages: one plain line, drafted from `git --no-pager diff` of the files
   being committed (not from the session's memory of the work), leading with the biggest behavior change in the
   style of `git log --format=%s -15`, read before the first draft. PR bodies: one bullet per behavior change in
@@ -57,6 +54,27 @@ help, offer a reply keyword like `details` instead of including it.
   terminal for the user to paste back, or lands in the laptop's Downloads and goes to the VM with
   `scp <file> claude-vm:Downloads/`. Read Go module sources from the agent's own
   `go env GOMODCACHE`.
+
+## Do This Now and Open Questions
+
+- Anything the user must do (run a command, click, restart, paste) goes in a `Do This Now` section, never in prose.
+  Format exactly: a blank line, a line `## Do This Now`, a blank line, then ONE fenced block tagged `powershell`
+  (an untagged block is plain text, so zen cannot color the steps apart from the commands), with no `---` rule.
+  Each item in it is a `# N. <action and what it changes>` comment line ("# 1. Remove inherited write access from
+  githooks."), with that item's commands directly under it, so the whole block copies at once. Never write an item
+  that only points at the commands ("# Run the lines below."). An item that needs the user to look, wait or decide
+  before the next command says so ("# 4. Wait for the release to publish, then tell me."). An item with no command
+  is a comment only. The block holds every step in full, never a pointer to an earlier reply or a step number. It is
+  the reply's last fenced block, so zen's ctrl+y copies it. With nothing for the user to do, leave the section out.
+- Questions go in an `Open Questions` section as text, never through the AskUserQuestion tool. Format exactly: a
+  blank line, a line `## Open Questions`, a blank line, then a numbered list, one item per line, with no `---` rule.
+  Ask one question if blocked. Each item asks one thing and has one answer shape. A yes/no item names one action and
+  marks it `(recommended)` when recommended ("Rename to csdk-abi-check.yml (recommended)?"). A choice item letters
+  two or more real alternatives and marks the recommended one ("(a) squash (recommended) or (b) rebase?"). Never
+  append "Answer a or b." "Keep it as is", "skip it" and "stop here" are the "no" to a yes/no item, never a lettered
+  option. If "yes" could answer an item, split it into separate yes/no items. With no questions, leave the section
+  out, never write "None."
+- Both sections close the reply, `Do This Now` first when both appear. Nothing follows them.
 
 ## Working style
 
