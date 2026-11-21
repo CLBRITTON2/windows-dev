@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, perusal, zen, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
+  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, perusal, calmpane, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
   tests need, terminus and its MCP registration, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and its focus-file, diff-popup, zen and claude-tab plugins, and the agent's dotfile links.
 
 .DESCRIPTION
@@ -54,10 +54,10 @@ Write-Step 'perusal'
 & go install github.com/CLBRITTON2/perusal/cmd/perusal@latest
 if ($LASTEXITCODE -ne 0) { throw "go install perusal failed (exit $LASTEXITCODE)" }
 
-# The zen herdr plugin runs zen.exe.
-Write-Step 'zen'
-& go install github.com/CLBRITTON2/herdr-zen/cmd/zen@latest
-if ($LASTEXITCODE -ne 0) { throw "go install zen failed (exit $LASTEXITCODE)" }
+# The zen herdr plugin runs calmpane.exe.
+Write-Step 'calmpane'
+& go install github.com/CLBRITTON2/calmpane/cmd/calmpane@latest
+if ($LASTEXITCODE -ne 0) { throw "go install calmpane failed (exit $LASTEXITCODE)" }
 
 # The fork's go.mod still declares github.com/michaelquigley/terminus, so go install of the fork's path fails. Build
 # the fork's claude-reviewer-schema commit (Claude Code rejects upstream's 2020-12 findings schema) from an archive.

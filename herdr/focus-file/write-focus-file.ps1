@@ -31,7 +31,7 @@ function Get-FocusedPaneDirectories {
         throw "herdr pane list has $($focused.Count) focused panes, want 1: $output"
     }
     $pane = $focused[0]
-    # A zen pane (herdr-zen) stands in for the Claude pane its claude_pane token names.
+    # A zen pane (calmpane) stands in for the Claude pane its claude_pane token names.
     if ($pane.tokens.claude_pane) {
         $claudePanes = @($reply.result.panes | Where-Object pane_id -eq $pane.tokens.claude_pane)
         if ($claudePanes.Count -ne 1) {

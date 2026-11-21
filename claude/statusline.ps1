@@ -104,7 +104,7 @@ function Get-LocationName([string]$dir) {
     return Split-Path -Leaf $dir
 }
 
-# The zen view (herdr-zen) shows this file under its input. Rewritten in place, not renamed over: Windows refuses
+# The zen view (calmpane) shows this file under its input. Rewritten in place, not renamed over: Windows refuses
 # the rename while the zen view has the file open. The trailing newline tells the zen view the write is whole.
 function Write-StatusLineFile([string]$sessionId, [string]$line) {
     [string]$statusLineDir = Join-Path $env:LOCALAPPDATA 'windows-dev\statusline'
