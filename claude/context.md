@@ -42,7 +42,8 @@ the start of every session, and in the terminus canon it points to.
   `git -C ~/dev/<repo> fetch origin`, then
   `git -C ~/dev/<repo> worktree add -b <branch> ~/dev/worktrees/<repo>/<folder> <sha>`, where `<repo>` is the clone's
   path under `~\dev`, `<folder>` is `<branch>` with `/` replaced by `-`, and `<sha>` is the fetched tip of origin's
-  default branch. Edit and commit only inside it. In the same reply, hand me the same two commands for my laptop
+  default branch. `<branch>` is one to three words (`focus-hold`, `readme`), never a card's full slug. Edit and
+  commit only inside it. In the same reply, hand me the same two commands for my laptop
   with `$HOME\dev` paths and the same sha, so perusal has my copy of the worktree to take your commits into.
 - `scripts\prune-worktrees.ps1` in windows-dev, run on my laptop, removes the worktrees whose PR merged, on both
   machines. Never remove a worktree yourself.

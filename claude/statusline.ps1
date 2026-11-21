@@ -78,15 +78,61 @@ function Get-CompactWindow([long]$modelWindow) {
     return $modelWindow
 }
 
-[string]$cwd = $status.workspace.current_dir
-[string]$branch = git --no-optional-locks -C $cwd rev-parse --abbrev-ref HEAD 2>$null
+# Sessions start in ~\dev\agents and edit other repos through absolute paths, so the location is the work tree
+# record-edited-dir.ps1 listed first for the session, the one it edited most recently. ~\dev\agents is skipped, as in
+# write-focus-file.ps1, since edits there are only context upkeep. A work tree prune-worktrees.ps1 removed stays in
+# the list.
+function Get-LastEditedDir([string]$sessionId, [string]$currentDir) {
+    [string]$editedDirsFile = Join-Path $env:LOCALAPPDATA "windows-dev\edited-dirs\$sessionId"
+    if (Test-Path -LiteralPath $editedDirsFile -PathType Leaf) {
+        [string]$agentsDir = Join-Path $HOME 'dev\agents'
+        [string]$lastEdited = [System.IO.File]::ReadAllLines($editedDirsFile) |
+            Where-Object { $_ -and (Test-Path -LiteralPath $_ -PathType Container) } |
+            Where-Object { $_ -ine $agentsDir } | Select-Object -First 1
+        if ($lastEdited) { return $lastEdited }
+    }
+    return $currentDir
+}
+
+# <repo>/<folder> for a folder under ~\dev\worktrees\<repo path>\<folder>, the leaf for any other folder.
+function Get-LocationName([string]$dir) {
+    [string]$worktreesPrefix = (Join-Path $HOME 'dev\worktrees') + '\'
+    if ($dir.StartsWith($worktreesPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        [string[]]$parts = $dir.Substring($worktreesPrefix.Length).TrimEnd('\').Split('\')
+        if ($parts.Count -ge 2) { return "$($parts[-2])/$($parts[-1])" }
+    }
+    return Split-Path -Leaf $dir
+}
+
+# The zen view (herdr-zen) shows this file under its input. Rewritten in place, not renamed over: Windows refuses
+# the rename while the zen view has the file open. The trailing newline tells the zen view the write is whole.
+function Write-StatusLineFile([string]$sessionId, [string]$line) {
+    [string]$statusLineDir = Join-Path $env:LOCALAPPDATA 'windows-dev\statusline'
+    [void][System.IO.Directory]::CreateDirectory($statusLineDir)
+    [byte[]]$bytes = [System.Text.UTF8Encoding]::new($false).GetBytes("$line`n")
+    $stream = [System.IO.File]::Open((Join-Path $statusLineDir $sessionId), [System.IO.FileMode]::Create,
+        [System.IO.FileAccess]::Write, [System.IO.FileShare]::ReadWrite)
+    try {
+        $stream.Write($bytes, 0, $bytes.Length)
+    } finally {
+        $stream.Dispose()
+    }
+}
+
+$sessionId = [guid]::Empty
+if (-not [guid]::TryParse($status.session_id, [ref]$sessionId)) {
+    throw "statusLine payload session_id '$($status.session_id)' is not a GUID, so it cannot name a file"
+}
+
+[string]$locationDir = Get-LastEditedDir $sessionId.ToString() $status.workspace.current_dir
+[string]$branch = git --no-optional-locks -C $locationDir rev-parse --abbrev-ref HEAD 2>$null
 [System.Collections.Generic.List[string]]$segments = [System.Collections.Generic.List[string]]::new()
 
-[string]$location = Format-Color $rose (Split-Path -Leaf $cwd)
+[string]$location = Format-Color $rose (Get-LocationName $locationDir)
 if ($branch) {
     $location += " $(Format-Color $iris "$iconBranch $branch")"
     # Staged and unstaged edits against HEAD. Untracked files are not counted.
-    [string[]]$numstat = git --no-optional-locks -C $cwd diff HEAD --numstat 2>$null
+    [string[]]$numstat = git --no-optional-locks -C $locationDir diff HEAD --numstat 2>$null
     [long]$added = Measure-NumstatColumn $numstat 0
     [long]$removed = Measure-NumstatColumn $numstat 1
     if ($added -gt 0 -or $removed -gt 0) {
@@ -128,5 +174,7 @@ if ($transcript -and (Test-Path -LiteralPath $transcript)) {
 }
 
 $writer = [System.IO.StreamWriter]::new([Console]::OpenStandardOutput(), [System.Text.UTF8Encoding]::new($false))
-$writer.Write($segments -join (Format-Color $subtle '  │  '))
+[string]$line = $segments -join (Format-Color $subtle '  │  ')
+$writer.Write($line)
 $writer.Flush()
+Write-StatusLineFile $sessionId.ToString() $line

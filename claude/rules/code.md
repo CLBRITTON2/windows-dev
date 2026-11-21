@@ -12,7 +12,7 @@ The rules terminus reviews against (naming, comments, tests, simplicity) live on
 - No default parameter values. Make every parameter explicit.
 - Write pure functions: modify return values, never input parameters or global state.
 - Single purpose per function. No multi-mode behavior, no flag parameters that switch logic.
-- Plain `if`/`else` that assigns in each branch. Never a ternary, and never assign a value then overwrite it.
+- Plain `if`/`else` over a ternary.
 - Keep OOP simple and readable with limited inheritance.
 - All imports at the top of the file.
 - Follow DRY, KISS, YAGNI. Check whether the logic already exists before writing new code.
@@ -51,4 +51,3 @@ The rules terminus reviews against (naming, comments, tests, simplicity) live on
 - No fallbacks unless I explicitly ask for them.
 - Retry external API or service calls only in long-running processes (services, daemons, UI clients): warn on each
   retry, then raise the last error. Scripts and CI steps call once and fail, since a rerun is the retry.
-- Logging uses structured fields, not dynamic values interpolated into the message string.

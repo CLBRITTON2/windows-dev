@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, perusal, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
-  tests need, terminus and its MCP registration, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and its focus-file and diff-popup plugins, and the agent's dotfile links.
+  The personal part of the agent VM setup: the laptop's dev toolchain, gopls, perusal, zen, csharp-ls, Visual Studio workloads, what the desktop-edge-win UI
+  tests need, terminus and its MCP registration, PSFzf, vcpkg and the MSYS2 compilers, herdr's config and its focus-file, diff-popup, zen and claude-tab plugins, and the agent's dotfile links.
 
 .DESCRIPTION
   agent-vm-bootstrap.ps1 dot-sources it last, so it runs under Windows PowerShell 5.1 in the bootstrap's scope, with
@@ -53,6 +53,11 @@ if ($LASTEXITCODE -ne 0) { throw "go install gopls failed (exit $LASTEXITCODE)" 
 Write-Step 'perusal'
 & go install github.com/CLBRITTON2/perusal/cmd/perusal@latest
 if ($LASTEXITCODE -ne 0) { throw "go install perusal failed (exit $LASTEXITCODE)" }
+
+# The zen herdr plugin runs zen.exe.
+Write-Step 'zen'
+& go install github.com/CLBRITTON2/herdr-zen/cmd/zen@latest
+if ($LASTEXITCODE -ne 0) { throw "go install zen failed (exit $LASTEXITCODE)" }
 
 # The fork's go.mod still declares github.com/michaelquigley/terminus, so go install of the fork's path fails. Build
 # the fork's claude-reviewer-schema commit (Claude Code rejects upstream's 2020-12 findings schema) from an archive.
@@ -128,7 +133,7 @@ if (-not (Test-Path -LiteralPath $herdrConfig)) {
 
 $plugins = & $herdr plugin list --json | ConvertFrom-Json
 if ($LASTEXITCODE -ne 0) { throw "herdr plugin list failed (exit $LASTEXITCODE)" }
-foreach ($pluginDir in @('focus-file', 'diff-popup')) {
+foreach ($pluginDir in @('focus-file', 'diff-popup', 'zen', 'claude-tab')) {
     $pluginId = "windows-dev.$pluginDir"
     if ($plugins.result.plugins.plugin_id -notcontains $pluginId) {
         & $herdr plugin link (Join-Path $windowsDev "herdr\$pluginDir")

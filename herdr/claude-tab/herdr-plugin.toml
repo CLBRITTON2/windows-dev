@@ -1,0 +1,11 @@
+id = "windows-dev.claude-tab"
+name = "Claude tab"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+platforms = ["windows"]
+
+# A new workspace also emits tab.created for its first tab. Restoring a session emits none, so resumed panes are left
+# to resume_agents_on_restore.
+[[events]]
+on = "tab.created"
+command = ["pwsh", "-NoProfile", "-NonInteractive", "-File", "start-claude-in-new-tab.ps1"]

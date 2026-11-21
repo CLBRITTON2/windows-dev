@@ -138,10 +138,10 @@ function pwt {
 if ($env:USERNAME -ne 'claude') {
     # herdr's server and its Claude panes run in claude-vm (scripts/host/new-agent-vm.ps1), reached through the claude-vm
     # alias in ~\.ssh\config. The local client attaches over ssh because mouse clicks do not survive `ssh -t` into the
-    # VM.
+    # VM. Server keybindings make the VM's herdr config.toml the one that binds keys, plugin actions included.
     function herdr {
         if ($args.Count -eq 0) {
-            $herdrArguments = @('--remote', 'claude-vm')
+            $herdrArguments = @('--remote', 'claude-vm', '--remote-keybindings', 'server')
         } else {
             $herdrArguments = $args
         }

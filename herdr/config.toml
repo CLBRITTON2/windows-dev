@@ -11,11 +11,15 @@ name = "rose-pine"
 panel_bg = "reset"
 sidebar_bg = "reset"
 
+# Room for the zen view: herdr 0.9.5 has no zoom-only setting, so these apply to every pane.
+[ui]
+hide_tab_bar_when_single_tab = true
+pane_outer_borders = false
+
 [ui.sound]
 enabled = false
 
 [keys]
-focus_agent = "alt+1..9"
 toggle_sidebar = "alt+0"
 
 [ui.sidebar.agents.rows_by_agent]
@@ -23,3 +27,53 @@ claude = [
   ["state_icon", "terminal_title_stripped"],
   ["state_text"],
 ]
+
+[[keys.command]]
+key = "alt+x"
+type = "plugin_action"
+command = "windows-dev.zen.toggle"
+
+[[keys.command]]
+key = "alt+1"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-1"
+
+[[keys.command]]
+key = "alt+2"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-2"
+
+[[keys.command]]
+key = "alt+3"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-3"
+
+[[keys.command]]
+key = "alt+4"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-4"
+
+[[keys.command]]
+key = "alt+5"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-5"
+
+[[keys.command]]
+key = "alt+6"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-6"
+
+[[keys.command]]
+key = "alt+7"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-7"
+
+[[keys.command]]
+key = "alt+8"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-8"
+
+[[keys.command]]
+key = "alt+9"
+type = "plugin_action"
+command = "windows-dev.zen.focus-agent-9"

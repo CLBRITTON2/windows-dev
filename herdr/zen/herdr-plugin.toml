@@ -1,0 +1,94 @@
+id = "windows-dev.zen"
+name = "Zen view"
+version = "0.1.0"
+min_herdr_version = "0.9.5"
+platforms = ["windows"]
+
+# herdr/config.toml binds alt+x to this action.
+[[actions]]
+id = "toggle"
+title = "Toggle zen view"
+contexts = ["pane"]
+command = ["zen.exe", "toggle"]
+
+# Win+A (glazewm/turn-on-zen-and-attach-herdr.ps1) invokes this over ssh before it attaches, so herdr comes up in
+# zen mode.
+[[actions]]
+id = "on"
+title = "Turn zen view on"
+contexts = ["pane"]
+command = ["zen.exe", "on"]
+
+# herdr/config.toml binds alt+1..9 to these actions in place of herdr's focus_agent keys: while zen mode is on,
+# zen.exe focuses the agent's zen pane without first showing the agent's own pane.
+[[actions]]
+id = "focus-agent-1"
+title = "Focus agent 1"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "1"]
+
+[[actions]]
+id = "focus-agent-2"
+title = "Focus agent 2"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "2"]
+
+[[actions]]
+id = "focus-agent-3"
+title = "Focus agent 3"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "3"]
+
+[[actions]]
+id = "focus-agent-4"
+title = "Focus agent 4"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "4"]
+
+[[actions]]
+id = "focus-agent-5"
+title = "Focus agent 5"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "5"]
+
+[[actions]]
+id = "focus-agent-6"
+title = "Focus agent 6"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "6"]
+
+[[actions]]
+id = "focus-agent-7"
+title = "Focus agent 7"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "7"]
+
+[[actions]]
+id = "focus-agent-8"
+title = "Focus agent 8"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "8"]
+
+[[actions]]
+id = "focus-agent-9"
+title = "Focus agent 9"
+contexts = ["pane"]
+command = ["zen.exe", "focus-agent", "9"]
+
+# While zen mode is on, focusing a Claude pane shows its zen view. agent_detected covers a pane focused before
+# Claude started in it.
+[[events]]
+on = "pane.focused"
+command = ["zen.exe", "focus"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["zen.exe", "focus"]
+
+# zen.exe is CLBRITTON2/herdr-zen. Opened by the toggle action and the focus hook, which set placement, target pane and
+# ZEN_CLAUDE_PANE. zen.exe finds restored zen panes by this title.
+[[panes]]
+id = "zen"
+title = "Zen"
+placement = "zoomed"
+command = ["zen.exe"]
