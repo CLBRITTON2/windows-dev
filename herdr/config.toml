@@ -19,6 +19,11 @@ pane_outer_borders = false
 [ui.sound]
 enabled = false
 
+# Draws calmpane's `Zen mode` notification for a refused alt+x. herdr 0.9.5 has no per-source filter, so background
+# agents' state changes pop up too.
+[ui.toast]
+delivery = "herdr"
+
 [keys]
 toggle_sidebar = "alt+0"
 

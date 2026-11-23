@@ -23,14 +23,19 @@ the start of every session, and in the terminus canon it points to.
 - Test data, repro artifacts, and downloads go in the session scratchpad, nowhere else in the agent's home.
   `scripts/agent-vm/clean-agent.ps1` in windows-dev deletes the scratch folders of sessions idle for 7 days, so
   anything worth keeping goes into the agents repo context file first.
+- Clean up after yourself before finishing a task, without asking: delete what the task left outside the scratchpad
+  (exes renamed aside to install over a running one, test installs, stray test files) and stop the processes and
+  test sessions it started.
 - Diagnosing a failure or explaining how code behaves at runtime: quote the log line, source line, or command output
   before naming a cause or a flow. A claim with none behind it is labeled a hypothesis.
 - When project instructions include test or lint commands, run them before finishing if the task changed
   code.
 - Before committing a code change, review the uncommitted changes with the terminus MCP tools: `start_review` with
   `repo_path` set to the worktree, then `collect_review`. Fix each blocking finding, or tell me why it is wrong, and
-  review again until the verdict is `clean`. A repo with no `projects/<repo>/rubric.yaml` in
-  `~/dev/agents/terminus-canon` gets one before its first review, listing the shared rules the others list.
+  review again until the verdict is `clean`, for at most 3 rounds. If the third is not `clean`, stop fixing: list
+  each remaining finding with whether you agree and why, and wait for my call before committing. A repo with no
+  `projects/<repo>/rubric.yaml` in `~/dev/agents/terminus-canon` gets one before its first review, listing the shared
+  rules the others list.
 
 ## Git
 
