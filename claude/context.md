@@ -61,6 +61,10 @@ the start of every session, and in the terminus canon it points to.
   uncommitted. Never guess whether I already committed an earlier change.
 - Run `git status` in the same turn before saying anything about what is committed or pending, including "next is
   the commit" or "still uncommitted". I commit between turns without saying so.
+- Before naming my branch, handing me git commands, or saying what is on my laptop, read
+  `C:\Users\claude\dev\owner-state.json`, which perusal on my laptop rewrites every 15 seconds: each work tree's
+  branch, HEAD, uncommitted files and upstream counts. A `readAt` older than a minute means perusal is not running, so
+  say so instead of trusting it.
 - Reading is fine: run `git --no-pager diff`, `git log`, `git show`, or `git status` to inspect when you
   need to.
 - In the agent VM, each repo under `~\dev` is a clone of the same repo under the laptop's `~\dev`. perusal on the
