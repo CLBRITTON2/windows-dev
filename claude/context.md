@@ -2,7 +2,8 @@
 
 Context loaded at the start of every Claude Code session: `~/.claude/CLAUDE.md` is a symlink to this file.
 This repo is the source of truth. Code, comment, and error handling rules live in `rules/code.md`, which also loads at
-the start of every session, and in the terminus canon it points to.
+the start of every session, and in the terminus canon it points to. The agent VM workflow (git, worktrees, perusal,
+terminus reviews, scratch files, context upkeep) lives in `~/dev/agents/CLAUDE.md`, where every session starts.
 
 ## Writing
 
@@ -13,16 +14,10 @@ the start of every session, and in the terminus canon it points to.
 
 ## Workflow
 
-- Read existing code and relevant `CLAUDE.md` files before editing.
-- Read a file you will change with the Read tool, even when Bash reads are allowed: Edit and Write refuse a file
-  only `cat`, `sed` or `head` read.
 - In-repo edits in my projects: proceed. Reversible actions (build, run tests, write a file): proceed.
 - Hard to reverse or outward facing (hits a remote, deletes, touches CI/CD or production): ask first.
 - Keep changes minimal and related to the request. Do not revert unrelated changes.
-- If unsure, inspect the codebase instead of inventing patterns.
-- Test data, repro artifacts, and downloads go in the session scratchpad, nowhere else in the agent's home.
-  `scripts/agent-vm/clean-agent.ps1` in windows-dev deletes the scratch folders of sessions idle for 7 days, so
-  anything worth keeping goes into the agents repo context file first.
+- If a dependency is installed locally, read its source instead of guessing.
 - Clean up after yourself before finishing a task, without asking: delete what the task left outside the scratchpad
   (exes renamed aside to install over a running one, test installs, stray test files) and stop the processes and
   test sessions it started.
@@ -30,47 +25,6 @@ the start of every session, and in the terminus canon it points to.
   before naming a cause or a flow. A claim with none behind it is labeled a hypothesis.
 - When project instructions include test or lint commands, run them before finishing if the task changed
   code.
-- Before committing a code change, review the uncommitted changes with the terminus MCP tools: `start_review` with
-  `repo_path` set to the worktree, then `collect_review`. Fix each blocking finding, or tell me why it is wrong, and
-  review again until the verdict is `clean`, for at most 3 rounds. If the third is not `clean`, stop fixing: list
-  each remaining finding with whether you agree and why, and wait for my call before committing. A repo with no
-  `projects/<repo>/rubric.yaml` in `~/dev/agents/terminus-canon` gets one before its first review, listing the shared
-  rules the others list.
-
-## Git
-
-- In the agent VM, commit your work: `add`, `commit`, `fetch`, `switch` and `worktree add` are yours to run. Commit
-  when a change is ready for my review. Only commits reach my laptop, uncommitted edits do not.
-- windows-dev takes no worktrees: edit and commit in the `~/dev/windows-dev` clone itself, and hand me no git
-  commands for it.
-- In every other repo, each task that changes it gets its own worktree, never the clone's own checkout. Run
-  `git -C ~/dev/<repo> fetch origin`, then
-  `git -C ~/dev/<repo> worktree add -b <branch> ~/dev/worktrees/<repo>/<folder> <sha>`, where `<repo>` is the clone's
-  path under `~\dev`, `<folder>` is `<branch>` with `/` replaced by `-`, and `<sha>` is the fetched tip of origin's
-  default branch. `<branch>` is one to three words (`focus-hold`, `readme`), never a card's full slug. Edit and
-  commit only inside it. In the same reply, hand me the same two commands for my laptop
-  with `$HOME\dev` paths and the same sha, so perusal has my copy of the worktree to take your commits into.
-- `scripts\prune-worktrees.ps1` in windows-dev, run on my laptop, removes the worktrees whose PR merged, on both
-  machines. Never remove a worktree yourself.
-- `rebase` and `cherry-pick` are yours inside a worktree under `~/dev/worktrees`, run as
-  `git -C ~/dev/worktrees/<repo>/<folder> ...`, never in a clone's own checkout.
-- Never run push, pull, checkout, reset, restore, clean, merge, tag, a branch delete or rename, or a worktree
-  remove, prune or move, and never ask permission to run one. Hand over other git commands for my laptop or a commit
-  message only when I ask for one.
-- Run `git status` and `git log` right before handing me git commands, and build them from what is actually
-  uncommitted. Never guess whether I already committed an earlier change.
-- Run `git status` in the same turn before saying anything about what is committed or pending, including "next is
-  the commit" or "still uncommitted". I commit between turns without saying so.
-- Before naming my branch, handing me git commands, or saying what is on my laptop, read
-  `C:\Users\claude\dev\owner-state.json`, which perusal on my laptop rewrites every 15 seconds: each work tree's
-  branch, HEAD, uncommitted files and upstream counts. A `readAt` older than a minute means perusal is not running, so
-  say so instead of trusting it.
-- Reading is fine: run `git --no-pager diff`, `git log`, `git show`, or `git status` to inspect when you
-  need to.
-- In the agent VM, each repo under `~\dev` is a clone of the same repo under the laptop's `~\dev`. perusal on the
-  laptop takes each new commit in the VM into the laptop's work tree as unstaged changes, where I review and commit
-  it. So git commands handed to me target the laptop repo, written `$HOME\dev\<repo>`, never the VM path and never
-  `ssh claude-vm git ...`.
 
 ## Shell
 
@@ -79,32 +33,15 @@ the start of every session, and in the terminus canon it points to.
 - Prefer `rg` for searching code and files. Prefer non-interactive flags over interactive prompts.
 - Every path in a command handed to me is absolute (scripts, configs, logs, build outputs), so it runs from any
   directory.
-- The Bash tool is Git Bash. Never `cd`: pass absolute paths, and read another repo with `git -C <path>`. Write
-  Windows paths with forward slashes (`C:/Users/...`) or quoted, since Bash strips unquoted backslashes. Start every
-  `gh api` call with `gh api -X GET`. Run a PowerShell script with `pwsh -NoProfile -File <script>`, never
-  `-ExecutionPolicy Bypass`.
-
-## Dependencies
-
-- Install into the project environment, not globally. Add dependencies to project config files
-  (package.json, pyproject.toml, go.mod), not as one-off manual installs.
-- If a dependency is installed locally, read its source instead of guessing.
+- The Bash tool is Git Bash. Write Windows paths with forward slashes (`C:/Users/...`) or quoted, since Bash strips
+  unquoted backslashes. Start every `gh api` call with `gh api -X GET`. Run a PowerShell script with
+  `pwsh -NoProfile -File <script>`, never `-ExecutionPolicy Bypass`.
 
 ## GitHub Actions
 
 - Put all logic in a script (PowerShell, bash) that runs locally. The workflow only checks out code and
   invokes the script. Pass GitHub-specific values (tokens, run IDs) as script parameters so they can be
   supplied manually when running locally.
-
-## Knowledge upkeep
-
-- Sessions start in `~/dev/agents`, the home repo. Its `CLAUDE.md` points each repo at its context file under
-  `~/dev/agents/context/<path>/`, and the repos themselves hold no `CLAUDE.md` of mine.
-- When a session settles what a term means, finds a version-specific behavior, or corrects a wrong
-  assumption about a subsystem, fold it into that project's `CLAUDE.md` in the same turn without being
-  asked (terms go in its `## Vocabulary` section). Current state only, no changelog.
-- Durable findings about a project go in its context file in the agents repo, never in auto-memory or ad hoc
-  files. Commit it in the agent VM like any other repo, so it reaches my laptop.
 
 ## Security
 
@@ -114,7 +51,5 @@ the start of every session, and in the terminus canon it points to.
 
 ## Environment
 
-- I use WSL (zsh) for POSIX work. The agent VM has no WSL.
-- Build mostly in Go, CMake, and node (npm and yarn). I work in the openziti and netfoundry ecosystems.
-  `ziti` is on my PATH but not the agent's: download the release a task needs into the session scratchpad.
+- `ziti` is on my PATH but not the agent's: download the release a task needs into the session scratchpad.
 - Match the toolchain already present in a repo. Do not introduce a new build system.

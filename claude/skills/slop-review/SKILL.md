@@ -8,7 +8,7 @@ description: >
 ---
 
 Strip what should not ship from the branch. The user sees only judgment calls, one at a time. Commit applied
-changes per the Git rules in `~/.claude/CLAUDE.md`, since only commits reach the laptop. Run no other git mutation.
+changes per `## Git` in `~/dev/agents/CLAUDE.md`, since only commits reach the laptop. Run no other git mutation.
 
 ## 1. Base
 

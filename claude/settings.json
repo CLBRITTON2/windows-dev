@@ -49,7 +49,6 @@
       "Bash(npm run *)",
       "Bash(yarn run *)",
       "Bash(xargs grep :*)",
-      "Bash(ziti:*)",
       "Bash(go build:*)",
       "Read(~/dev/openziti/**)",
       "Read(~/dev/windows-dev/**)",
