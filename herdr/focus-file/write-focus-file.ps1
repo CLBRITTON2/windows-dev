@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 Writes the focused herdr pane's working directory, then every work tree its Claude session edited, one per line, to
-~\dev\.herdr-focus, with the agents home repo moved last.
+~\dev\.herdr-focus, leaving out the agents home repo when any other is listed.
 
 .DESCRIPTION
 herdr runs this as the agent account on startup and on every pane focus change. perusal follows the file to review
@@ -48,11 +48,15 @@ function Get-FocusedPaneDirectories {
     } else {
         $directories = @($pane.cwd)
     }
-    # perusal opens on the first line, and panes start in the agents home repo, whose edits are only context upkeep.
-    # It stays listed, since perusal takes commits only from the listed work trees.
+    # Panes start in the agents home repo, whose edits are only context upkeep, and perusal opens the first listed repo
+    # with uncommitted changes. agents always has uncommitted changes, so it is listed only when nothing else is.
     # A work tree prune-worktrees.ps1 removed stays in the session's list, and perusal would offer to recreate it.
     $unique = @($directories | Select-Object -Unique | Where-Object { Test-Path -LiteralPath $_ -PathType Container })
-    return @($unique | Where-Object { $_ -ine $agentsDir }) + @($unique | Where-Object { $_ -ieq $agentsDir })
+    $otherWorkTrees = @($unique | Where-Object { $_ -ine $agentsDir })
+    if ($otherWorkTrees) {
+        return $otherWorkTrees
+    }
+    return $unique
 }
 
 # Replace instead of overwrite, so a reader never sees a half-written list.
