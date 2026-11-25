@@ -33,9 +33,9 @@ A review outlives compaction and sessions only through its ledger at
 ## 2. Find
 
 Spawn four `diff-reviewer` agents in parallel, each fresh and given only the diff: one general review, and one per
-lens (correctness bugs, dead or duplicated code and churn, missing tests). Merge their findings, then spawn one agent that tries to disprove
-each against the source, and keep what survives. Present nothing before that pass returns. Read the full diff
-yourself for what the reviewers do not weigh:
+lens (correctness bugs, dead or duplicated code and churn, missing tests). Merge their findings, then spawn one agent
+that tries to disprove each against the source, and keep what survives. Present nothing before that pass returns.
+Read the full diff yourself for what the reviewers do not weigh:
 
 - SCOPE: a fix spread to paths that never failed. Each touched site needs the failing test or run that proves it.
 - CHURN: lines changed against the base with no correctness or hygiene value. Restoring the base's text is the fix.
@@ -76,8 +76,9 @@ One change site per message, then stop. A finding that touches two files is two 
   `<scratchpad>/slop/note.txt` (perusal shows them only on `i`). Then run, in the background,
   `pwsh -NoProfile -File C:/Users/claude/dev/windows-dev/herdr/diff-popup/open-diff-popup.ps1 -OldPath <repo file>
   -NewPath <copy> -NotePath <note> -Label <repo-relative path> -FocusPollIntervalMs 1000`. It waits until this
-  Claude pane has focus, since herdr opens a popup on whichever pane is active. The reply holds only the footer, never the diff. Add a view against the
-  base only when the first one hides the point. After approval, make the same change on the repo file.
+  Claude pane has focus, since herdr opens a popup on whichever pane is active. The reply holds only the footer,
+  never the diff. Add a view against the base only when the first one hides the point. After approval, make the same
+  change on the repo file.
 - Proposed code is exactly what goes in the file. Notes go in prose, never inside the snippet.
 - One or two plain lines for trade-offs, side edits, and whether a touched comment is new or exists on the base.
 - End every message and every page with the fenced footer, the question folded into the SUMMARY line, no finding IDs

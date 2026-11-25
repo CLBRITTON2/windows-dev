@@ -52,6 +52,7 @@ the LAN, or my ziti services, and its `gh` token is read-only.
 
 Needs:
 
+- Windows with Hyper-V (Pro or Enterprise), PowerShell 7 and git.
 - The Windows 11 Enterprise evaluation ISO (64-bit) from the
   [Microsoft Evaluation Center](https://www.microsoft.com/en-us/evalcenter/download-windows-11-enterprise), saved in
   your profile outside `~\dev`, for example `~\Downloads`.
@@ -59,16 +60,19 @@ Needs:
 - A new fine-grained read-only [GitHub token](https://github.com/settings/personal-access-tokens/new), which the
   script asks for first.
 
+If you skipped the bootstrap, clone this repo first with `git clone https://github.com/CLBRITTON2/windows-dev.git`
+and run the script from your clone in place of `~\.windows-dev`.
+
 In pwsh as administrator (about 35 minutes), with your own ISO and public key paths:
 
 ```powershell
 & "$HOME\.windows-dev\scripts\host\new-agent-vm.ps1" -InstallIso <path\to\windows-eval.iso> -AuthorizedKeyPath <path\to\key.pub> -VmName <vm-name>
 ```
 
-Then run `herdr`, and `claude` in a pane once to log in. The evaluation runs out after 90 days: rebuild with a new
-`-VmName`, or delete the old VM and its `C:\ProgramData\<VmName>` folder first. The VM gets only git, gh, pwsh,
-Claude Code and herdr ([`docs/agent-vm.md`](docs/agent-vm.md)). `-PersonalSetupPath <script>` runs a setup script
-of your own in the VM after that. Mine is
+The script adds a `Host <vm-name>` entry to `~\.ssh\config`. Then `ssh <vm-name>`, run `herdr`, and `claude` in a pane
+once to log in. The evaluation runs out after 90 days: rebuild with a new `-VmName`, or delete the old VM and its
+`C:\ProgramData\<VmName>` folder first. The VM gets only git, gh, pwsh, Claude Code and herdr.
+`-PersonalSetupPath <script>` runs a setup script of your own in the VM after that. Mine is
 [`scripts/agent-vm/agent-vm-personal-setup.ps1`](scripts/agent-vm/agent-vm-personal-setup.ps1).
 
 ### Claude Code config

@@ -61,4 +61,6 @@ Good:
 ## boundary
 
 Do not flag a type declared at package level in a test file (a fake, a fixture), or a loop that applies the same one
-check to every item of a list of plain values, as long as no item carries its own expected result.
+check to every item of a list of plain values, as long as no item carries its own expected result. Do not flag a
+golden test that finds its cases as folders or files on disk at run time and compares each to the expected output
+stored beside it, since a new case is added by capturing data, not by writing code.
