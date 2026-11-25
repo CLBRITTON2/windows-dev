@@ -128,7 +128,6 @@ if ($env:USERNAME -eq 'claude') {
 } else {
     $windowsDevScripts = "$HOME\.windows-dev\scripts"
 }
-function udoz-repos { & "$windowsDevScripts\update-ziti-repos.ps1" -Root "$HOME\dev\openziti" }
 function pfc { perusal follow }
 function pwt {
     & "$windowsDevScripts\prune-worktrees.ps1" -DevRoot "$HOME\dev" -AgentHost claude-vm -AgentDevRoot C:/Users/claude/dev

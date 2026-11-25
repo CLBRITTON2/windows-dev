@@ -1,7 +1,7 @@
 # Code rules
 
 The rules terminus reviews against (naming, comments, tests, simplicity) live only in its canon,
-`~/dev/agents/terminus-canon`, one file per rule. Read them before writing code. The rules below are the rest.
+`~/dev/windows-dev/terminus/canon`, one file per rule. Read them before writing code. The rules below are the rest.
 
 ## Code style
 

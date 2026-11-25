@@ -59,15 +59,17 @@ Needs:
 - A new fine-grained read-only [GitHub token](https://github.com/settings/personal-access-tokens/new), which the
   script asks for first.
 
-In pwsh as administrator (about 35 minutes):
+In pwsh as administrator (about 35 minutes), with your own ISO and public key paths:
 
 ```powershell
-& "$HOME\.windows-dev\scripts\host\new-agent-vm.ps1" -InstallIso "$HOME\Downloads\windows-eval.iso" -AuthorizedKeyPath "$HOME\.ssh\claude-vm.pub" -VmName claude-vm -PersonalSetupPath "$HOME\.windows-dev\scripts\agent-vm\agent-vm-personal-setup.ps1"
+& "$HOME\.windows-dev\scripts\host\new-agent-vm.ps1" -InstallIso <path\to\windows-eval.iso> -AuthorizedKeyPath <path\to\key.pub> -VmName <vm-name>
 ```
 
 Then run `herdr`, and `claude` in a pane once to log in. The evaluation runs out after 90 days: rebuild with a new
-`-VmName`, or delete the old VM and its `C:\ProgramData\<VmName>` folder first. Without `-PersonalSetupPath`, the VM
-gets only git, gh, pwsh, Claude Code and herdr ([`docs/agent-vm.md`](docs/agent-vm.md)).
+`-VmName`, or delete the old VM and its `C:\ProgramData\<VmName>` folder first. The VM gets only git, gh, pwsh,
+Claude Code and herdr ([`docs/agent-vm.md`](docs/agent-vm.md)). `-PersonalSetupPath <script>` runs a setup script
+of your own in the VM after that. Mine is
+[`scripts/agent-vm/agent-vm-personal-setup.ps1`](scripts/agent-vm/agent-vm-personal-setup.ps1).
 
 ### Claude Code config
 
@@ -75,6 +77,10 @@ gets only git, gh, pwsh, Claude Code and herdr ([`docs/agent-vm.md`](docs/agent-
 - [`claude/hooks/pre-tool-use-hook.ps1`](claude/hooks/pre-tool-use-hook.ps1) catches bad shell habits. It is a
   guardrail, not a security boundary. The VM is the boundary.
 - [`claude/statusline.ps1`](claude/statusline.ps1) draws the status line.
+- [`terminus/canon`](terminus/canon) holds the code rules
+  [terminus](https://github.com/michaelquigley/terminus) reviews against, one file per rule.
+  [`scripts/sync-rubrics.ps1`](scripts/sync-rubrics.ps1) writes a rubric listing all of them for each folder under
+  `terminus/canon/projects/`, which stays out of git.
 - [`scripts/agent-vm/clean-agent.ps1`](scripts/agent-vm/clean-agent.ps1), run as the account, deletes the scratch
   folders of sessions idle for a week.
 
